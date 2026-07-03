@@ -1,11 +1,8 @@
-extends Node
+extends Node2D
 
+signal customer_paid(amount: float)
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+var base_plate_price: float = 5.0
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func serve_test_customer() -> void:
+	customer_paid.emit(base_plate_price)

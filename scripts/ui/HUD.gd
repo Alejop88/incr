@@ -2,8 +2,8 @@ extends Control
 
 signal serve_customer_requested
 
-@onready var money_label: Label = $MoneyLabel
-@onready var test_serve_button: Button = $TestServeButton
+@onready var money_label: Label = $VBoxContainer/MoneyLabel
+@onready var test_serve_button: Button = $VBoxContainer/TestServeButton
 
 func _ready() -> void:
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)

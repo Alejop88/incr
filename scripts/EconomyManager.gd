@@ -1,11 +1,17 @@
 extends Node
 
+signal money_changed(new_money: float)
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+var money: float = 0.0
 
+func add_money(amount: float) -> void:
+	money += amount
+	money_changed.emit(money)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func spend_money(amount: float) -> bool:
+	if money < amount:
+		return false
+
+	money -= amount
+	money_changed.emit(money)
+	return true
