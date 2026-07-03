@@ -12,7 +12,11 @@ script = ExtResource("1_rvslj")
 script = ExtResource("2_0bbpv")
 
 [node name="Restaurant" parent="." unique_id=1967190223 instance=ExtResource("3_rarhs")]
+position = Vector2(300, 241)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=937811976]
 
 [node name="HUD" parent="CanvasLayer" unique_id=1499943344 instance=ExtResource("4_vcsgt")]
+offset_left = 1.0
+offset_right = -9.0
+offset_bottom = 7.0
