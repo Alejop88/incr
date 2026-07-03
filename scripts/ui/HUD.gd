@@ -1,11 +1,15 @@
-extends Node
+extends Control
 
+signal serve_customer_requested
 
-# Called when the node enters the scene tree for the first time.
+@onready var money_label: Label = $MoneyLabel
+@onready var test_serve_button: Button = $TestServeButton
+
 func _ready() -> void:
-	pass # Replace with function body.
+	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
 
+func set_money(value: float) -> void:
+	money_label.text = "Dinero: %.1f €" % value
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func _on_test_serve_button_pressed() -> void:
+	serve_customer_requested.emit()

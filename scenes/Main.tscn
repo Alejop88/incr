@@ -1,3 +1,18 @@
 [gd_scene format=3 uid="uid://bbfyksdmcl06n"]
 
-[node name="Main" type="Node2D" unique_id=1305730807]
+[ext_resource type="Script" uid="uid://cwcy2ns2dnasv" path="res://scripts/Main.gd" id="1_rvslj"]
+[ext_resource type="Script" uid="uid://ccp6li34ne550" path="res://scripts/EconomyManager.gd" id="2_0bbpv"]
+[ext_resource type="PackedScene" uid="uid://5epriq255ler" path="res://scenes/restaurant/Restaurant.tscn" id="3_rarhs"]
+[ext_resource type="PackedScene" uid="uid://ntxm0vr40r75" path="res://scenes/ui/HUD.tscn" id="4_vcsgt"]
+
+[node name="Main" type="Node" unique_id=574707317]
+script = ExtResource("1_rvslj")
+
+[node name="EconomyManager" type="Node" parent="." unique_id=1600470306]
+script = ExtResource("2_0bbpv")
+
+[node name="Restaurant" parent="." unique_id=1967190223 instance=ExtResource("3_rarhs")]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=937811976]
+
+[node name="HUD" parent="CanvasLayer" unique_id=1499943344 instance=ExtResource("4_vcsgt")]
