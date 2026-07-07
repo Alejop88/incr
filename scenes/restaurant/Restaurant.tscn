@@ -8,7 +8,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vcsgt"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_htwgg"]
-size = Vector2(0, 0)
+size = Vector2(80, 80)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rarhs"]
 
@@ -26,13 +26,12 @@ texture = ExtResource("2_g4flx")
 shape = SubResource("RectangleShape2D_vcsgt")
 
 [node name="KitchenPoint" type="Area2D" parent="." unique_id=231791917]
-position = Vector2(150, 250)
+position = Vector2(112, 221)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="KitchenPoint" unique_id=1353350670]
 shape = SubResource("RectangleShape2D_htwgg")
 
 [node name="Sprite2D" type="Sprite2D" parent="KitchenPoint" unique_id=941499777]
-position = Vector2(74, 37.000015)
 scale = Vector2(0.2651822, 0.23406594)
 texture = ExtResource("4_bewk8")
 

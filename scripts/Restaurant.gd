@@ -14,11 +14,13 @@ func _ready() -> void:
 
 func serve_test_customer() -> void:
 	customer_paid.emit(base_plate_price)
-
+	
 func _on_kitchen_point_input_event(_viewport, event, _shape_idx) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		print("He pulsado la cocina")
 		player_waiter.move_to_position(kitchen_point.global_position)
 
 func _on_table_01_point_input_event(_viewport, event, _shape_idx) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		print("Click en mesa")
 		player_waiter.move_to_position(table_01_point.global_position)
