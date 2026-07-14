@@ -12,6 +12,7 @@ size = Vector2(101, 104)
 size = Vector2(80, 100)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rarhs"]
+size = Vector2(80, 80)
 
 [node name="Restaurant" type="Node2D" unique_id=1967190223]
 script = ExtResource("1_3a4hs")
@@ -29,6 +30,8 @@ shape = SubResource("RectangleShape2D_vcsgt")
 
 [node name="KitchenPoint" type="Area2D" parent="." unique_id=231791917]
 position = Vector2(112, 221)
+collision_layer = 2
+collision_mask = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="KitchenPoint" unique_id=941499777]
 scale = Vector2(0.2651822, 0.23406594)
@@ -39,6 +42,8 @@ shape = SubResource("RectangleShape2D_htwgg")
 
 [node name="Table01Point" type="Area2D" parent="." unique_id=551340980]
 position = Vector2(650, 250)
+collision_layer = 2
+collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Table01Point" unique_id=395125650]
 shape = SubResource("RectangleShape2D_rarhs")
