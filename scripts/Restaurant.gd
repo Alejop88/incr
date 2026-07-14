@@ -19,20 +19,13 @@ func _ready() -> void:
 
 	kitchen_point.input_event.connect(_on_kitchen_point_input_event)
 	table_01_point.input_event.connect(_on_table_01_point_input_event)
-
+	player_waiter.destination_reached.connect(_on_player_waiter_destination_reached)
+	
 func serve_test_customer() -> void:
 	customer_paid.emit(base_plate_price)
 	
-func _on_kitchen_point_input_event(
-	_viewport: Viewport,
-	event: InputEvent,
-	_shape_idx: int
-) -> void:
-	print("KITCHEN RECIBE EVENTO: ", event)
-
-	if event is InputEventMouseButton \
-			and event.button_index == MOUSE_BUTTON_LEFT \
-			and event.pressed:
+func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		print("Clic izquierdo en cocina")
 		player_waiter.move_to_position(kitchen_point.global_position)
 
@@ -59,3 +52,5 @@ func _input(event: InputEvent) -> void:
 			" posición: ",
 			event.position
 		)
+func _on_player_waiter_destination_reached() -> void:
+	print("El camarero ha llegado a su destino")

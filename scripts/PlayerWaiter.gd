@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+signal destination_reached
+
 @export var speed: float = 220.0
 
 var target_position: Vector2
@@ -9,7 +11,6 @@ func _ready() -> void:
 	target_position = global_position
 
 func move_to_position(new_position: Vector2) -> void:
-	print("Moviendo camarero a: ", new_position)
 	target_position = new_position
 	has_target = true
 
@@ -23,6 +24,8 @@ func _physics_process(_delta: float) -> void:
 		global_position = target_position
 		velocity = Vector2.ZERO
 		has_target = false
+
+		destination_reached.emit()
 		return
 
 	velocity = direction.normalized() * speed
