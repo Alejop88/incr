@@ -6,12 +6,20 @@ signal destination_reached
 
 var target_position: Vector2
 var has_target: bool = false
+enum TargetType {
+	NONE,
+	KITCHEN,
+	TABLE
+}
+
+var target_type: TargetType = TargetType.NONE
 
 func _ready() -> void:
 	target_position = global_position
 
-func move_to_position(new_position: Vector2) -> void:
+func move_to_position(new_position: Vector2, type: TargetType) -> void:
 	target_position = new_position
+	target_type = type
 	has_target = true
 
 func _physics_process(_delta: float) -> void:

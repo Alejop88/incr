@@ -27,12 +27,12 @@ func serve_test_customer() -> void:
 func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		print("Clic izquierdo en cocina")
-		player_waiter.move_to_position(kitchen_point.global_position)
+		player_waiter.move_to_position(kitchen_point.global_position,player_waiter.TargetType.KITCHEN)
 
 func _on_table_01_point_input_event(_viewport, event, _shape_idx) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		print("Click en mesa")
-		player_waiter.move_to_position(table_01_point.global_position)
+		player_waiter.move_to_position(table_01_point.global_position,player_waiter.TargetType.TABLE)
 		
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -53,4 +53,8 @@ func _input(event: InputEvent) -> void:
 			event.position
 		)
 func _on_player_waiter_destination_reached() -> void:
-	print("El camarero ha llegado a su destino")
+	match player_waiter.target_type:
+		player_waiter.TargetType.KITCHEN:
+			print("Ha llegado a la cocina")
+		player_waiter.TargetType.TABLE:
+			print("Ha llegado a la mesa")
