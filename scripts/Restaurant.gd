@@ -4,8 +4,7 @@ signal customer_paid(amount: float)
 
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
 @onready var kitchen_point: Area2D = $KitchenPoint
-@onready var table_01_point: Area2D = $Table01Point
-
+@onready var table_01_point = $Table01Point
 var base_plate_price: float = 5.0
 
 func _ready() -> void:
@@ -13,13 +12,18 @@ func _ready() -> void:
 
 	player_waiter.input_pickable = false
 
-	print("Waiter pickable: ", player_waiter.input_pickable)
-	print("Kitchen pickable: ", kitchen_point.input_pickable)
-	print("Kitchen layer: ", kitchen_point.collision_layer)
-
 	kitchen_point.input_event.connect(_on_kitchen_point_input_event)
 	table_01_point.input_event.connect(_on_table_01_point_input_event)
-	player_waiter.destination_reached.connect(_on_player_waiter_destination_reached)
+
+	player_waiter.destination_reached.connect(
+		_on_player_waiter_destination_reached
+	)
+
+	table_01_point.payment_collected.connect(
+		_on_table_payment_collected
+	)
+
+	table_01_point.seat_customer()
 	
 func serve_test_customer() -> void:
 	customer_paid.emit(base_plate_price)
@@ -55,6 +59,17 @@ func _input(event: InputEvent) -> void:
 func _on_player_waiter_destination_reached() -> void:
 	match player_waiter.target_type:
 		player_waiter.TargetType.KITCHEN:
-			print("Ha llegado a la cocina")
+			player_waiter.has_plate = true
+			print("El camarero ha recogido un plato")
+
 		player_waiter.TargetType.TABLE:
-			print("Ha llegado a la mesa")
+			if player_waiter.has_plate:
+				var delivered: bool = table_01_point.receive_food()
+
+				if delivered:
+					player_waiter.has_plate = false
+					print("El camarero ha entregado el plato")
+			else:
+				print("El camarero ha llegado sin plato")
+func _on_table_payment_collected(amount: float) -> void:
+	customer_paid.emit(amount)

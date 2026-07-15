@@ -3,7 +3,7 @@ extends CharacterBody2D
 signal destination_reached
 
 @export var speed: float = 220.0
-
+var has_plate: bool = false
 var target_position: Vector2
 var has_target: bool = false
 enum TargetType {
