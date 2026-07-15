@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cqge8v4cxdpmt" path="res://assets/art/SpritePnjInitial.png" id="2_g4flx"]
 [ext_resource type="Script" uid="uid://b66vdgt4auk5" path="res://scripts/PlayerWaiter.gd" id="2_htwgg"]
 [ext_resource type="Texture2D" uid="uid://c6685hw1lxn1" path="res://assets/art/SpriteChef.png" id="4_bewk8"]
-[ext_resource type="Script" uid="uid://dui07flapa3um" path="res://scenes/restaurant/Table.gd" id="5_ycgdg"]
+[ext_resource type="Script" uid="uid://dui07flapa3um" path="res://scripts/Table.gd" id="5_ycgdg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vcsgt"]
 size = Vector2(101, 104)
