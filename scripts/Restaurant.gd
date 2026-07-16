@@ -8,6 +8,8 @@ signal customer_paid(amount: float)
 var base_plate_price: float = 5.0
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
 @onready var customer_seat_point: Marker2D = $Table01Point/SeatPoints/Seat01
+@onready var customer_exit_point: Marker2D = $CustomerExitPoint
+var current_customer
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 func _ready() -> void:
 	get_viewport().physics_object_picking = true
@@ -27,10 +29,11 @@ func _ready() -> void:
 
 	table_01_point.seat_customer()
 	
-	var customer = customer_scene.instantiate()
-	customer.global_position = customer_spawn_point.global_position
-	add_child(customer)
-	customer.move_to_position(customer_seat_point.global_position)
+	current_customer = customer_scene.instantiate()
+	current_customer.global_position = customer_spawn_point.global_position
+	add_child(current_customer)
+	current_customer.destination_reached.connect(_on_customer_destination_reached)
+	current_customer.move_to_position(customer_seat_point.global_position,current_customer.TargetType.TABLE)
 	
 func serve_test_customer() -> void:
 	customer_paid.emit(base_plate_price)
@@ -64,6 +67,11 @@ func _input(event: InputEvent) -> void:
 			event.position
 		)
 func _on_player_waiter_destination_reached() -> void:
+	print(
+		"CAMARERO LLEGÓ. Tipo de destino: ",
+		player_waiter.target_type
+	)
+
 	match player_waiter.target_type:
 		player_waiter.TargetType.KITCHEN:
 			player_waiter.has_plate = true
@@ -80,3 +88,16 @@ func _on_player_waiter_destination_reached() -> void:
 				print("El camarero ha llegado sin plato")
 func _on_table_payment_collected(amount: float) -> void:
 	customer_paid.emit(amount)
+
+	if current_customer != null:
+		current_customer.leave_restaurant(customer_exit_point.global_position)
+func _on_customer_destination_reached() -> void:
+	match current_customer.target_type:
+		current_customer.TargetType.TABLE:
+			print("El cliente ha llegado a la mesa")
+			table_01_point.seat_customer()
+
+		current_customer.TargetType.EXIT:
+			print("El cliente ha salido del restaurante")
+			current_customer.queue_free()
+			current_customer = null

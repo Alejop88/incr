@@ -1,13 +1,23 @@
 extends CharacterBody2D
-
+signal destination_reached
 @export var speed: float = 120.0
 
 var target_position: Vector2
 var has_target := false
+enum TargetType {
+	NONE,
+	TABLE,
+	EXIT
+}
 
+var target_type: TargetType = TargetType.NONE
 
-func move_to_position(new_position: Vector2) -> void:
+func move_to_position(
+	new_position: Vector2,
+	new_target_type: TargetType
+) -> void:
 	target_position = new_position
+	target_type = new_target_type
 	has_target = true
 
 
@@ -21,7 +31,10 @@ func _physics_process(_delta: float) -> void:
 		global_position = target_position
 		velocity = Vector2.ZERO
 		has_target = false
+		destination_reached.emit()
 		return
 
 	velocity = direction.normalized() * speed
 	move_and_slide()
+func leave_restaurant(new_position: Vector2) -> void:
+	move_to_position(new_position, TargetType.EXIT)

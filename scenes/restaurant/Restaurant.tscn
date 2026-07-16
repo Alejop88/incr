@@ -59,6 +59,10 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table01Point" unique_id=1097822484]
 
 [node name="Seat01" type="Marker2D" parent="Table01Point/SeatPoints" unique_id=651886688]
+position = Vector2(103, 0)
 
 [node name="CustomerSpawnPoint" type="Marker2D" parent="." unique_id=1508840823]
 position = Vector2(74, -149)
+
+[node name="CustomerExitPoint" type="Marker2D" parent="." unique_id=1458075719]
+position = Vector2(652, 7)
