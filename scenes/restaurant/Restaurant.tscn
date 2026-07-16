@@ -56,7 +56,9 @@ debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 [node name="EatingTimer" type="Timer" parent="Table01Point" unique_id=555991887]
 one_shot = true
 
-[node name="CustomerSeatPoint" type="Marker2D" parent="Table01Point" unique_id=651886688]
+[node name="SeatPoints" type="Node2D" parent="Table01Point" unique_id=1097822484]
+
+[node name="Seat01" type="Marker2D" parent="Table01Point/SeatPoints" unique_id=651886688]
 
 [node name="CustomerSpawnPoint" type="Marker2D" parent="." unique_id=1508840823]
 position = Vector2(74, -149)

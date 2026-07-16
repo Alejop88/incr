@@ -7,7 +7,7 @@ signal customer_paid(amount: float)
 @onready var table_01_point = $Table01Point
 var base_plate_price: float = 5.0
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
-@onready var customer_seat_point: Marker2D = $Table01Point/CustomerSeatPoint
+@onready var customer_seat_point: Marker2D = $Table01Point/SeatPoints/Seat01
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 func _ready() -> void:
 	get_viewport().physics_object_picking = true
