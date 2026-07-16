@@ -6,7 +6,9 @@ signal customer_paid(amount: float)
 @onready var kitchen_point: Area2D = $KitchenPoint
 @onready var table_01_point = $Table01Point
 var base_plate_price: float = 5.0
-
+@onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
+@onready var customer_seat_point: Marker2D = $Table01Point/CustomerSeatPoint
+var customer_scene := preload("res://scenes/customer/Customer.tscn")
 func _ready() -> void:
 	get_viewport().physics_object_picking = true
 
@@ -24,6 +26,11 @@ func _ready() -> void:
 	)
 
 	table_01_point.seat_customer()
+	
+	var customer = customer_scene.instantiate()
+	customer.global_position = customer_spawn_point.global_position
+	add_child(customer)
+	customer.move_to_position(customer_seat_point.global_position)
 	
 func serve_test_customer() -> void:
 	customer_paid.emit(base_plate_price)

@@ -1,3 +1,17 @@
 [gd_scene format=3 uid="uid://br8jaei6kdf5l"]
 
+[ext_resource type="Script" uid="uid://dq0vm1qcvf202" path="res://scripts/Customer.gd" id="1_2hfkh"]
+[ext_resource type="Texture2D" uid="uid://lnou05ilrpdf" path="res://assets/art/SpriteCustomer.png" id="2_xvxe4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b6rs3"]
+size = Vector2(205, 164)
+
 [node name="Customer" type="CharacterBody2D" unique_id=1124705050]
+script = ExtResource("1_2hfkh")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1147921199]
+texture = ExtResource("2_xvxe4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1020025879]
+position = Vector2(2.5, 62)
+shape = SubResource("RectangleShape2D_b6rs3")
