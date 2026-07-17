@@ -66,3 +66,7 @@ position = Vector2(74, -149)
 
 [node name="CustomerExitPoint" type="Marker2D" parent="." unique_id=1458075719]
 position = Vector2(652, 7)
+
+[node name="CustomerSpawnTimer" type="Timer" parent="." unique_id=362038933]
+wait_time = 2.0
+one_shot = true

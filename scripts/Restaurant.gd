@@ -9,7 +9,9 @@ var base_plate_price: float = 5.0
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
 @onready var customer_seat_point: Marker2D = $Table01Point/SeatPoints/Seat01
 @onready var customer_exit_point: Marker2D = $CustomerExitPoint
-var current_customer
+@onready var customer_spawn_timer: Timer = $CustomerSpawnTimer
+var active_customers: Array[CharacterBody2D] = []
+var table_01_customer: CharacterBody2D = null
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 func _ready() -> void:
 	get_viewport().physics_object_picking = true
@@ -27,14 +29,9 @@ func _ready() -> void:
 		_on_table_payment_collected
 	)
 
-	table_01_point.seat_customer()
 	
-	current_customer = customer_scene.instantiate()
-	current_customer.global_position = customer_spawn_point.global_position
-	add_child(current_customer)
-	current_customer.destination_reached.connect(_on_customer_destination_reached)
-	current_customer.move_to_position(customer_seat_point.global_position,current_customer.TargetType.TABLE)
-	
+	spawn_customer()
+	customer_spawn_timer.timeout.connect(_on_customer_spawn_timer_timeout)
 func serve_test_customer() -> void:
 	customer_paid.emit(base_plate_price)
 	
@@ -48,16 +45,16 @@ func _on_table_01_point_input_event(_viewport, event, _shape_idx) -> void:
 		print("Click en mesa")
 		player_waiter.move_to_position(table_01_point.global_position,player_waiter.TargetType.TABLE)
 		
-func _input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		print(
-			"GLOBAL -> botón: ",
-			event.button_index,
-			" pulsado: ",
-			event.pressed,
-			" posición: ",
-			event.position
-		)
+#func _input(event: InputEvent) -> void:
+#	if event is InputEventMouseButton:
+#		print(
+#			"GLOBAL -> botón: ",
+#			event.button_index,
+#			" pulsado: ",
+#			event.pressed,
+#			" posición: ",
+#			event.position
+#		)
 
 	if event is InputEventScreenTouch:
 		print(
@@ -89,15 +86,37 @@ func _on_player_waiter_destination_reached() -> void:
 func _on_table_payment_collected(amount: float) -> void:
 	customer_paid.emit(amount)
 
-	if current_customer != null:
-		current_customer.leave_restaurant(customer_exit_point.global_position)
-func _on_customer_destination_reached() -> void:
-	match current_customer.target_type:
-		current_customer.TargetType.TABLE:
+	if table_01_customer != null:
+		table_01_customer.leave_restaurant(customer_exit_point.global_position)
+func _on_customer_destination_reached(
+	customer: CharacterBody2D
+) -> void:
+	match customer.target_type:
+		customer.TargetType.TABLE:
 			print("El cliente ha llegado a la mesa")
+
+			table_01_customer = customer
 			table_01_point.seat_customer()
 
-		current_customer.TargetType.EXIT:
+		customer.TargetType.EXIT:
 			print("El cliente ha salido del restaurante")
-			current_customer.queue_free()
-			current_customer = null
+
+			active_customers.erase(customer)
+
+			if table_01_customer == customer:
+				table_01_customer = null
+
+			customer.queue_free()
+			customer_spawn_timer.start()
+func spawn_customer() -> void:
+	var customer: CharacterBody2D = customer_scene.instantiate()
+
+	customer.global_position = customer_spawn_point.global_position
+	add_child(customer)
+
+	active_customers.append(customer)
+	customer.destination_reached.connect(_on_customer_destination_reached.bind(customer))
+	customer.move_to_position(customer_seat_point.global_position,customer.TargetType.TABLE)
+	print("Nuevo cliente creado")
+func _on_customer_spawn_timer_timeout() -> void:
+	spawn_customer()

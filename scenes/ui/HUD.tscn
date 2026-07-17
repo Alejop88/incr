@@ -22,8 +22,31 @@ theme_override_constants/separation = 10
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 
+[node name="UpgradesButton" type="Button" parent="VBoxContainer" unique_id=701352961]
+layout_mode = 2
+text = "MEJORAS"
+
 [node name="TestServeButton" type="Button" parent="VBoxContainer" unique_id=1192041914]
 custom_minimum_size = Vector2(180, 45)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Servir cliente"
+
+[node name="UpgradesPanel" type="PanelContainer" parent="." unique_id=451698728]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UpgradesPanel" unique_id=1905431504]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="UpgradesPanel/VBoxContainer" unique_id=1483396364]
+layout_mode = 2
+
+[node name="WaiterSpeedButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=2044935206]
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=1317944477]
+layout_mode = 2
+text = "CERRAR"
