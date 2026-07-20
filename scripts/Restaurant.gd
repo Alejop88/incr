@@ -120,3 +120,7 @@ func spawn_customer() -> void:
 	print("Nuevo cliente creado")
 func _on_customer_spawn_timer_timeout() -> void:
 	spawn_customer()
+func upgrade_waiter_speed() -> void:
+	player_waiter.speed += 25.0
+
+	print("Velocidad del camarero: ",player_waiter.speed)
