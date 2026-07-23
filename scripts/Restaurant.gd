@@ -30,7 +30,7 @@ func _ready() -> void:
 	player_waiter.destination_reached.connect(_on_player_waiter_destination_reached)
 	table_01_point.payment_collected.connect(_on_table_payment_collected)
 
-	table_01_point.set_payment_amount(plate_price)
+	update_stats()
 	spawn_customer()
 	customer_spawn_timer.timeout.connect(_on_customer_spawn_timer_timeout)
 func serve_test_customer() -> void:
@@ -127,12 +127,12 @@ func upgrade_waiter_speed() -> void:
 
 	waiter_speed_level += 1
 
-	increase_waiter_speed()
+	update_waiter_speed()
 
 	print("Nivel velocidad: ", waiter_speed_level)
 	print("Velocidad del camarero: ", player_waiter.speed)
 	
-func increase_waiter_speed() -> void:
+func update_waiter_speed() -> void:
 	player_waiter.set_speed_upgrade_level(waiter_speed_level)
 func upgrade_plate_price() -> void:
 	if plate_price_level >= MAX_PLATE_PRICE_LEVEL:
@@ -147,3 +147,8 @@ func update_plate_price() -> void:
 	table_01_point.set_payment_amount(plate_price)
 func get_plate_price() -> float:
 	return plate_price
+	
+# Actualiza todas las estadísticas derivadas de las mejoras actuales.
+func update_stats() -> void:
+	update_waiter_speed()
+	update_plate_price()
