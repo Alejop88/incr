@@ -8,12 +8,15 @@ signal serve_customer_requested
 @onready var upgrades_panel: PanelContainer = $UpgradesPanel
 @onready var close_button: Button = $UpgradesPanel/VBoxContainer/CloseButton
 signal waiter_speed_upgrade_requested
+signal plate_price_upgrade_requested
 @onready var waiter_speed_button: Button = $UpgradesPanel/VBoxContainer/WaiterSpeedButton
+@onready var plate_price_button: Button = $UpgradesPanel/VBoxContainer/PlatePriceButton
 func _ready() -> void:
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
 	upgrades_button.pressed.connect(_on_upgrades_button_pressed)
 	close_button.pressed.connect(_on_close_button_pressed)
 	waiter_speed_button.pressed.connect(_on_waiter_speed_button_pressed)
+	plate_price_button.pressed.connect(_on_plate_price_button_pressed)
 func set_money(value: float) -> void:
 	money_label.text = "Dinero: %.1f €" % value
 
@@ -37,3 +40,13 @@ func set_waiter_speed_upgrade(level: int,cost: float,max_level: int) -> void:
 
 	waiter_speed_button.disabled = false
 	waiter_speed_button.text = "Velocidad camarero - Nivel %d - %.1f €" % [level,cost]
+func set_plate_price_upgrade(level: int, cost: float, max_level: int) -> void:
+	if level >= max_level:
+		plate_price_button.text = "Precio del plato - MÁXIMO"
+		plate_price_button.disabled = true
+		return
+
+	plate_price_button.disabled = false
+	plate_price_button.text = "Precio del plato - Nivel %d - %.1f €" % [level, cost]
+func _on_plate_price_button_pressed() -> void:
+	plate_price_upgrade_requested.emit()

@@ -75,3 +75,5 @@ func _on_input_event(
 
 		if state == State.WAITING_PAYMENT:
 			collect_payment()
+func set_payment_amount(amount: float) -> void:
+	payment_amount = amount

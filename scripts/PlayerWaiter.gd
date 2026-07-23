@@ -3,6 +3,8 @@ extends CharacterBody2D
 signal destination_reached
 
 @export var speed: float = 220.0
+const BASE_SPEED: float = 220.0
+const SPEED_PER_LEVEL: float = 25.0
 var has_plate: bool = false
 var target_position: Vector2
 var has_target: bool = false
@@ -38,3 +40,5 @@ func _physics_process(_delta: float) -> void:
 
 	velocity = direction.normalized() * speed
 	move_and_slide()
+func set_speed_upgrade_level(level: int) -> void:
+	speed = BASE_SPEED + SPEED_PER_LEVEL * level

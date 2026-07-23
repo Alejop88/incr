@@ -6,6 +6,7 @@ extends Node
 var waiter_speed_level: int = 0
 var waiter_speed_upgrade_cost: float = 10.0
 const MAX_WAITER_SPEED_LEVEL: int = 10
+var plate_price_upgrade_cost: float = 10.0
 func _ready() -> void:
 	restaurant.customer_paid.connect(_on_customer_paid)
 	economy_manager.money_changed.connect(_on_money_changed)
@@ -13,6 +14,8 @@ func _ready() -> void:
 	hud.waiter_speed_upgrade_requested.connect(_on_waiter_speed_upgrade_requested)
 	hud.set_money(economy_manager.money)
 	hud.set_waiter_speed_upgrade(waiter_speed_level,waiter_speed_upgrade_cost,MAX_WAITER_SPEED_LEVEL)
+	hud.set_plate_price_upgrade(restaurant.plate_price_level,plate_price_upgrade_cost,restaurant.MAX_PLATE_PRICE_LEVEL)
+	hud.plate_price_upgrade_requested.connect(_on_plate_price_upgrade_requested)
 func _on_serve_customer_requested() -> void:
 	restaurant.serve_test_customer()
 
@@ -41,3 +44,11 @@ func _on_waiter_speed_upgrade_requested() -> void:
 	waiter_speed_upgrade_cost *= 1.5
 
 	hud.set_waiter_speed_upgrade(waiter_speed_level,waiter_speed_upgrade_cost,MAX_WAITER_SPEED_LEVEL)
+func _on_plate_price_upgrade_requested() -> void:
+	if not economy_manager.spend_money(plate_price_upgrade_cost):
+		return
+
+	restaurant.upgrade_plate_price()
+	plate_price_upgrade_cost *= 1.5
+
+	hud.set_plate_price_upgrade(restaurant.plate_price_level,plate_price_upgrade_cost,restaurant.MAX_PLATE_PRICE_LEVEL)
