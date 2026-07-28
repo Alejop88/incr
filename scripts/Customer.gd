@@ -11,7 +11,7 @@ enum TargetType {
 }
 
 var target_type: TargetType = TargetType.NONE
-
+var is_seated: bool = false
 func move_to_position(
 	new_position: Vector2,
 	new_target_type: TargetType
@@ -37,4 +37,5 @@ func _physics_process(_delta: float) -> void:
 	velocity = direction.normalized() * speed
 	move_and_slide()
 func leave_restaurant(new_position: Vector2) -> void:
+	is_seated = false
 	move_to_position(new_position, TargetType.EXIT)

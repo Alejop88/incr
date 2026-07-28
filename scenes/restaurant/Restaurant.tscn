@@ -61,6 +61,30 @@ one_shot = true
 [node name="Seat01" type="Marker2D" parent="Table01Point/SeatPoints" unique_id=651886688]
 position = Vector2(103, 0)
 
+[node name="Table02Point" type="Area2D" parent="." unique_id=1077909806]
+visible = false
+position = Vector2(650, 250)
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+script = ExtResource("5_ycgdg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table02Point" unique_id=1035449694]
+position = Vector2(-4, -165)
+shape = SubResource("RectangleShape2D_rarhs")
+disabled = true
+debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
+
+[node name="Sprite2D" type="Sprite2D" parent="Table02Point" unique_id=573602460]
+
+[node name="EatingTimer" type="Timer" parent="Table02Point" unique_id=838597371]
+one_shot = true
+
+[node name="SeatPoints" type="Node2D" parent="Table02Point" unique_id=691477431]
+
+[node name="Seat01" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=378942625]
+position = Vector2(103, 0)
+
 [node name="CustomerSpawnPoint" type="Marker2D" parent="." unique_id=1508840823]
 position = Vector2(74, -149)
 

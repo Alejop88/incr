@@ -11,9 +11,9 @@ enum State {
 
 @export var eating_time: float = 5.0
 @export var payment_amount: float = 5.0
-
+var seated_customer: CharacterBody2D = null
 @onready var eating_timer: Timer = $EatingTimer
-
+@onready var customer_seat_point: Marker2D = $SeatPoints/Seat01
 var state: State = State.FREE
 
 
@@ -22,11 +22,13 @@ func _ready() -> void:
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
 
 
-func seat_customer() -> bool:
+func seat_customer(customer: CharacterBody2D) -> bool:
 	if state != State.FREE:
 		return false
 
+	seated_customer = customer
 	state = State.WAITING_FOOD
+
 	print("Cliente sentado. Esperando comida")
 	return true
 
@@ -56,6 +58,7 @@ func collect_payment() -> bool:
 		return false
 
 	payment_collected.emit(payment_amount)
+	clear_seated_customer()
 
 	state = State.FREE
 	print("Pago recogido: ", payment_amount, " €")
@@ -75,5 +78,15 @@ func _on_input_event(
 
 		if state == State.WAITING_PAYMENT:
 			collect_payment()
+			
 func set_payment_amount(amount: float) -> void:
 	payment_amount = amount
+	
+func get_customer_seat_position() -> Vector2:
+	return customer_seat_point.global_position
+	
+func get_seated_customer() -> CharacterBody2D:
+	return seated_customer
+	
+func clear_seated_customer() -> void:
+	seated_customer = null
