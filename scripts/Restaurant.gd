@@ -4,12 +4,7 @@ signal customer_paid(amount: float)
 
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
 @onready var kitchen_point: Area2D = $KitchenPoint
-@onready var table_01 = $Table01Point
-@onready var table_02 = $Table02Point
-@onready var tables: Array[Area2D] = [
-	table_01,
-	table_02
-]
+@onready var tables: Array[Area2D] = []
 const BASE_PLATE_PRICE: float = 5.0
 var plate_price: float = BASE_PLATE_PRICE
 var plate_price_level: int = 0
@@ -24,8 +19,9 @@ var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 func _ready() -> void:
-	print("TABLE 01: ", table_01.name, " | ", table_01.global_position)
-	print("TABLE 02: ", table_02.name, " | ", table_02.global_position)
+	for child in get_children():
+		if child is Area2D and child.has_method("is_available"):
+			tables.append(child)
 	get_viewport().physics_object_picking = true
 
 	player_waiter.input_pickable = false
