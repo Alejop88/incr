@@ -4,7 +4,12 @@ signal customer_paid(amount: float)
 
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
 @onready var kitchen_point: Area2D = $KitchenPoint
-@onready var table = $Table01Point
+@onready var table_01 = $Table01Point
+@onready var table_02 = $Table02Point
+@onready var tables: Array[Area2D] = [
+	table_01,
+	table_02
+]
 const BASE_PLATE_PRICE: float = 5.0
 var plate_price: float = BASE_PLATE_PRICE
 var plate_price_level: int = 0
@@ -16,18 +21,22 @@ var waiter_speed_level: int = 0
 @onready var customer_exit_point: Marker2D = $CustomerExitPoint
 @onready var customer_spawn_timer: Timer = $CustomerSpawnTimer
 var active_customers: Array[CharacterBody2D] = []
-var table_01_customer: CharacterBody2D = null
+var selected_table: Area2D = null
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 func _ready() -> void:
+	print("TABLE 01: ", table_01.name, " | ", table_01.global_position)
+	print("TABLE 02: ", table_02.name, " | ", table_02.global_position)
 	get_viewport().physics_object_picking = true
 
 	player_waiter.input_pickable = false
 
 	kitchen_point.input_event.connect(_on_kitchen_point_input_event)
-	table.input_event.connect(_on_table_01_point_input_event)
-
+	for current_table in tables:
+		current_table.input_event.connect(_on_table_input_event.bind(current_table))
+	for current_table in tables:
+		current_table.payment_collected.connect(_on_table_payment_collected.bind(current_table))
+	
 	player_waiter.destination_reached.connect(_on_player_waiter_destination_reached)
-	table.payment_collected.connect(_on_table_payment_collected)
 
 	update_stats()
 	spawn_customer()
@@ -40,10 +49,20 @@ func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_
 		print("Clic izquierdo en cocina")
 		player_waiter.move_to_position(kitchen_point.global_position,player_waiter.TargetType.KITCHEN)
 
-func _on_table_01_point_input_event(_viewport, event, _shape_idx) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		print("Click en mesa")
-		player_waiter.move_to_position(table.global_position,player_waiter.TargetType.TABLE)
+func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int,current_table: Area2D) -> void:
+	if event is InputEventMouseButton \
+			and event.pressed \
+			and event.button_index == MOUSE_BUTTON_LEFT:
+
+		print(
+	"Click en mesa: ",
+	current_table.name,
+	" | Posición: ",
+	current_table.global_position
+)
+		selected_table = current_table
+
+		player_waiter.move_to_position(current_table.global_position,player_waiter.TargetType.TABLE)
 		
 #func _input(event: InputEvent) -> void:
 #	if event is InputEventMouseButton:
@@ -75,51 +94,82 @@ func _on_player_waiter_destination_reached() -> void:
 			print("El camarero ha recogido un plato")
 
 		player_waiter.TargetType.TABLE:
+			print("El camarero llegó a la mesa: ", selected_table.name)
+			if selected_table == null:
+				print("No hay ninguna mesa seleccionada")
+				return
+
 			if player_waiter.has_plate:
-				var delivered: bool = table.receive_food()
+				var delivered: bool = selected_table.receive_food()
 
 				if delivered:
 					player_waiter.has_plate = false
-					print("El camarero ha entregado el plato")
+					print(
+						"El camarero ha entregado el plato en: ",
+						selected_table.name
+					)
 			else:
 				print("El camarero ha llegado sin plato")
 
-func _on_table_payment_collected(amount: float) -> void:
-	customer_paid.emit(amount)
-	var customer: CharacterBody2D = table.get_seated_customer()
-	if customer != null:
-		customer.leave_restaurant(customer_exit_point.global_position)
-
-func _on_customer_destination_reached(
-	customer: CharacterBody2D
+func _on_table_payment_collected(
+	amount: float,
+	current_table: Area2D
 ) -> void:
+	customer_paid.emit(amount)
+
+	var customer: CharacterBody2D = current_table.get_seated_customer()
+
+	if customer != null:
+		customer.leave_restaurant(
+			customer_exit_point.global_position
+		)
+
+func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: Area2D) -> void:
 	match customer.target_type:
 		customer.TargetType.TABLE:
-			print("El cliente ha llegado a la mesa")
+			print(
+				"El cliente ha llegado a: ",
+				customer_table.name
+			)
 
-			table_01_customer = customer
-			table.seat_customer(customer)
-			customer.is_seated = true
+			var seated: bool = customer_table.seat_customer(customer)
+
+			if seated:
+				customer.is_seated = true
+
 		customer.TargetType.EXIT:
 			print("El cliente ha salido del restaurante")
 
 			active_customers.erase(customer)
-
-			if table_01_customer == customer:
-				table_01_customer = null
-
 			customer.queue_free()
 			customer_spawn_timer.start()
 func spawn_customer() -> void:
+	print("Spawn solicitado")
+	var available_table: Area2D = get_available_table()
+
+	if available_table == null:
+		print("No hay ninguna mesa disponible")
+		customer_spawn_timer.start()
+		return
+
 	var customer: CharacterBody2D = customer_scene.instantiate()
 
 	customer.global_position = customer_spawn_point.global_position
 	add_child(customer)
-
+	var reserved: bool = available_table.reserve(customer)
+	if not reserved:
+		customer.queue_free()
+		customer_spawn_timer.start()
+		return
+	
 	active_customers.append(customer)
-	customer.destination_reached.connect(_on_customer_destination_reached.bind(customer))
-	customer.move_to_position(table.get_customer_seat_position(),customer.TargetType.TABLE)
-	print("Nuevo cliente creado")
+
+	customer.destination_reached.connect(_on_customer_destination_reached.bind(customer,available_table))
+
+	customer.move_to_position(available_table.get_customer_seat_position(),customer.TargetType.TABLE)
+
+	print("Nuevo cliente creado para: ", available_table.name)
+	customer_spawn_timer.start()
 func _on_customer_spawn_timer_timeout() -> void:
 	spawn_customer()
 func upgrade_waiter_speed() -> void:
@@ -145,7 +195,9 @@ func upgrade_plate_price() -> void:
 	print("Precio actual del plato: ", plate_price)
 func update_plate_price() -> void:
 	plate_price = BASE_PLATE_PRICE + PLATE_PRICE_INCREMENT * plate_price_level
-	table.set_payment_amount(plate_price)
+
+	for current_table in tables:
+		current_table.set_payment_amount(plate_price)
 	
 func get_plate_price() -> float:
 	return plate_price
@@ -154,3 +206,9 @@ func get_plate_price() -> float:
 func update_stats() -> void:
 	update_waiter_speed()
 	update_plate_price()
+func get_available_table() -> Area2D:
+	for current_table in tables:
+		if current_table.is_available():
+			return current_table
+
+	return null

@@ -1,9 +1,10 @@
 extends Area2D
 
 signal payment_collected(amount: float)
-
+signal table_selected(table: Area2D)
 enum State {
 	FREE,
+	RESERVED,
 	WAITING_FOOD,
 	EATING,
 	WAITING_PAYMENT
@@ -23,7 +24,7 @@ func _ready() -> void:
 
 
 func seat_customer(customer: CharacterBody2D) -> bool:
-	if state != State.FREE:
+	if state != State.RESERVED:
 		return false
 
 	seated_customer = customer
@@ -32,6 +33,16 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 	print("Cliente sentado. Esperando comida")
 	return true
 
+func reserve(customer: CharacterBody2D) -> bool:
+	if state != State.FREE:
+		return false
+
+	seated_customer = customer
+	state = State.RESERVED
+
+	print("Mesa reservada")
+
+	return true
 
 func receive_food() -> bool:
 	if state != State.WAITING_FOOD:
@@ -90,3 +101,6 @@ func get_seated_customer() -> CharacterBody2D:
 	
 func clear_seated_customer() -> void:
 	seated_customer = null
+	
+func is_available() -> bool:
+	return visible and state == State.FREE

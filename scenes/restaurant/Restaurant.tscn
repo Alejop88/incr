@@ -62,17 +62,14 @@ one_shot = true
 position = Vector2(103, 0)
 
 [node name="Table02Point" type="Area2D" parent="." unique_id=1077909806]
-visible = false
-position = Vector2(650, 250)
+position = Vector2(645, 99)
 collision_layer = 2
 collision_mask = 0
-input_pickable = false
 script = ExtResource("5_ycgdg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Table02Point" unique_id=1035449694]
-position = Vector2(-4, -165)
+position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_rarhs")
-disabled = true
 debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 
 [node name="Sprite2D" type="Sprite2D" parent="Table02Point" unique_id=573602460]
@@ -89,7 +86,7 @@ position = Vector2(103, 0)
 position = Vector2(74, -149)
 
 [node name="CustomerExitPoint" type="Marker2D" parent="." unique_id=1458075719]
-position = Vector2(652, 7)
+position = Vector2(435, 42)
 
 [node name="CustomerSpawnTimer" type="Timer" parent="." unique_id=362038933]
 wait_time = 2.0

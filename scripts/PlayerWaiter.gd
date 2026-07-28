@@ -20,6 +20,12 @@ func _ready() -> void:
 	target_position = global_position
 
 func move_to_position(new_position: Vector2, type: TargetType) -> void:
+	print(
+		"CAMARERO RECIBE DESTINO: ",
+		new_position,
+		" | Posición actual: ",
+		global_position
+	)
 	target_position = new_position
 	target_type = type
 	has_target = true
