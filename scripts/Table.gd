@@ -12,6 +12,7 @@ enum State {
 
 @export var eating_time: float = 5.0
 @export var payment_amount: float = 5.0
+@export var seat_capacity: int = 1
 var seated_customer: CharacterBody2D = null
 @onready var eating_timer: Timer = $EatingTimer
 @onready var customer_seat_point: Marker2D = $SeatPoints/Seat01
@@ -19,6 +20,7 @@ var state: State = State.FREE
 
 
 func _ready() -> void:
+	add_to_group("restaurant_tables")
 	input_event.connect(_on_input_event)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
 
@@ -102,5 +104,12 @@ func get_seated_customer() -> CharacterBody2D:
 func clear_seated_customer() -> void:
 	seated_customer = null
 	
+func get_seat_capacity() -> int:
+	return seat_capacity
 func is_available() -> bool:
 	return visible and state == State.FREE
+func can_seat_group(group_size: int) -> bool:
+	if not is_available():
+		return false
+
+	return seat_capacity >= group_size

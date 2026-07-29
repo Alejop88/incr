@@ -19,9 +19,9 @@ var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 func _ready() -> void:
-	for child in get_children():
-		if child is Area2D and child.has_method("is_available"):
-			tables.append(child)
+	for table in get_tree().get_nodes_in_group("restaurant_tables"):
+		if table is Area2D:
+			tables.append(table)
 	get_viewport().physics_object_picking = true
 
 	player_waiter.input_pickable = false
@@ -202,9 +202,14 @@ func get_plate_price() -> float:
 func update_stats() -> void:
 	update_waiter_speed()
 	update_plate_price()
-func get_available_table() -> Area2D:
-	for current_table in tables:
-		if current_table.is_available():
-			return current_table
+func get_available_table(group_size: int = 1) -> Area2D:
+	var valid_tables: Array[Area2D] = []
 
-	return null
+	for current_table in tables:
+		if current_table.can_seat_group(group_size):
+			valid_tables.append(current_table)
+
+	if valid_tables.is_empty():
+		return null
+
+	return valid_tables.pick_random()
