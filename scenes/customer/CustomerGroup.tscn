@@ -4,3 +4,7 @@
 
 [node name="CustomerGroup" type="Node2D" unique_id=1695353541]
 script = ExtResource("1_bhys2")
+
+[node name="QueuePatienceTimer" type="Timer" parent="." unique_id=1013093685]
+wait_time = 60.0
+one_shot = true

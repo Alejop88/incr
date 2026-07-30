@@ -3,7 +3,15 @@ extends Node2D
 var group_size: int = 1
 var customers: Array[CharacterBody2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
+signal queue_patience_expired(customer_group)
 
+@export var queue_patience_time: float = 60.0
+
+@onready var queue_patience_timer: Timer = $QueuePatienceTimer
+func _ready() -> void:
+	queue_patience_timer.timeout.connect(
+		_on_queue_patience_timer_timeout
+	)
 func get_group_size() -> int:
 	return group_size
 	
@@ -54,9 +62,53 @@ func _on_customer_exit_reached(customer: CharacterBody2D) -> void:
 	if customers.is_empty():
 		queue_free()
 func move_to_queue_position(queue_position: Vector2) -> void:
-	for customer in customers:
+	var horizontal_spacing: float = 18.0
+	var vertical_spacing: float = 18.0
+
+	var positions: Array[Vector2] = []
+
+	match customers.size():
+		1:
+			positions = [
+				Vector2.ZERO
+			]
+
+		2:
+			positions = [
+				Vector2(-horizontal_spacing / 2.0, 0.0),
+				Vector2(horizontal_spacing / 2.0, 0.0)
+			]
+
+		3:
+			positions = [
+				Vector2(-horizontal_spacing / 2.0, -vertical_spacing / 2.0),
+				Vector2(horizontal_spacing / 2.0, -vertical_spacing / 2.0),
+				Vector2(0.0, vertical_spacing / 2.0)
+			]
+
+		4:
+			positions = [
+				Vector2(-horizontal_spacing / 2.0, -vertical_spacing / 2.0),
+				Vector2(horizontal_spacing / 2.0, -vertical_spacing / 2.0),
+				Vector2(-horizontal_spacing / 2.0, vertical_spacing / 2.0),
+				Vector2(horizontal_spacing / 2.0, vertical_spacing / 2.0)
+			]
+
+	for i in range(customers.size()):
+		var customer: CharacterBody2D = customers[i]
+
 		customer.visible = true
 		customer.move_to_position(
-			queue_position,
+			queue_position + positions[i],
 			customer.TargetType.QUEUE
 		)
+func start_queue_patience() -> void:
+	queue_patience_timer.start(queue_patience_time)
+
+
+func stop_queue_patience() -> void:
+	queue_patience_timer.stop()
+
+
+func _on_queue_patience_timer_timeout() -> void:
+	queue_patience_expired.emit(self)

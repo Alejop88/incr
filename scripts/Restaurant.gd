@@ -193,6 +193,9 @@ func spawn_customer() -> void:
 
 		waiting_queue.append(customer_group)
 
+		customer_group.queue_patience_expired.connect(_on_queue_patience_expired)
+		customer_group.start_queue_patience()
+		
 		var queue_index: int = waiting_queue.size() - 1
 		customer_group.move_to_queue_position(queue_points[queue_index].global_position)
 		print("Grupo añadido a la cola en: ",queue_points[queue_index].name)
@@ -284,6 +287,7 @@ func try_seat_waiting_group() -> void:
 			continue
 
 		waiting_queue.remove_at(i)
+		customer_group.stop_queue_patience()
 		update_waiting_queue_positions()
 
 		var customer: CharacterBody2D = customer_group.get_leader()
@@ -322,3 +326,16 @@ func update_waiting_queue_positions() -> void:
 		customer_group.move_to_queue_position(
 			queue_points[i].global_position
 		)
+func _on_queue_patience_expired(customer_group: Node2D) -> void:
+	if not waiting_queue.has(customer_group):
+		return
+	customer_group.stop_queue_patience()
+
+	waiting_queue.erase(customer_group)
+	update_waiting_queue_positions()
+
+	customer_group.leave_restaurant(
+		customer_exit_point.global_position
+	)
+
+	print("Un grupo se ha cansado de esperar y se marcha")
