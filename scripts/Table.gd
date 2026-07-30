@@ -2,6 +2,7 @@ extends Area2D
 
 signal payment_collected(amount: float)
 signal table_selected(table: Area2D)
+signal customers_left_without_paying(table: Area2D)
 enum State {
 	FREE,
 	RESERVED,
@@ -19,6 +20,7 @@ var delivered_plates: int = 0
 var occupied_seats: int = 0
 @onready var eating_timer: Timer = $EatingTimer
 @onready var customer_seat_points: Array[Marker2D] = []
+@onready var food_wait_timer: Timer = $FoodWaitTimer
 var state: State = State.FREE
 
 
@@ -37,7 +39,7 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 
 	seated_customer = customer
 	state = State.WAITING_FOOD
-
+	food_wait_timer.start(20.0)
 	print("Cliente sentado. Esperando comida")
 	return true
 
@@ -64,6 +66,7 @@ func receive_food() -> bool:
 	print("Platos entregados: ", delivered_plates, "/", required_plates)
 
 	if delivered_plates >= required_plates:
+		food_wait_timer.stop()
 		state = State.EATING
 		eating_timer.start(eating_time)
 
@@ -142,3 +145,11 @@ func get_group_seat_positions(group_size: int) -> Array[Vector2]:
 		positions.append(get_customer_seat_position(i))
 
 	return positions
+
+
+func _on_food_wait_timer_timeout() -> void:
+	if state != State.WAITING_FOOD:
+		return
+
+	print("Los clientes se han cansado de esperar")
+	customers_left_without_paying.emit(self)

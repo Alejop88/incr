@@ -61,6 +61,9 @@ one_shot = true
 [node name="Seat01" type="Marker2D" parent="Table01Point/SeatPoints" unique_id=651886688]
 position = Vector2(103, 0)
 
+[node name="FoodWaitTimer" type="Timer" parent="Table01Point" unique_id=250822806]
+one_shot = true
+
 [node name="Table02Point" type="Area2D" parent="." unique_id=1077909806]
 position = Vector2(645, 99)
 collision_layer = 2
@@ -92,6 +95,9 @@ position = Vector2(-96, -25)
 [node name="Seat04" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=716704038]
 position = Vector2(97, -19)
 
+[node name="FoodWaitTimer" type="Timer" parent="Table02Point" unique_id=794417113]
+one_shot = true
+
 [node name="CustomerSpawnPoint" type="Marker2D" parent="." unique_id=1508840823]
 position = Vector2(74, -149)
 
@@ -101,3 +107,6 @@ position = Vector2(435, 42)
 [node name="CustomerSpawnTimer" type="Timer" parent="." unique_id=362038933]
 wait_time = 2.0
 one_shot = true
+
+[connection signal="timeout" from="Table01Point/FoodWaitTimer" to="Table01Point" method="_on_food_wait_timer_timeout"]
+[connection signal="timeout" from="Table02Point/FoodWaitTimer" to="Table02Point" method="_on_food_wait_timer_timeout"]

@@ -34,7 +34,8 @@ func _ready() -> void:
 		current_table.input_event.connect(_on_table_input_event.bind(current_table))
 	for current_table in tables:
 		current_table.payment_collected.connect(_on_table_payment_collected.bind(current_table))
-	
+	for current_table in tables:
+		current_table.customers_left_without_paying.connect(_on_customers_left_without_paying)
 	player_waiter.destination_reached.connect(_on_player_waiter_destination_reached)
 
 	update_stats()
@@ -127,7 +128,23 @@ func _on_table_payment_collected(
 			customer_group.leave_restaurant(
 				customer_exit_point.global_position
 			)
+func _on_customers_left_without_paying(
+	current_table: Area2D
+) -> void:
+	var customer: CharacterBody2D = \
+		current_table.get_seated_customer()
 
+	if customer == null:
+		return
+
+	var customer_group: Node = customer.get_parent()
+
+	if customer_group.has_method("leave_restaurant"):
+		customer_group.leave_restaurant(
+			customer_exit_point.global_position
+		)
+
+	current_table.clear_seated_customer()
 func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: Area2D) -> void:
 	match customer.target_type:
 		customer.TargetType.TABLE:
