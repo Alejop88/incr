@@ -14,6 +14,7 @@ enum State {
 @export var eating_time: float = 5.0
 @export var payment_amount: float = 5.0
 @export var seat_capacity: int = 1
+@export var food_wait_time: float = 20.0
 var seated_customer: CharacterBody2D = null
 var required_plates: int = 1
 var delivered_plates: int = 0
@@ -42,9 +43,9 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 
 	seated_customer = customer
 	state = State.WAITING_FOOD
-	food_wait_timer.start(20.0)
-	patience_bar.max_value = 20.0
-	patience_bar.value = 20.0
+	food_wait_timer.start(food_wait_time)
+	patience_bar.max_value = food_wait_time
+	patience_bar.value = food_wait_time
 	patience_bar.visible = true
 	print("Cliente sentado. Esperando comida")
 	return true

@@ -10,6 +10,7 @@ var has_target := false
 enum TargetType {
 	NONE,
 	TABLE,
+	QUEUE,
 	EXIT
 }
 

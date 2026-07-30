@@ -4,15 +4,17 @@
 [ext_resource type="Texture2D" uid="uid://lnou05ilrpdf" path="res://assets/art/SpriteCustomer.png" id="2_xvxe4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_b6rs3"]
-size = Vector2(205, 164)
+size = Vector2(70, 130.75)
 
 [node name="Customer" type="CharacterBody2D" unique_id=1124705050]
 script = ExtResource("1_2hfkh")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1147921199]
+position = Vector2(1, 0.99999905)
+scale = Vector2(0.37550607, 0.3401099)
 texture = ExtResource("2_xvxe4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1020025879]
-position = Vector2(2.5, 62)
+position = Vector2(-2, 16.375)
 shape = SubResource("RectangleShape2D_b6rs3")
 disabled = true

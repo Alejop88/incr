@@ -53,3 +53,10 @@ func _on_customer_exit_reached(customer: CharacterBody2D) -> void:
 
 	if customers.is_empty():
 		queue_free()
+func move_to_queue_position(queue_position: Vector2) -> void:
+	for customer in customers:
+		customer.visible = true
+		customer.move_to_position(
+			queue_position,
+			customer.TargetType.QUEUE
+		)

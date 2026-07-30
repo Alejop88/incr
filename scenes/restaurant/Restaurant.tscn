@@ -126,5 +126,23 @@ position = Vector2(435, 42)
 wait_time = 2.0
 one_shot = true
 
+[node name="QueuePoints" type="Node2D" parent="." unique_id=787927817]
+position = Vector2(-1, 0)
+
+[node name="Queue01" type="Marker2D" parent="QueuePoints" unique_id=932525985]
+position = Vector2(240, 168)
+
+[node name="Queue02" type="Marker2D" parent="QueuePoints" unique_id=1787639074]
+position = Vector2(242, 136)
+
+[node name="Queue03" type="Marker2D" parent="QueuePoints" unique_id=1946153440]
+position = Vector2(242, 101)
+
+[node name="Queue04" type="Marker2D" parent="QueuePoints" unique_id=1604495369]
+position = Vector2(242, 67)
+
+[node name="Queue05" type="Marker2D" parent="QueuePoints" unique_id=480175768]
+position = Vector2(242, 25)
+
 [connection signal="timeout" from="Table01Point/FoodWaitTimer" to="Table01Point" method="_on_food_wait_timer_timeout"]
 [connection signal="timeout" from="Table02Point/FoodWaitTimer" to="Table02Point" method="_on_food_wait_timer_timeout"]

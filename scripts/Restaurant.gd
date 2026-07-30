@@ -15,9 +15,10 @@ var waiter_speed_level: int = 0
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
 @onready var customer_exit_point: Marker2D = $CustomerExitPoint
 @onready var customer_spawn_timer: Timer = $CustomerSpawnTimer
+@onready var queue_points: Array[Marker2D] = []
 var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
-
+var waiting_queue: Array[Node2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var customer_group_scene := preload("res://scenes/customer/CustomerGroup.tscn")
 
@@ -25,6 +26,9 @@ func _ready() -> void:
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
 		if table is Area2D:
 			tables.append(table)
+	for queue_point in $QueuePoints.get_children():
+		if queue_point is Marker2D:
+			queue_points.append(queue_point)
 	get_viewport().physics_object_picking = true
 
 	player_waiter.input_pickable = false
@@ -128,6 +132,7 @@ func _on_table_payment_collected(
 			customer_group.leave_restaurant(
 				customer_exit_point.global_position
 			)
+	call_deferred("try_seat_waiting_group")
 func _on_customers_left_without_paying(
 	current_table: Area2D
 ) -> void:
@@ -145,6 +150,7 @@ func _on_customers_left_without_paying(
 		)
 
 	current_table.clear_seated_customer()
+	try_seat_waiting_group()
 func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: Area2D) -> void:
 	match customer.target_type:
 		customer.TargetType.TABLE:
@@ -157,7 +163,8 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 
 			if seated:
 				customer.is_seated = true
-
+		customer.TargetType.QUEUE:
+			print("El grupo ha llegado a la cola")
 		customer.TargetType.EXIT:
 			print("El cliente ha salido del restaurante")
 
@@ -170,17 +177,28 @@ func spawn_customer() -> void:
 	var group_size: int = [1, 2, 3, 4].pick_random()
 	print("Tamaño de grupo generado: ", group_size)
 
-	var available_table: Area2D = get_available_table(group_size)
-
-	if available_table == null:
-		print("No hay ninguna mesa disponible")
-		customer_spawn_timer.start()
-		return
-
 	var customer_group: Node2D = customer_group_scene.instantiate()
 	customer_group.global_position = customer_spawn_point.global_position
 	add_child(customer_group)
 	customer_group.setup(group_size)
+
+	var available_table: Area2D = get_available_table(group_size)
+
+	if available_table == null:
+		if waiting_queue.size() >= queue_points.size():
+			print("La cola está llena")
+			customer_group.queue_free()
+			customer_spawn_timer.start()
+			return
+
+		waiting_queue.append(customer_group)
+
+		var queue_index: int = waiting_queue.size() - 1
+		customer_group.move_to_queue_position(queue_points[queue_index].global_position)
+		print("Grupo añadido a la cola en: ",queue_points[queue_index].name)
+
+		customer_spawn_timer.start()
+		return
 
 	var group_customers: Array[CharacterBody2D] = customer_group.get_customers()
 	print("Clientes reales creados: ", group_customers.size())
@@ -252,3 +270,55 @@ func get_available_table(group_size: int = 1) -> Area2D:
 		return null
 
 	return valid_tables.pick_random()
+
+func try_seat_waiting_group() -> void:
+	if waiting_queue.is_empty():
+		return
+
+	for i in range(waiting_queue.size()):
+		var customer_group: Node2D = waiting_queue[i]
+		var group_size: int = customer_group.get_group_size()
+		var available_table: Area2D = get_available_table(group_size)
+
+		if available_table == null:
+			continue
+
+		waiting_queue.remove_at(i)
+		update_waiting_queue_positions()
+
+		var customer: CharacterBody2D = customer_group.get_leader()
+		var reserved: bool = available_table.reserve(customer)
+
+		if not reserved:
+			waiting_queue.insert(i, customer_group)
+			update_waiting_queue_positions()
+			return
+
+		active_customers.append(customer)
+
+		customer.destination_reached.connect(
+			_on_customer_destination_reached.bind(
+				customer,
+				available_table
+			)
+		)
+
+		var seat_positions: Array[Vector2] = \
+			available_table.get_group_seat_positions(group_size)
+
+		customer_group.move_customers_to_seats(seat_positions)
+
+		print(
+			"Un grupo compatible de la cola entra en: ",
+			available_table.name
+		)
+
+		return
+
+func update_waiting_queue_positions() -> void:
+	for i in range(waiting_queue.size()):
+		var customer_group: Node2D = waiting_queue[i]
+
+		customer_group.move_to_queue_position(
+			queue_points[i].global_position
+		)
