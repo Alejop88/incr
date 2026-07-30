@@ -17,7 +17,10 @@ var waiter_speed_level: int = 0
 @onready var customer_spawn_timer: Timer = $CustomerSpawnTimer
 var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
+
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
+var customer_group_scene := preload("res://scenes/customer/CustomerGroup.tscn")
+
 func _ready() -> void:
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
 		if table is Area2D:
@@ -90,11 +93,11 @@ func _on_player_waiter_destination_reached() -> void:
 			print("El camarero ha recogido un plato")
 
 		player_waiter.TargetType.TABLE:
-			print("El camarero llegó a la mesa: ", selected_table.name)
+			
 			if selected_table == null:
 				print("No hay ninguna mesa seleccionada")
 				return
-
+				print("El camarero llegó a la mesa: ", selected_table.name)
 			if player_waiter.has_plate:
 				var delivered: bool = selected_table.receive_food()
 
@@ -106,6 +109,8 @@ func _on_player_waiter_destination_reached() -> void:
 					)
 			else:
 				print("El camarero ha llegado sin plato")
+			if selected_table.collect_payment():
+				print("El camarero ha cobrado la mesa")
 
 func _on_table_payment_collected(
 	amount: float,
@@ -116,9 +121,12 @@ func _on_table_payment_collected(
 	var customer: CharacterBody2D = current_table.get_seated_customer()
 
 	if customer != null:
-		customer.leave_restaurant(
-			customer_exit_point.global_position
-		)
+		var customer_group: Node = customer.get_parent()
+
+		if customer_group.has_method("leave_restaurant"):
+			customer_group.leave_restaurant(
+				customer_exit_point.global_position
+			)
 
 func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: Area2D) -> void:
 	match customer.target_type:
@@ -141,17 +149,29 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 			customer_spawn_timer.start()
 func spawn_customer() -> void:
 	print("Spawn solicitado")
-	var available_table: Area2D = get_available_table()
+
+	var group_size: int = [1, 2, 3, 4].pick_random()
+	print("Tamaño de grupo generado: ", group_size)
+
+	var available_table: Area2D = get_available_table(group_size)
 
 	if available_table == null:
 		print("No hay ninguna mesa disponible")
 		customer_spawn_timer.start()
 		return
 
-	var customer: CharacterBody2D = customer_scene.instantiate()
+	var customer_group: Node2D = customer_group_scene.instantiate()
+	customer_group.global_position = customer_spawn_point.global_position
+	add_child(customer_group)
+	customer_group.setup(group_size)
 
-	customer.global_position = customer_spawn_point.global_position
-	add_child(customer)
+	var group_customers: Array[CharacterBody2D] = customer_group.get_customers()
+	print("Clientes reales creados: ", group_customers.size())
+
+	var customer: CharacterBody2D = customer_group.get_leader()
+
+	
+	
 	var reserved: bool = available_table.reserve(customer)
 	if not reserved:
 		customer.queue_free()
@@ -162,7 +182,9 @@ func spawn_customer() -> void:
 
 	customer.destination_reached.connect(_on_customer_destination_reached.bind(customer,available_table))
 
-	customer.move_to_position(available_table.get_customer_seat_position(),customer.TargetType.TABLE)
+	var seat_positions: Array[Vector2] = available_table.get_group_seat_positions(group_size)
+
+	customer_group.move_customers_to_seats(seat_positions)
 
 	print("Nuevo cliente creado para: ", available_table.name)
 	customer_spawn_timer.start()

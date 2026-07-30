@@ -66,6 +66,7 @@ position = Vector2(645, 99)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("5_ycgdg")
+seat_capacity = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Table02Point" unique_id=1035449694]
 position = Vector2(0, -1)
@@ -80,7 +81,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table02Point" unique_id=691477431]
 
 [node name="Seat01" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=378942625]
-position = Vector2(103, 0)
+position = Vector2(100, 19)
+
+[node name="Seat02" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=1095771052]
+position = Vector2(-98, 14)
+
+[node name="Seat03" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=475131559]
+position = Vector2(-96, -25)
+
+[node name="Seat04" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=716704038]
+position = Vector2(97, -19)
 
 [node name="CustomerSpawnPoint" type="Marker2D" parent="." unique_id=1508840823]
 position = Vector2(74, -149)

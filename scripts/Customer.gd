@@ -2,6 +2,9 @@ extends CharacterBody2D
 signal destination_reached
 @export var speed: float = 120.0
 
+@export_enum("1", "2", "3", "4")
+var group_size: int = 1
+
 var target_position: Vector2
 var has_target := false
 enum TargetType {
@@ -39,3 +42,6 @@ func _physics_process(_delta: float) -> void:
 func leave_restaurant(new_position: Vector2) -> void:
 	is_seated = false
 	move_to_position(new_position, TargetType.EXIT)
+
+func get_group_size() -> int:
+	return group_size
