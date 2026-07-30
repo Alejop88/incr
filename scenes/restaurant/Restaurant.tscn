@@ -64,6 +64,15 @@ position = Vector2(103, 0)
 [node name="FoodWaitTimer" type="Timer" parent="Table01Point" unique_id=250822806]
 one_shot = true
 
+[node name="PatienceBar" type="ProgressBar" parent="Table01Point" unique_id=397429382]
+offset_left = -37.0
+offset_top = -74.0
+offset_right = 33.0
+offset_bottom = -60.0
+max_value = 20.0
+value = 20.0
+show_percentage = false
+
 [node name="Table02Point" type="Area2D" parent="." unique_id=1077909806]
 position = Vector2(645, 99)
 collision_layer = 2
@@ -97,6 +106,15 @@ position = Vector2(97, -19)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table02Point" unique_id=794417113]
 one_shot = true
+
+[node name="PatienceBar" type="ProgressBar" parent="Table02Point" unique_id=1855322688]
+offset_left = -37.0
+offset_top = -74.0
+offset_right = 33.0
+offset_bottom = -60.0
+max_value = 20.0
+value = 20.0
+show_percentage = false
 
 [node name="CustomerSpawnPoint" type="Marker2D" parent="." unique_id=1508840823]
 position = Vector2(74, -149)

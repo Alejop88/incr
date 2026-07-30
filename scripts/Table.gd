@@ -21,6 +21,7 @@ var occupied_seats: int = 0
 @onready var eating_timer: Timer = $EatingTimer
 @onready var customer_seat_points: Array[Marker2D] = []
 @onready var food_wait_timer: Timer = $FoodWaitTimer
+@onready var patience_bar: ProgressBar = $PatienceBar
 var state: State = State.FREE
 
 
@@ -31,7 +32,9 @@ func _ready() -> void:
 			customer_seat_points.append(seat)
 	input_event.connect(_on_input_event)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
-
+func _process(_delta: float) -> void:
+	if state == State.WAITING_FOOD:
+		patience_bar.value = food_wait_timer.time_left
 
 func seat_customer(customer: CharacterBody2D) -> bool:
 	if state != State.RESERVED:
@@ -40,6 +43,9 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 	seated_customer = customer
 	state = State.WAITING_FOOD
 	food_wait_timer.start(20.0)
+	patience_bar.max_value = 20.0
+	patience_bar.value = 20.0
+	patience_bar.visible = true
 	print("Cliente sentado. Esperando comida")
 	return true
 
@@ -67,6 +73,7 @@ func receive_food() -> bool:
 
 	if delivered_plates >= required_plates:
 		food_wait_timer.stop()
+		patience_bar.visible = false
 		state = State.EATING
 		eating_timer.start(eating_time)
 
@@ -124,7 +131,7 @@ func clear_seated_customer() -> void:
 	delivered_plates = 0
 	occupied_seats = 0
 	state = State.FREE
-	
+	patience_bar.visible = false
 func get_seat_capacity() -> int:
 	return seat_capacity
 func is_available() -> bool:
