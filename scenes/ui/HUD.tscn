@@ -50,6 +50,10 @@ layout_mode = 2
 [node name="PlatePriceButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=957869129]
 layout_mode = 2
 
+[node name="BuyTableButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=1015174698]
+layout_mode = 2
+text = "Comprar mesa"
+
 [node name="CloseButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=1317944477]
 layout_mode = 2
 text = "CERRAR"

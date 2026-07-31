@@ -339,3 +339,22 @@ func _on_queue_patience_expired(customer_group: Node2D) -> void:
 	)
 
 	print("Un grupo se ha cansado de esperar y se marcha")
+func unlock_next_table() -> bool:
+	var tables := get_tree().get_nodes_in_group("restaurant_tables")
+
+	for table in tables:
+		if not table.unlocked:
+			table.unlock()
+			print("Mesa comprada: ", table.name)
+			return true
+
+	print("No quedan mesas bloqueadas")
+	return false
+func has_locked_tables() -> bool:
+	var tables := get_tree().get_nodes_in_group("restaurant_tables")
+
+	for table in tables:
+		if not table.unlocked:
+			return true
+
+	return false

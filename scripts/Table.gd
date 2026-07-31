@@ -10,7 +10,7 @@ enum State {
 	EATING,
 	WAITING_PAYMENT
 }
-
+@export var unlocked: bool = true
 @export var eating_time: float = 5.0
 @export var payment_amount: float = 5.0
 @export var seat_capacity: int = 1
@@ -33,6 +33,8 @@ func _ready() -> void:
 			customer_seat_points.append(seat)
 	input_event.connect(_on_input_event)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
+	if not unlocked:
+		visible = false
 func _process(_delta: float) -> void:
 	if state == State.WAITING_FOOD:
 		patience_bar.value = food_wait_timer.time_left
@@ -51,6 +53,9 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 	return true
 
 func reserve(customer: CharacterBody2D) -> bool:
+	if not unlocked:
+		return false
+
 	if state != State.FREE:
 		return false
 
@@ -136,6 +141,9 @@ func clear_seated_customer() -> void:
 func get_seat_capacity() -> int:
 	return seat_capacity
 func is_available() -> bool:
+	if not unlocked:
+		return false
+
 	return visible and state == State.FREE
 func can_seat_group(group_size: int) -> bool:
 	if not is_available():
@@ -161,3 +169,11 @@ func _on_food_wait_timer_timeout() -> void:
 
 	print("Los clientes se han cansado de esperar")
 	customers_left_without_paying.emit(self)
+func unlock() -> void:
+	unlocked = true
+	visible = true
+
+	print(name, " desbloqueada")
+func lock() -> void:
+	unlocked = false
+	visible = false
