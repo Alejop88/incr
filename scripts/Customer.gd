@@ -13,7 +13,8 @@ enum TargetType {
 	QUEUE,
 	EXIT
 }
-
+var has_received_food: bool = false
+var requested_dish: DishTypes.Type = DishTypes.Type.NONE
 var target_type: TargetType = TargetType.NONE
 var is_seated: bool = false
 func move_to_position(

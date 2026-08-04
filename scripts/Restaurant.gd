@@ -94,33 +94,42 @@ func _on_player_waiter_destination_reached() -> void:
 
 	match player_waiter.target_type:
 		player_waiter.TargetType.KITCHEN:
-			player_waiter.has_plate = true
-			print("El camarero ha recogido un plato")
+			var available_dishes: Array[DishTypes.Type] = [
+				DishTypes.Type.BURGER,
+				DishTypes.Type.PIZZA
+			]
+
+			player_waiter.carried_dish = available_dishes.pick_random()
+
+			print(
+				"El camarero ha recogido: ",
+				DishTypes.Type.keys()[player_waiter.carried_dish]
+			)
 
 		player_waiter.TargetType.TABLE:
-			
 			if selected_table == null:
 				print("No hay ninguna mesa seleccionada")
 				return
-				print("El camarero llegó a la mesa: ", selected_table.name)
-			if player_waiter.has_plate:
-				var delivered: bool = selected_table.receive_food()
+
+			print(
+				"El camarero llegó a la mesa: ",
+				selected_table.name
+			)
+
+			if player_waiter.carried_dish != DishTypes.Type.NONE:
+				var delivered: bool = selected_table.receive_food(player_waiter.carried_dish)
 
 				if delivered:
-					player_waiter.has_plate = false
-					print(
-						"El camarero ha entregado el plato en: ",
-						selected_table.name
-					)
+					print("El camarero ha entregado ",DishTypes.Type.keys()[player_waiter.carried_dish]," en ",selected_table.name)
+
+					player_waiter.carried_dish = DishTypes.Type.NONE
 			else:
 				print("El camarero ha llegado sin plato")
+
 			if selected_table.collect_payment():
 				print("El camarero ha cobrado la mesa")
 
-func _on_table_payment_collected(
-	amount: float,
-	current_table: Area2D
-) -> void:
+func _on_table_payment_collected(amount: float,current_table: Area2D) -> void:
 	customer_paid.emit(amount)
 
 	var customer: CharacterBody2D = current_table.get_seated_customer()
@@ -210,7 +219,7 @@ func spawn_customer() -> void:
 
 	
 	
-	var reserved: bool = available_table.reserve(customer)
+	var reserved: bool = available_table.reserve(customer_group)
 	if not reserved:
 		customer.queue_free()
 		customer_spawn_timer.start()
@@ -291,7 +300,7 @@ func try_seat_waiting_group() -> void:
 		update_waiting_queue_positions()
 
 		var customer: CharacterBody2D = customer_group.get_leader()
-		var reserved: bool = available_table.reserve(customer)
+		var reserved: bool = available_table.reserve(customer_group)
 
 		if not reserved:
 			waiting_queue.insert(i, customer_group)

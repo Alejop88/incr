@@ -9,9 +9,7 @@ signal queue_patience_expired(customer_group)
 
 @onready var queue_patience_timer: Timer = $QueuePatienceTimer
 func _ready() -> void:
-	queue_patience_timer.timeout.connect(
-		_on_queue_patience_timer_timeout
-	)
+	queue_patience_timer.timeout.connect(_on_queue_patience_timer_timeout)
 func get_group_size() -> int:
 	return group_size
 	
@@ -24,8 +22,21 @@ func create_customers() -> void:
 		var customer: CharacterBody2D = customer_scene.instantiate()
 		customer.group_size = group_size
 		add_child(customer)
+		var available_dishes: Array[DishTypes.Type] = \
+		[
+			DishTypes.Type.BURGER,
+			DishTypes.Type.PIZZA
+		]
+		customer.requested_dish = available_dishes.pick_random()
 		customer.visible = false
 		customers.append(customer)
+		print(
+			"Cliente ",
+			i + 1,
+			" ha pedido: ",
+			DishTypes.Type.keys()[customer.requested_dish]
+		)
+
 	print("Grupo creado con ", customers.size(), " clientes")
 func get_leader() -> CharacterBody2D:
 	if customers.is_empty():

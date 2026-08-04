@@ -5,7 +5,7 @@ signal destination_reached
 @export var speed: float = 220.0
 const BASE_SPEED: float = 220.0
 const SPEED_PER_LEVEL: float = 25.0
-var has_plate: bool = false
+var carried_dish: DishTypes.Type = DishTypes.Type.NONE
 var target_position: Vector2
 var has_target: bool = false
 enum TargetType {

@@ -25,7 +25,6 @@ var occupied_seats: int = 0
 @onready var patience_bar: ProgressBar = $PatienceBar
 var state: State = State.FREE
 
-
 func _ready() -> void:
 	add_to_group("restaurant_tables")
 	for seat in $SeatPoints.get_children():
@@ -52,30 +51,60 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 	print("Cliente sentado. Esperando comida")
 	return true
 
-func reserve(customer: CharacterBody2D) -> bool:
+func reserve(customer_group: Node2D) -> bool:
 	if not unlocked:
 		return false
 
 	if state != State.FREE:
 		return false
 
-	seated_customer = customer
-	required_plates = customer.get_group_size()
+	var leader: CharacterBody2D = customer_group.get_leader()
+
+	if leader == null:
+		return false
+
+	seated_customer = leader
+
+	required_plates = customer_group.get_group_size()
 	occupied_seats = required_plates
 	state = State.RESERVED
 
-	print("Mesa reservada para un grupo de ",required_plates," personas")
 
 	return true
 
-func receive_food() -> bool:
+func receive_food(dish: DishTypes.Type) -> bool:
 	if state != State.WAITING_FOOD:
 		print("Esta mesa no está esperando comida")
 		return false
 
-	delivered_plates += 1
+	var customer: CharacterBody2D = find_customer_waiting_for_dish(dish)
 
-	print("Platos entregados: ", delivered_plates, "/", required_plates)
+	if customer == null:
+		print(
+			"Ningún cliente de esta mesa espera: ",
+			DishTypes.Type.keys()[dish]
+		)
+		return false
+
+	customer.has_received_food = true
+	delivered_plates += 1
+	print(
+	"Cliente servido con ",
+	DishTypes.Type.keys()[dish],
+	" | Faltan por servir: ",
+	required_plates - delivered_plates
+)
+	print(
+		"Plato entregado a un cliente: ",
+		DishTypes.Type.keys()[dish]
+	)
+
+	print(
+		"Platos entregados: ",
+		delivered_plates,
+		"/",
+		required_plates
+	)
 
 	if delivered_plates >= required_plates:
 		food_wait_timer.stop()
@@ -83,8 +112,10 @@ func receive_food() -> bool:
 		state = State.EATING
 		eating_timer.start(eating_time)
 
-		print("Todos los platos entregados. El grupo empieza a comer")
-	
+		print(
+			"Todos los clientes tienen su plato. El grupo empieza a comer"
+		)
+
 	return true
 
 
@@ -174,6 +205,26 @@ func unlock() -> void:
 	visible = true
 
 	print(name, " desbloqueada")
+
+
 func lock() -> void:
 	unlocked = false
 	visible = false
+func find_customer_waiting_for_dish(
+	dish: DishTypes.Type
+) -> CharacterBody2D:
+
+	if seated_customer == null:
+		return null
+
+	var customer_group: Node = seated_customer.get_parent()
+
+	if customer_group == null:
+		return null
+
+	for customer in customer_group.get_customers():
+		if customer.requested_dish == dish \
+		and not customer.has_received_food:
+			return customer
+
+	return null
