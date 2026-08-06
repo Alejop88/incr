@@ -15,6 +15,9 @@ size = Vector2(80, 100)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rarhs"]
 size = Vector2(80, 80)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b6rs3"]
+size = Vector2(40, 40)
+
 [node name="Restaurant" type="Node2D" unique_id=1967190223]
 script = ExtResource("1_3a4hs")
 
@@ -144,6 +147,16 @@ position = Vector2(242, 67)
 
 [node name="Queue05" type="Marker2D" parent="QueuePoints" unique_id=480175768]
 position = Vector2(242, 25)
+
+[node name="TrashPoint" type="Area2D" parent="." unique_id=56642591]
+position = Vector2(116, 328)
+
+[node name="Sprite2D" type="Sprite2D" parent="TrashPoint" unique_id=1818619362]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TrashPoint" unique_id=989216028]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_b6rs3")
+debug_color = Color(0.94890803, 0.20741636, 0.2489987, 0.41960785)
 
 [connection signal="timeout" from="Table01Point/FoodWaitTimer" to="Table01Point" method="_on_food_wait_timer_timeout"]
 [connection signal="timeout" from="Table02Point/FoodWaitTimer" to="Table02Point" method="_on_food_wait_timer_timeout"]

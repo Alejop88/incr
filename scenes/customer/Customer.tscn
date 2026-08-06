@@ -18,3 +18,10 @@ texture = ExtResource("2_xvxe4")
 position = Vector2(-2, 16.375)
 shape = SubResource("RectangleShape2D_b6rs3")
 disabled = true
+
+[node name="OrderLabel" type="Label" parent="." unique_id=1383310986]
+offset_left = -21.0
+offset_top = -71.0
+offset_right = 19.0
+offset_bottom = -48.0
+horizontal_alignment = 1

@@ -1,7 +1,7 @@
 extends CharacterBody2D
 signal destination_reached
 @export var speed: float = 120.0
-
+@onready var order_label: Label = $OrderLabel
 @export_enum("1", "2", "3", "4")
 var group_size: int = 1
 
@@ -17,6 +17,9 @@ var has_received_food: bool = false
 var requested_dish: DishTypes.Type = DishTypes.Type.NONE
 var target_type: TargetType = TargetType.NONE
 var is_seated: bool = false
+func _ready() -> void:
+	update_order_label()
+	hide_order()
 func move_to_position(
 	new_position: Vector2,
 	new_target_type: TargetType
@@ -47,3 +50,24 @@ func leave_restaurant(new_position: Vector2) -> void:
 
 func get_group_size() -> int:
 	return group_size
+func set_requested_dish(dish: DishTypes.Type) -> void:
+	requested_dish = dish
+	update_order_label()
+
+
+func update_order_label() -> void:
+	match requested_dish:
+		DishTypes.Type.BURGER:
+			order_label.text = "🍔"
+
+		DishTypes.Type.PIZZA:
+			order_label.text = "🍕"
+
+		_:
+			order_label.text = ""
+func show_order() -> void:
+	order_label.visible = true
+
+
+func hide_order() -> void:
+	order_label.visible = false

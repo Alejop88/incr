@@ -27,7 +27,7 @@ func create_customers() -> void:
 			DishTypes.Type.BURGER,
 			DishTypes.Type.PIZZA
 		]
-		customer.requested_dish = available_dishes.pick_random()
+		customer.set_requested_dish(available_dishes.pick_random())
 		customer.visible = false
 		customers.append(customer)
 		print(

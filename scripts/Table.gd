@@ -48,6 +48,11 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 	patience_bar.max_value = food_wait_time
 	patience_bar.value = food_wait_time
 	patience_bar.visible = true
+	var customer_group: Node = customer.get_parent()
+
+	if customer_group != null and customer_group.has_method("get_customers"):
+		for group_customer in customer_group.get_customers():
+			group_customer.show_order()
 	print("Cliente sentado. Esperando comida")
 	return true
 
@@ -87,6 +92,7 @@ func receive_food(dish: DishTypes.Type) -> bool:
 		return false
 
 	customer.has_received_food = true
+	customer.hide_order()
 	delivered_plates += 1
 	print(
 	"Cliente servido con ",

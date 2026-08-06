@@ -4,6 +4,7 @@ signal customer_paid(amount: float)
 
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
 @onready var kitchen_point: Area2D = $KitchenPoint
+@onready var trash_point: Area2D = $TrashPoint
 @onready var tables: Array[Area2D] = []
 const BASE_PLATE_PRICE: float = 5.0
 var plate_price: float = BASE_PLATE_PRICE
@@ -34,6 +35,7 @@ func _ready() -> void:
 	player_waiter.input_pickable = false
 
 	kitchen_point.input_event.connect(_on_kitchen_point_input_event)
+	trash_point.input_event.connect(_on_trash_point_input_event)
 	for current_table in tables:
 		current_table.input_event.connect(_on_table_input_event.bind(current_table))
 	for current_table in tables:
@@ -128,6 +130,17 @@ func _on_player_waiter_destination_reached() -> void:
 
 			if selected_table.collect_payment():
 				print("El camarero ha cobrado la mesa")
+		player_waiter.TargetType.TRASH:
+			if player_waiter.carried_dish == DishTypes.Type.NONE:
+				print("El camarero ha llegado a la papelera sin plato")
+				return
+
+			print(
+				"Plato tirado: ",
+				DishTypes.Type.keys()[player_waiter.carried_dish]
+			)
+
+			player_waiter.carried_dish = DishTypes.Type.NONE
 
 func _on_table_payment_collected(amount: float,current_table: Area2D) -> void:
 	customer_paid.emit(amount)
@@ -367,3 +380,20 @@ func has_locked_tables() -> bool:
 			return true
 
 	return false
+func _on_trash_point_input_event(
+	_viewport: Viewport,
+	event: InputEvent,
+	_shape_idx: int
+) -> void:
+	if event is InputEventMouseButton \
+			and event.button_index == MOUSE_BUTTON_LEFT \
+			and event.pressed:
+
+		if player_waiter.carried_dish == DishTypes.Type.NONE:
+			print("El camarero no lleva ningún plato")
+			return
+
+		player_waiter.move_to_position(
+			trash_point.global_position,
+			player_waiter.TargetType.TRASH
+		)

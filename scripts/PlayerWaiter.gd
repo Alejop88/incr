@@ -11,7 +11,8 @@ var has_target: bool = false
 enum TargetType {
 	NONE,
 	KITCHEN,
-	TABLE
+	TABLE,
+	TRASH
 }
 
 var target_type: TargetType = TargetType.NONE
