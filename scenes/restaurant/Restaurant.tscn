@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cqge8v4cxdpmt" path="res://assets/art/SpritePnjInitial.png" id="2_g4flx"]
 [ext_resource type="Script" uid="uid://b66vdgt4auk5" path="res://scripts/PlayerWaiter.gd" id="2_htwgg"]
 [ext_resource type="Texture2D" uid="uid://c6685hw1lxn1" path="res://assets/art/SpriteChef.png" id="4_bewk8"]
+[ext_resource type="Script" uid="uid://cdyy1ecx3ujb2" path="res://scripts/Kitchen.gd" id="4_y38bg"]
 [ext_resource type="Script" uid="uid://dui07flapa3um" path="res://scripts/Table.gd" id="5_ycgdg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vcsgt"]
@@ -36,6 +37,7 @@ shape = SubResource("RectangleShape2D_vcsgt")
 position = Vector2(112, 221)
 collision_layer = 2
 collision_mask = 0
+script = ExtResource("4_y38bg")
 
 [node name="Sprite2D" type="Sprite2D" parent="KitchenPoint" unique_id=941499777]
 scale = Vector2(0.2651822, 0.23406594)
@@ -43,6 +45,10 @@ texture = ExtResource("4_bewk8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="KitchenPoint" unique_id=1353350670]
 shape = SubResource("RectangleShape2D_htwgg")
+
+[node name="CookTimer" type="Timer" parent="KitchenPoint" unique_id=1288236058]
+wait_time = 3.0
+one_shot = true
 
 [node name="Table01Point" type="Area2D" parent="." unique_id=551340980]
 position = Vector2(650, 250)

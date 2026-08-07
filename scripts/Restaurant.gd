@@ -96,12 +96,22 @@ func _on_player_waiter_destination_reached() -> void:
 
 	match player_waiter.target_type:
 		player_waiter.TargetType.KITCHEN:
-			var available_dishes: Array[DishTypes.Type] = [
-				DishTypes.Type.BURGER,
-				DishTypes.Type.PIZZA
-			]
+			if player_waiter.carried_dish != DishTypes.Type.NONE:
+				print("El camarero ya lleva un plato")
+				return
 
-			player_waiter.carried_dish = available_dishes.pick_random()
+			var dish: DishTypes.Type = kitchen_point.take_ready_dish()
+
+			if dish == DishTypes.Type.NONE:
+				print("No hay platos preparados en la cocina")
+				return
+
+			player_waiter.carried_dish = dish
+
+			print(
+				"El camarero ha recogido: ",
+				DishTypes.Type.keys()[player_waiter.carried_dish]
+			)
 
 			print(
 				"El camarero ha recogido: ",
@@ -185,6 +195,14 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 
 			if seated:
 				customer.is_seated = true
+
+			var customer_group: Node = customer.get_parent()
+
+			if customer_group != null \
+					and customer_group.has_method("get_customers"):
+
+				kitchen_point.add_orders(customer_group.get_customers())
+				
 		customer.TargetType.QUEUE:
 			print("El grupo ha llegado a la cola")
 		customer.TargetType.EXIT:
