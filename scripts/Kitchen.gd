@@ -57,6 +57,10 @@ func try_start_cooking() -> void:
 	if is_cooking:
 		return
 
+	if ready_dishes.size() >= counter_capacity:
+		print("Mostrador lleno. El cocinero espera")
+		return
+
 	if order_queue.is_empty():
 		return
 
@@ -81,5 +85,5 @@ func take_ready_dish() -> DishTypes.Type:
 		" | Quedan preparados: ",
 		ready_dishes.size()
 	)
-
+	try_start_cooking()
 	return dish
