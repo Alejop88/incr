@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://dgx3onchuarpc"]
+
+[ext_resource type="Script" uid="uid://c2ghalm0wyhdt" path="res://scripts/MichelinUpgrades.gd" id="1_n6na1"]
+
+[node name="MichelinUpgrades" type="Control" unique_id=348600953]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_n6na1")
+
+[node name="Background" type="Panel" parent="." unique_id=401538527]
+layout_mode = 0
+offset_left = 3.0
+offset_right = 378.0
+offset_bottom = 212.0
+
+[node name="TitleLabel" type="Label" parent="." unique_id=1252073161]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 1.0
+offset_right = 244.0
+offset_bottom = 24.0
+text = "Mejoras Estrella"
+
+[node name="StarsLabel" type="Label" parent="." unique_id=1451175646]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "⭐ 0"
+
+[node name="CounterCapacityUpgradeButton" type="Button" parent="." unique_id=904238691]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 93.0
+offset_right = 207.0
+offset_bottom = 133.0
+tooltip_text = "Añade +1 espacio para platos preparados.
+
+Coste: ⭐ 1"
+text = "+1"
+
+[node name="CloseButton" type="Button" parent="." unique_id=81587447]
+layout_mode = 0
+offset_left = 357.0
+offset_right = 375.0
+offset_bottom = 31.0
+text = "X"

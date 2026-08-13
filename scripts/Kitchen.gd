@@ -8,12 +8,14 @@ var is_cooking: bool = false
 @onready var cook_timer: Timer = $CookTimer
 
 var order_queue: Array[DishTypes.Type] = []
-@export var counter_capacity: int = 4
-
+const BASE_COUNTER_CAPACITY: int = 4
+@export var counter_capacity: int = BASE_COUNTER_CAPACITY
+var counter_capacity_bonus: int = 0
+const COUNTER_CAPACITY_PER_MICHELIN_LEVEL: int = 1
 var ready_dishes: Array[DishTypes.Type] = []
 func _ready() -> void:
 	cook_timer.timeout.connect(_on_cook_timer_timeout)
-
+	
 func _on_cook_timer_timeout() -> void:
 	print(
 		"Plato terminado: ",
@@ -87,3 +89,22 @@ func take_ready_dish() -> DishTypes.Type:
 	)
 	try_start_cooking()
 	return dish
+func get_ready_dish_count() -> int:
+	return ready_dishes.size()
+func is_counter_full() -> bool:
+	return ready_dishes.size() >= counter_capacity
+func get_free_counter_slots() -> int:
+	return max(0, counter_capacity - ready_dishes.size())
+func increase_counter_capacity(amount: int) -> void:
+	counter_capacity += amount
+	try_start_cooking()
+	print("Nueva capacidad del mostrador: ", counter_capacity)
+func update_counter_capacity_from_bonus() -> void:
+	counter_capacity = BASE_COUNTER_CAPACITY + counter_capacity_bonus
+
+	try_start_cooking()
+
+	print("Capacidad del mostrador actualizada: ",counter_capacity)
+func set_counter_capacity_bonus(bonus: int) -> void:
+	counter_capacity_bonus = bonus
+	update_counter_capacity_from_bonus()

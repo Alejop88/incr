@@ -1,8 +1,10 @@
 extends Node
 
 @onready var economy_manager: Node = $EconomyManager
+@onready var michelin_manager: Node = $MichelinManager
 @onready var restaurant: Node2D = $Restaurant
 @onready var hud: Control = $CanvasLayer/HUD
+@onready var michelin_upgrades: Control = $CanvasLayer/MichelinUpgrades
 var waiter_speed_level: int = 0
 var waiter_speed_upgrade_cost: float = 10.0
 const MAX_WAITER_SPEED_LEVEL: int = 10
@@ -11,14 +13,21 @@ var table_purchase_cost: float = 50.0
 func _ready() -> void:
 	restaurant.customer_paid.connect(_on_customer_paid)
 	economy_manager.money_changed.connect(_on_money_changed)
+	michelin_manager.stars_changed.connect(_on_stars_changed)
 	hud.serve_customer_requested.connect(_on_serve_customer_requested)
 	hud.waiter_speed_upgrade_requested.connect(_on_waiter_speed_upgrade_requested)
 	hud.set_money(economy_manager.money)
+	hud.set_stars(michelin_manager.get_stars())
 	hud.set_waiter_speed_upgrade(waiter_speed_level,waiter_speed_upgrade_cost,MAX_WAITER_SPEED_LEVEL)
 	hud.set_plate_price_upgrade(restaurant.plate_price_level,plate_price_upgrade_cost,restaurant.MAX_PLATE_PRICE_LEVEL)
 	hud.plate_price_upgrade_requested.connect(_on_plate_price_upgrade_requested)
 	hud.buy_table_requested.connect(_on_buy_table_requested)
+	hud.star_upgrades_requested.connect(_on_star_upgrades_requested)
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
+	restaurant.set_counter_capacity_bonus(michelin_manager.counter_capacity_bonus)
+	michelin_manager.counter_capacity_bonus_changed.connect(_on_counter_capacity_bonus_changed)
+	michelin_upgrades.upgrade_requested.connect(_on_star_upgrade_requested)
+	
 func _on_serve_customer_requested() -> void:
 	restaurant.serve_test_customer()
 
@@ -30,6 +39,9 @@ func _on_money_changed(new_money: float) -> void:
 
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),new_money)
 	
+func _on_stars_changed(new_stars: int) -> void:
+	hud.set_stars(new_stars)
+	michelin_upgrades.set_stars(new_stars)
 func _on_waiter_speed_upgrade_requested() -> void:
 	if waiter_speed_level >= MAX_WAITER_SPEED_LEVEL:
 		print("La velocidad del camarero ya está al máximo")
@@ -74,3 +86,31 @@ func _on_buy_table_requested() -> void:
 	table_purchase_cost *= 1.5
 
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
+func _on_counter_capacity_bonus_changed(new_level: int) -> void:
+	restaurant.set_counter_capacity_bonus(new_level)
+func _on_star_upgrades_requested() -> void:
+	michelin_upgrades.set_stars(
+		michelin_manager.get_stars()
+	)
+
+	for upgrade_id in michelin_upgrades.get_upgrade_ids():
+		michelin_upgrades.set_upgrade_bought(
+			upgrade_id,
+			michelin_manager.is_upgrade_bought(upgrade_id)
+		)
+		michelin_upgrades.set_upgrade_info(
+			upgrade_id,
+			michelin_manager.get_upgrade_name(upgrade_id),
+			michelin_manager.get_upgrade_description(upgrade_id),
+			michelin_manager.get_upgrade_cost(upgrade_id)
+		)
+	michelin_upgrades.visible = true
+
+func _on_star_upgrade_requested(upgrade_id: String) -> void:
+	var bought: bool = michelin_manager.buy_upgrade(upgrade_id)
+
+	if not bought:
+		print("No se ha podido comprar la mejora: ",upgrade_id)
+		return
+
+	michelin_upgrades.set_upgrade_bought(upgrade_id, true)

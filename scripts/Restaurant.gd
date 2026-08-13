@@ -415,3 +415,5 @@ func _on_trash_point_input_event(
 			trash_point.global_position,
 			player_waiter.TargetType.TRASH
 		)
+func set_counter_capacity_bonus(bonus: int) -> void:
+	kitchen_point.set_counter_capacity_bonus(bonus)
