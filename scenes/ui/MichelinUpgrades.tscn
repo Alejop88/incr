@@ -9,6 +9,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+tooltip_text = "Mostrador ampliado II
+
+Añade +2 espacios para platos preparados.
+
+Coste: ⭐ 3"
 script = ExtResource("1_n6na1")
 
 [node name="Background" type="Panel" parent="." unique_id=401538527]
@@ -31,7 +36,7 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "⭐ 0"
 
-[node name="CounterCapacityUpgradeButton" type="Button" parent="." unique_id=904238691]
+[node name="counter_capacity_1" type="Button" parent="." unique_id=904238691]
 layout_mode = 0
 offset_left = 160.0
 offset_top = 93.0
@@ -41,6 +46,14 @@ tooltip_text = "Añade +1 espacio para platos preparados.
 
 Coste: ⭐ 1"
 text = "+1"
+
+[node name="counter_capacity_2" type="Button" parent="." unique_id=1124769558]
+layout_mode = 0
+offset_left = 161.0
+offset_top = 155.0
+offset_right = 207.0
+offset_bottom = 197.0
+text = "+2"
 
 [node name="CloseButton" type="Button" parent="." unique_id=81587447]
 layout_mode = 0

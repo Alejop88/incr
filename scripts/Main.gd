@@ -98,6 +98,12 @@ func _on_star_upgrades_requested() -> void:
 			upgrade_id,
 			michelin_manager.is_upgrade_bought(upgrade_id)
 		)
+
+		michelin_upgrades.set_upgrade_locked(
+			upgrade_id,
+			not michelin_manager.are_upgrade_requirements_met(upgrade_id)
+		)
+
 		michelin_upgrades.set_upgrade_info(
 			upgrade_id,
 			michelin_manager.get_upgrade_name(upgrade_id),
@@ -114,3 +120,15 @@ func _on_star_upgrade_requested(upgrade_id: String) -> void:
 		return
 
 	michelin_upgrades.set_upgrade_bought(upgrade_id, true)
+	for current_upgrade_id in michelin_upgrades.get_upgrade_ids():
+		michelin_upgrades.set_upgrade_locked(
+			current_upgrade_id,
+			not michelin_manager.are_upgrade_requirements_met(
+				current_upgrade_id
+			)
+		)
+		michelin_upgrades.set_upgrade_info(
+			current_upgrade_id,
+			michelin_manager.get_upgrade_name(current_upgrade_id),
+			michelin_manager.get_upgrade_description(current_upgrade_id),
+			michelin_manager.get_upgrade_cost(current_upgrade_id))
