@@ -3,15 +3,15 @@ signal upgrade_requested(upgrade_id: String)
 
 @onready var stars_label: Label = $StarsLabel
 @onready var close_button: Button = $CloseButton
-@onready var counter_capacity_upgrade_button: Button = $counter_capacity_1
-@onready var counter_capacity_upgrade_2_button: Button = $counter_capacity_2
+
 
 
 var upgrade_buttons: Dictionary = {}
 func _ready() -> void:
 	close_button.pressed.connect(_on_close_button_pressed)
-	upgrade_buttons["counter_capacity_1"] = counter_capacity_upgrade_button
-	upgrade_buttons["counter_capacity_2"] = counter_capacity_upgrade_2_button
+	for child in get_children():
+		if child is Button and child != close_button:
+			upgrade_buttons[child.name] = child
 	for upgrade_id in upgrade_buttons:
 		var button: Button = upgrade_buttons[upgrade_id]
 
@@ -21,8 +21,7 @@ func _ready() -> void:
 		)
 func set_stars(value: int) -> void:
 	stars_label.text = "⭐ %d" % value
-func set_counter_capacity_upgrade_bought(is_bought: bool) -> void:
-	counter_capacity_upgrade_button.disabled = is_bought
+
 
 func _on_close_button_pressed() -> void:
 	visible = false
