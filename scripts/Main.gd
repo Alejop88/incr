@@ -12,6 +12,7 @@ var plate_price_upgrade_cost: float = 10.0
 var table_purchase_cost: float = 50.0
 func _ready() -> void:
 	restaurant.customer_paid.connect(_on_customer_paid)
+	restaurant.kitchen_panel_requested.connect(_on_kitchen_panel_requested)
 	economy_manager.money_changed.connect(_on_money_changed)
 	michelin_manager.stars_changed.connect(_on_stars_changed)
 	hud.serve_customer_requested.connect(_on_serve_customer_requested)
@@ -132,3 +133,10 @@ func _on_star_upgrade_requested(upgrade_id: String) -> void:
 			michelin_manager.get_upgrade_name(current_upgrade_id),
 			michelin_manager.get_upgrade_description(current_upgrade_id),
 			michelin_manager.get_upgrade_cost(current_upgrade_id))
+func _on_kitchen_panel_requested() -> void:
+	hud.set_kitchen_ready_dishes(
+		restaurant.get_ready_dishes_count(),
+		restaurant.get_counter_capacity()
+	)
+
+	hud.open_kitchen_panel()

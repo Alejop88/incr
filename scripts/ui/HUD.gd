@@ -16,6 +16,9 @@ signal star_upgrades_requested
 @onready var waiter_speed_button: Button = $UpgradesPanel/VBoxContainer/WaiterSpeedButton
 @onready var plate_price_button: Button = $UpgradesPanel/VBoxContainer/PlatePriceButton
 @onready var buy_table_button: Button = $UpgradesPanel/VBoxContainer/BuyTableButton
+@onready var kitchen_panel: Control = $KitchenPanel
+@onready var kitchen_close_button: Button = $KitchenPanel/VBoxContainer/CloseButton
+@onready var ready_dishes_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesLabel
 func _ready() -> void:
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
 	upgrades_button.pressed.connect(_on_upgrades_button_pressed)
@@ -24,6 +27,7 @@ func _ready() -> void:
 	plate_price_button.pressed.connect(_on_plate_price_button_pressed)
 	buy_table_button.pressed.connect(_on_buy_table_button_pressed)
 	star_upgrades_button.pressed.connect(_on_star_upgrades_button_pressed)
+	kitchen_close_button.pressed.connect(_on_kitchen_close_button_pressed)
 func set_money(value: float) -> void:
 	money_label.text = "Dinero: %.1f €" % value
 func set_stars(value: int) -> void:
@@ -70,3 +74,11 @@ func set_table_purchase(cost: float,has_locked_tables: bool,current_money: float
 
 	buy_table_button.text = "Comprar mesa - %.1f €" % cost
 	buy_table_button.disabled = current_money < cost
+func open_kitchen_panel() -> void:
+	kitchen_panel.visible = true
+
+func _on_kitchen_close_button_pressed() -> void:
+	kitchen_panel.visible = false
+func set_kitchen_ready_dishes(current: int, capacity: int) -> void:
+	ready_dishes_label.text = \
+		"Platos preparados: %d / %d" % [current, capacity]

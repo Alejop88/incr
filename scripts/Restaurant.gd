@@ -1,7 +1,7 @@
 extends Node2D
 
 signal customer_paid(amount: float)
-
+signal kitchen_panel_requested
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
 @onready var kitchen_point: Area2D = $KitchenPoint
 @onready var trash_point: Area2D = $TrashPoint
@@ -51,10 +51,16 @@ func serve_test_customer() -> void:
 	customer_paid.emit(plate_price)
 	
 func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		print("Clic izquierdo en cocina")
-		player_waiter.move_to_position(kitchen_point.global_position,player_waiter.TargetType.KITCHEN)
-
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			print("Clic izquierdo en cocina")
+			player_waiter.move_to_position(
+				kitchen_point.global_position,
+				player_waiter.TargetType.KITCHEN
+			)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			kitchen_panel_requested.emit()
+			
 func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int,current_table: Area2D) -> void:
 	if event is InputEventMouseButton \
 			and event.pressed \
@@ -417,3 +423,8 @@ func _on_trash_point_input_event(
 		)
 func set_counter_capacity_bonus(bonus: int) -> void:
 	kitchen_point.set_counter_capacity_bonus(bonus)
+func get_ready_dishes_count() -> int:
+	return kitchen_point.get_ready_dishes_count()
+
+func get_counter_capacity() -> int:
+	return kitchen_point.get_counter_capacity()

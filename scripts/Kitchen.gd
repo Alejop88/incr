@@ -108,3 +108,8 @@ func update_counter_capacity_from_bonus() -> void:
 func set_counter_capacity_bonus(bonus: int) -> void:
 	counter_capacity_bonus = bonus
 	update_counter_capacity_from_bonus()
+func get_ready_dishes_count() -> int:
+	return ready_dishes.size()
+
+func get_counter_capacity() -> int:
+	return counter_capacity
