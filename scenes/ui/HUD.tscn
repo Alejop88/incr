@@ -93,6 +93,14 @@ text = "Cocina"
 layout_mode = 2
 text = "Platos preparados: 0 / 4"
 
+[node name="CookingProgressBar" type="ProgressBar" parent="KitchenPanel/VBoxContainer" unique_id=911894895]
+layout_mode = 2
+
+[node name="ReadyDishesListLabel" type="Label" parent="KitchenPanel/VBoxContainer" unique_id=1146107618]
+layout_mode = 2
+text = "Platos:
+Ninguno"
+
 [node name="CloseButton" type="Button" parent="KitchenPanel/VBoxContainer" unique_id=934119032]
 layout_mode = 2
 text = "Cerrar"

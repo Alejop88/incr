@@ -428,3 +428,8 @@ func get_ready_dishes_count() -> int:
 
 func get_counter_capacity() -> int:
 	return kitchen_point.get_counter_capacity()
+	
+func get_ready_dishes() -> Array:
+	return kitchen_point.get_ready_dishes()
+func get_cooking_progress() -> float:
+	return kitchen_point.get_cooking_progress()

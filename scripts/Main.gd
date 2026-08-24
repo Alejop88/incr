@@ -5,6 +5,7 @@ extends Node
 @onready var restaurant: Node2D = $Restaurant
 @onready var hud: Control = $CanvasLayer/HUD
 @onready var michelin_upgrades: Control = $CanvasLayer/MichelinUpgrades
+@onready var ready_dishes_list_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesListLabel
 var waiter_speed_level: int = 0
 var waiter_speed_upgrade_cost: float = 10.0
 const MAX_WAITER_SPEED_LEVEL: int = 10
@@ -134,9 +135,22 @@ func _on_star_upgrade_requested(upgrade_id: String) -> void:
 			michelin_manager.get_upgrade_description(current_upgrade_id),
 			michelin_manager.get_upgrade_cost(current_upgrade_id))
 func _on_kitchen_panel_requested() -> void:
-	hud.set_kitchen_ready_dishes(
-		restaurant.get_ready_dishes_count(),
-		restaurant.get_counter_capacity()
-	)
+	hud.set_kitchen_ready_dishes(restaurant.get_ready_dishes_count(),restaurant.get_counter_capacity())
+
+	hud.set_kitchen_ready_dishes_list(restaurant.get_ready_dishes())
 
 	hud.open_kitchen_panel()
+func _process(_delta: float) -> void:
+	if hud.kitchen_panel.visible:
+		hud.set_kitchen_cooking_progress(
+			restaurant.get_cooking_progress()
+		)
+
+		hud.set_kitchen_ready_dishes(
+			restaurant.get_ready_dishes_count(),
+			restaurant.get_counter_capacity()
+		)
+
+		hud.set_kitchen_ready_dishes_list(
+			restaurant.get_ready_dishes()
+		)

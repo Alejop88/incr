@@ -113,3 +113,14 @@ func get_ready_dishes_count() -> int:
 
 func get_counter_capacity() -> int:
 	return counter_capacity
+func get_ready_dishes() -> Array:
+	return ready_dishes.duplicate()
+func get_cooking_progress() -> float:
+	if not is_cooking:
+		return 0.0
+
+	if cook_timer.wait_time <= 0.0:
+		return 0.0
+
+	var elapsed: float = cook_timer.wait_time - cook_timer.time_left
+	return clamp(elapsed / cook_timer.wait_time * 100.0, 0.0, 100.0)

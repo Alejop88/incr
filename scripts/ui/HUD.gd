@@ -19,6 +19,8 @@ signal star_upgrades_requested
 @onready var kitchen_panel: Control = $KitchenPanel
 @onready var kitchen_close_button: Button = $KitchenPanel/VBoxContainer/CloseButton
 @onready var ready_dishes_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesLabel
+@onready var ready_dishes_list_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesListLabel
+@onready var cooking_progress_bar: ProgressBar = $KitchenPanel/VBoxContainer/CookingProgressBar
 func _ready() -> void:
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
 	upgrades_button.pressed.connect(_on_upgrades_button_pressed)
@@ -82,3 +84,16 @@ func _on_kitchen_close_button_pressed() -> void:
 func set_kitchen_ready_dishes(current: int, capacity: int) -> void:
 	ready_dishes_label.text = \
 		"Platos preparados: %d / %d" % [current, capacity]
+func set_kitchen_ready_dishes_list(dishes: Array) -> void:
+	if dishes.is_empty():
+		ready_dishes_list_label.text = "Platos:\nNinguno"
+		return
+
+	var text := "Platos:"
+
+	for dish in dishes:
+		text += "\n- " + DishTypes.Type.keys()[dish]
+
+	ready_dishes_list_label.text = text
+func set_kitchen_cooking_progress(progress: float) -> void:
+	cooking_progress_bar.value = progress
