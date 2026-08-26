@@ -93,6 +93,10 @@ text = "Cocina"
 layout_mode = 2
 text = "Platos preparados: 0 / 4"
 
+[node name="CurrentDishLabel" type="Label" parent="KitchenPanel/VBoxContainer" unique_id=1446868782]
+layout_mode = 2
+text = "Cocinando: Nada"
+
 [node name="CookingProgressBar" type="ProgressBar" parent="KitchenPanel/VBoxContainer" unique_id=911894895]
 layout_mode = 2
 
@@ -100,6 +104,12 @@ layout_mode = 2
 layout_mode = 2
 text = "Platos:
 Ninguno"
+
+[node name="OrderQueueContainer" type="VBoxContainer" parent="KitchenPanel/VBoxContainer" unique_id=1234906589]
+layout_mode = 2
+
+[node name="ManualOrderButtons" type="HBoxContainer" parent="KitchenPanel/VBoxContainer" unique_id=1676992908]
+layout_mode = 2
 
 [node name="CloseButton" type="Button" parent="KitchenPanel/VBoxContainer" unique_id=934119032]
 layout_mode = 2

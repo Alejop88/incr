@@ -124,3 +124,46 @@ func get_cooking_progress() -> float:
 
 	var elapsed: float = cook_timer.wait_time - cook_timer.time_left
 	return clamp(elapsed / cook_timer.wait_time * 100.0, 0.0, 100.0)
+func get_current_dish_name() -> String:
+	if not is_cooking:
+		return ""
+
+	return DishTypes.Type.keys()[current_dish]
+func get_order_queue() -> Array:
+	return order_queue.duplicate()
+func get_available_manual_dishes() -> Array:
+	return [
+		DishTypes.Type.PIZZA,
+		DishTypes.Type.BURGER
+	]
+func add_manual_order(dish: DishTypes.Type) -> void:
+	order_queue.append(dish)
+	try_start_cooking()
+func move_order_up(index: int) -> void:
+	if index <= 0:
+		return
+
+	if index >= order_queue.size():
+		return
+
+	var previous_dish = order_queue[index - 1]
+	order_queue[index - 1] = order_queue[index]
+	order_queue[index] = previous_dish
+func move_order_down(index: int) -> void:
+	if index < 0:
+		return
+
+	if index >= order_queue.size() - 1:
+		return
+
+	var next_dish = order_queue[index + 1]
+	order_queue[index + 1] = order_queue[index]
+	order_queue[index] = next_dish
+func cancel_order(index: int) -> void:
+	if index < 0:
+		return
+
+	if index >= order_queue.size():
+		return
+
+	order_queue.remove_at(index)

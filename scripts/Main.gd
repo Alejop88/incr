@@ -26,10 +26,15 @@ func _ready() -> void:
 	hud.buy_table_requested.connect(_on_buy_table_requested)
 	hud.star_upgrades_requested.connect(_on_star_upgrades_requested)
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
+	hud.manual_dish_requested.connect(_on_manual_dish_requested)
 	restaurant.set_counter_capacity_bonus(michelin_manager.counter_capacity_bonus)
 	michelin_manager.counter_capacity_bonus_changed.connect(_on_counter_capacity_bonus_changed)
 	michelin_upgrades.upgrade_requested.connect(_on_star_upgrade_requested)
-	
+	hud.kitchen_order_move_up_requested.connect(_on_kitchen_order_move_up_requested)
+	hud.kitchen_order_move_down_requested.connect(_on_kitchen_order_move_down_requested)
+	hud.kitchen_order_cancel_requested.connect(_on_kitchen_order_cancel_requested)
+
+
 func _on_serve_customer_requested() -> void:
 	restaurant.serve_test_customer()
 
@@ -113,7 +118,14 @@ func _on_star_upgrades_requested() -> void:
 			michelin_manager.get_upgrade_cost(upgrade_id)
 		)
 	michelin_upgrades.visible = true
-
+func _on_manual_dish_requested(dish_type: int) -> void:
+	restaurant.add_manual_kitchen_order(dish_type)
+func _on_kitchen_order_move_up_requested(index: int) -> void:
+	restaurant.move_kitchen_order_up(index)
+func _on_kitchen_order_move_down_requested(index: int) -> void:
+	restaurant.move_kitchen_order_down(index)
+func _on_kitchen_order_cancel_requested(index: int) -> void:
+	restaurant.cancel_kitchen_order(index)
 func _on_star_upgrade_requested(upgrade_id: String) -> void:
 	var bought: bool = michelin_manager.buy_upgrade(upgrade_id)
 
@@ -140,17 +152,13 @@ func _on_kitchen_panel_requested() -> void:
 	hud.set_kitchen_ready_dishes_list(restaurant.get_ready_dishes())
 
 	hud.open_kitchen_panel()
+
+	hud.set_manual_order_dishes(restaurant.get_available_manual_dishes())
+
 func _process(_delta: float) -> void:
 	if hud.kitchen_panel.visible:
-		hud.set_kitchen_cooking_progress(
-			restaurant.get_cooking_progress()
-		)
-
-		hud.set_kitchen_ready_dishes(
-			restaurant.get_ready_dishes_count(),
-			restaurant.get_counter_capacity()
-		)
-
-		hud.set_kitchen_ready_dishes_list(
-			restaurant.get_ready_dishes()
-		)
+		hud.set_kitchen_cooking_progress(restaurant.get_cooking_progress())
+		hud.set_kitchen_ready_dishes(restaurant.get_ready_dishes_count(),restaurant.get_counter_capacity())
+		hud.set_kitchen_ready_dishes_list(restaurant.get_ready_dishes())
+		hud.set_current_cooking_dish(restaurant.get_current_dish_name())
+		hud.set_kitchen_order_queue_buttons(restaurant.get_order_queue())

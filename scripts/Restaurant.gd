@@ -433,3 +433,17 @@ func get_ready_dishes() -> Array:
 	return kitchen_point.get_ready_dishes()
 func get_cooking_progress() -> float:
 	return kitchen_point.get_cooking_progress()
+func get_current_dish_name() -> String:
+	return kitchen_point.get_current_dish_name()
+func get_order_queue() -> Array:
+	return kitchen_point.get_order_queue()
+func get_available_manual_dishes() -> Array:
+	return kitchen_point.get_available_manual_dishes()
+func add_manual_kitchen_order(dish: DishTypes.Type) -> void:
+	kitchen_point.add_manual_order(dish)
+func move_kitchen_order_up(index: int) -> void:
+	kitchen_point.move_order_up(index)
+func move_kitchen_order_down(index: int) -> void:
+	kitchen_point.move_order_down(index)
+func cancel_kitchen_order(index: int) -> void:
+	kitchen_point.cancel_order(index)
