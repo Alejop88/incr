@@ -11,6 +11,10 @@ var waiter_speed_upgrade_cost: float = 10.0
 const MAX_WAITER_SPEED_LEVEL: int = 10
 var plate_price_upgrade_cost: float = 10.0
 var table_purchase_cost: float = 50.0
+var cook_speed_upgrade_cost: float = 20.0
+var cook_speed_level: int = 0
+
+const MAX_COOK_SPEED_LEVEL: int = 10
 func _ready() -> void:
 	restaurant.customer_paid.connect(_on_customer_paid)
 	restaurant.kitchen_panel_requested.connect(_on_kitchen_panel_requested)
@@ -18,6 +22,7 @@ func _ready() -> void:
 	michelin_manager.stars_changed.connect(_on_stars_changed)
 	hud.serve_customer_requested.connect(_on_serve_customer_requested)
 	hud.waiter_speed_upgrade_requested.connect(_on_waiter_speed_upgrade_requested)
+	hud.cook_speed_upgrade_requested.connect(_on_cook_speed_upgrade_requested)
 	hud.set_money(economy_manager.money)
 	hud.set_stars(michelin_manager.get_stars())
 	hud.set_waiter_speed_upgrade(waiter_speed_level,waiter_speed_upgrade_cost,MAX_WAITER_SPEED_LEVEL)
@@ -28,13 +33,14 @@ func _ready() -> void:
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
 	hud.manual_dish_requested.connect(_on_manual_dish_requested)
 	restaurant.set_counter_capacity_bonus(michelin_manager.counter_capacity_bonus)
+	restaurant.set_permanent_cook_speed_bonus(michelin_manager.cook_speed_bonus)
 	michelin_manager.counter_capacity_bonus_changed.connect(_on_counter_capacity_bonus_changed)
 	michelin_upgrades.upgrade_requested.connect(_on_star_upgrade_requested)
 	hud.kitchen_order_move_up_requested.connect(_on_kitchen_order_move_up_requested)
 	hud.kitchen_order_move_down_requested.connect(_on_kitchen_order_move_down_requested)
 	hud.kitchen_order_cancel_requested.connect(_on_kitchen_order_cancel_requested)
 	hud.ready_dish_selected.connect(_on_ready_dish_selected)
-
+	hud.set_cook_speed_upgrade(cook_speed_level,cook_speed_upgrade_cost,MAX_COOK_SPEED_LEVEL)
 func _on_serve_customer_requested() -> void:
 	restaurant.serve_test_customer()
 
@@ -68,6 +74,31 @@ func _on_waiter_speed_upgrade_requested() -> void:
 	waiter_speed_upgrade_cost *= 1.5
 
 	hud.set_waiter_speed_upgrade(waiter_speed_level,waiter_speed_upgrade_cost,MAX_WAITER_SPEED_LEVEL)
+func _on_cook_speed_upgrade_requested() -> void:
+	if cook_speed_level >= MAX_COOK_SPEED_LEVEL:
+		print("La velocidad de cocina ya está al máximo")
+		return
+
+	var purchase_successful: bool = economy_manager.spend_money(
+		cook_speed_upgrade_cost
+	)
+
+	if not purchase_successful:
+		print("No hay suficiente dinero para mejorar la cocina")
+		return
+
+	cook_speed_level += 1
+
+	restaurant.upgrade_cook_speed()
+
+	cook_speed_upgrade_cost *= 1.5
+	hud.set_cook_speed_upgrade(cook_speed_level,cook_speed_upgrade_cost,MAX_COOK_SPEED_LEVEL)
+	print(
+		"Mejora cocina comprada | Nivel: ",
+		cook_speed_level,
+		" | Próximo coste: ",
+		cook_speed_upgrade_cost
+	)
 func _on_plate_price_upgrade_requested() -> void:
 	if not economy_manager.spend_money(plate_price_upgrade_cost):
 		return
@@ -136,6 +167,7 @@ func _on_star_upgrade_requested(upgrade_id: String) -> void:
 		return
 
 	michelin_upgrades.set_upgrade_bought(upgrade_id, true)
+	restaurant.set_permanent_cook_speed_bonus(michelin_manager.cook_speed_bonus)
 	for current_upgrade_id in michelin_upgrades.get_upgrade_ids():
 		michelin_upgrades.set_upgrade_locked(
 			current_upgrade_id,

@@ -1,6 +1,12 @@
 class_name Kitchen
 extends Area2D
-@export var cook_time: float = 3.0
+
+const BASE_COOK_TIME: float = 5.0
+const COOK_TIME_REDUCTION_PER_LEVEL: float = 0.2
+const MIN_COOK_TIME: float = 0.5
+
+var cook_speed_level: int = 0
+var cook_time: float = BASE_COOK_TIME
 
 var current_dish: DishTypes.Type = DishTypes.Type.NONE
 var is_cooking: bool = false
@@ -17,7 +23,7 @@ var ready_dish_ids: Array[int] = []
 var next_ready_dish_id: int = 0
 func _ready() -> void:
 	cook_timer.timeout.connect(_on_cook_timer_timeout)
-	
+	update_cook_time()
 func _on_cook_timer_timeout() -> void:
 	print(
 		"Plato terminado: ",
@@ -194,3 +200,17 @@ func take_ready_dish_by_id(dish_id: int) -> DishTypes.Type:
 	try_start_cooking()
 
 	return dish
+func update_cook_time() -> void:
+	cook_time = max(
+		MIN_COOK_TIME,
+		BASE_COOK_TIME - COOK_TIME_REDUCTION_PER_LEVEL * cook_speed_level
+	)
+	print(
+		"Nivel efectivo cocina: ",
+		cook_speed_level,
+		" | Tiempo cocina: ",
+		cook_time,
+		" s")
+func set_cook_speed_level(level: int) -> void:
+	cook_speed_level = level
+	update_cook_time()

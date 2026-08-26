@@ -12,6 +12,9 @@ var plate_price_level: int = 0
 const PLATE_PRICE_INCREMENT: float = 1.0
 const MAX_PLATE_PRICE_LEVEL: int = 10
 const MAX_WAITER_SPEED_LEVEL: int = 10
+const MAX_COOK_SPEED_LEVEL: int = 10
+var cook_speed_level: int = 0
+var permanent_cook_speed_bonus: int = 0
 var waiter_speed_level: int = 0
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
 @onready var customer_exit_point: Marker2D = $CustomerExitPoint
@@ -299,6 +302,22 @@ func upgrade_waiter_speed() -> void:
 	
 func update_waiter_speed() -> void:
 	player_waiter.set_speed_upgrade_level(waiter_speed_level)
+func upgrade_cook_speed() -> void:
+	if cook_speed_level >= MAX_COOK_SPEED_LEVEL:
+		return
+
+	cook_speed_level += 1
+	update_cook_speed()
+
+	print("Nivel velocidad cocina: ", cook_speed_level)
+func update_cook_speed() -> void:
+	var total_level: int = \
+		cook_speed_level + permanent_cook_speed_bonus
+
+	kitchen_point.set_cook_speed_level(total_level)
+func set_permanent_cook_speed_bonus(bonus: int) -> void:
+	permanent_cook_speed_bonus = bonus
+	update_cook_speed()
 func upgrade_plate_price() -> void:
 	if plate_price_level >= MAX_PLATE_PRICE_LEVEL:
 		return
@@ -320,6 +339,7 @@ func get_plate_price() -> float:
 func update_stats() -> void:
 	update_waiter_speed()
 	update_plate_price()
+	update_cook_speed()
 func get_available_table(group_size: int = 1) -> Area2D:
 	var valid_tables: Array[Area2D] = []
 

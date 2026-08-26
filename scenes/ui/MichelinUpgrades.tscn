@@ -55,6 +55,14 @@ offset_right = 207.0
 offset_bottom = 197.0
 text = "+2"
 
+[node name="cook_speed_1" type="Button" parent="." unique_id=366471792]
+layout_mode = 0
+offset_left = 227.0
+offset_top = 49.0
+offset_right = 350.0
+offset_bottom = 80.0
+text = "Cocina rápida I"
+
 [node name="CloseButton" type="Button" parent="." unique_id=81587447]
 layout_mode = 0
 offset_left = 357.0

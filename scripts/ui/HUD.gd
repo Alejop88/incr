@@ -11,6 +11,7 @@ var last_ready_dishes: Array = []
 @onready var close_button: Button = $UpgradesPanel/VBoxContainer/CloseButton
 signal waiter_speed_upgrade_requested
 signal plate_price_upgrade_requested
+signal cook_speed_upgrade_requested
 signal buy_table_requested
 signal star_upgrades_requested
 signal kitchen_order_move_up_requested(index: int)
@@ -21,6 +22,7 @@ signal ready_dish_selected(dish_id: int)
 @onready var star_upgrades_button: Button = $StarUpgradesButton
 @onready var waiter_speed_button: Button = $UpgradesPanel/VBoxContainer/WaiterSpeedButton
 @onready var plate_price_button: Button = $UpgradesPanel/VBoxContainer/PlatePriceButton
+@onready var cook_speed_button: Button = $UpgradesPanel/VBoxContainer/CookSpeedButton
 @onready var buy_table_button: Button = $UpgradesPanel/VBoxContainer/BuyTableButton
 @onready var kitchen_panel: Control = $KitchenPanel
 @onready var kitchen_close_button: Button = $KitchenPanel/VBoxContainer/CloseButton
@@ -40,6 +42,7 @@ func _ready() -> void:
 	buy_table_button.pressed.connect(_on_buy_table_button_pressed)
 	star_upgrades_button.pressed.connect(_on_star_upgrades_button_pressed)
 	kitchen_close_button.pressed.connect(_on_kitchen_close_button_pressed)
+	cook_speed_button.pressed.connect(_on_cook_speed_button_pressed)
 func set_money(value: float) -> void:
 	money_label.text = "Dinero: %.1f €" % value
 func set_stars(value: int) -> void:
@@ -86,6 +89,19 @@ func set_table_purchase(cost: float,has_locked_tables: bool,current_money: float
 
 	buy_table_button.text = "Comprar mesa - %.1f €" % cost
 	buy_table_button.disabled = current_money < cost
+func set_cook_speed_upgrade(
+	level: int,
+	cost: float,
+	max_level: int
+) -> void:
+	if level >= max_level:
+		cook_speed_button.text = "Velocidad cocina - MÁXIMO"
+		cook_speed_button.disabled = true
+		return
+
+	cook_speed_button.disabled = false
+	cook_speed_button.text = \
+		"Velocidad cocina Nv.%d - %.0f €" % [level, cost]
 func open_kitchen_panel() -> void:
 	kitchen_panel.visible = true
 
@@ -203,3 +219,5 @@ func set_ready_dishes_buttons(dishes: Array,dish_ids: Array[int]) -> void:
 		ready_dishes_container.add_child(button)
 func _on_ready_dish_pressed(dish_id: int) -> void:
 	ready_dish_selected.emit(dish_id)
+func _on_cook_speed_button_pressed() -> void:
+	cook_speed_upgrade_requested.emit()
