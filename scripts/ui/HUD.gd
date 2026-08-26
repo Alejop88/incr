@@ -2,7 +2,7 @@ extends Control
 
 signal serve_customer_requested
 var last_order_queue= null
-
+var last_ready_dishes: Array = []
 @onready var money_label: Label = $VBoxContainer/MoneyLabel
 @onready var stars_label: Label = $StarsLabel
 @onready var test_serve_button: Button = $VBoxContainer/TestServeButton
@@ -17,6 +17,7 @@ signal kitchen_order_move_up_requested(index: int)
 signal kitchen_order_move_down_requested(index: int)
 signal manual_dish_requested(dish_type: int)
 signal kitchen_order_cancel_requested(index: int)
+signal ready_dish_selected(dish_id: int)
 @onready var star_upgrades_button: Button = $StarUpgradesButton
 @onready var waiter_speed_button: Button = $UpgradesPanel/VBoxContainer/WaiterSpeedButton
 @onready var plate_price_button: Button = $UpgradesPanel/VBoxContainer/PlatePriceButton
@@ -24,12 +25,11 @@ signal kitchen_order_cancel_requested(index: int)
 @onready var kitchen_panel: Control = $KitchenPanel
 @onready var kitchen_close_button: Button = $KitchenPanel/VBoxContainer/CloseButton
 @onready var ready_dishes_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesLabel
-@onready var ready_dishes_list_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesListLabel
 @onready var cooking_progress_bar: ProgressBar = $KitchenPanel/VBoxContainer/CookingProgressBar
 @onready var current_dish_label: Label = $KitchenPanel/VBoxContainer/CurrentDishLabel
 @onready var manual_order_buttons: HBoxContainer = $KitchenPanel/VBoxContainer/ManualOrderButtons
 @onready var order_queue_container: VBoxContainer = $KitchenPanel/VBoxContainer/OrderQueueContainer
-
+@onready var ready_dishes_container: VBoxContainer = $KitchenPanel/VBoxContainer/ReadyDishesContainer
 
 func _ready() -> void:
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
@@ -94,17 +94,7 @@ func _on_kitchen_close_button_pressed() -> void:
 func set_kitchen_ready_dishes(current: int, capacity: int) -> void:
 	ready_dishes_label.text = \
 		"Platos preparados: %d / %d" % [current, capacity]
-func set_kitchen_ready_dishes_list(dishes: Array) -> void:
-	if dishes.is_empty():
-		ready_dishes_list_label.text = "Platos:\nNinguno"
-		return
 
-	var text := "Platos:"
-
-	for dish in dishes:
-		text += "\n- " + DishTypes.Type.keys()[dish]
-
-	ready_dishes_list_label.text = text
 func set_kitchen_cooking_progress(progress: float) -> void:
 	cooking_progress_bar.value = progress
 func set_current_cooking_dish(dish_name: String) -> void:
@@ -186,3 +176,30 @@ func _on_kitchen_order_move_down_pressed(index: int) -> void:
 	kitchen_order_move_down_requested.emit(index)
 func _on_kitchen_order_cancel_pressed(index: int) -> void:
 	kitchen_order_cancel_requested.emit(index)
+func set_ready_dishes_buttons(dishes: Array,dish_ids: Array[int]) -> void:
+	if dishes == last_ready_dishes:
+		return
+
+	last_ready_dishes = dishes.duplicate()
+
+	for child in ready_dishes_container.get_children():
+		child.queue_free()
+
+	if dishes.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "No hay platos preparados"
+		ready_dishes_container.add_child(empty_label)
+		return
+
+	for i in range(dishes.size()):
+		var button := Button.new()
+
+		button.text = DishTypes.Type.keys()[dishes[i]]
+
+		button.pressed.connect(
+			_on_ready_dish_pressed.bind(dish_ids[i])
+		)
+
+		ready_dishes_container.add_child(button)
+func _on_ready_dish_pressed(dish_id: int) -> void:
+	ready_dish_selected.emit(dish_id)

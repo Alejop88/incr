@@ -22,7 +22,7 @@ var selected_table: Area2D = null
 var waiting_queue: Array[Node2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var customer_group_scene := preload("res://scenes/customer/CustomerGroup.tscn")
-
+var selected_ready_dish_id: int = -1
 func _ready() -> void:
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
 		if table is Area2D:
@@ -53,7 +53,15 @@ func serve_test_customer() -> void:
 func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
+			if player_waiter.carried_dish != DishTypes.Type.NONE:
+				print(
+					"El camarero ya lleva: ",
+					DishTypes.Type.keys()[player_waiter.carried_dish]
+				)
+				return
+
 			print("Clic izquierdo en cocina")
+
 			player_waiter.move_to_position(
 				kitchen_point.global_position,
 				player_waiter.TargetType.KITCHEN
@@ -103,25 +111,29 @@ func _on_player_waiter_destination_reached() -> void:
 	match player_waiter.target_type:
 		player_waiter.TargetType.KITCHEN:
 			if player_waiter.carried_dish != DishTypes.Type.NONE:
-				print("El camarero ya lleva un plato")
+				print("El camarero ya lleva: ",DishTypes.Type.keys()[player_waiter.carried_dish])
+				selected_ready_dish_id = -1
 				return
+			var dish: DishTypes.Type
 
-			var dish: DishTypes.Type = kitchen_point.take_ready_dish()
+			if selected_ready_dish_id >= 0:
+				dish = kitchen_point.take_ready_dish_by_id(
+					selected_ready_dish_id
+				)
+
+				selected_ready_dish_id = -1
+			else:
+				dish = kitchen_point.take_ready_dish()
 
 			if dish == DishTypes.Type.NONE:
-				print("No hay platos preparados en la cocina")
+				print("No hay ningún plato preparado para recoger")
 				return
 
 			player_waiter.carried_dish = dish
 
 			print(
 				"El camarero ha recogido: ",
-				DishTypes.Type.keys()[player_waiter.carried_dish]
-			)
-
-			print(
-				"El camarero ha recogido: ",
-				DishTypes.Type.keys()[player_waiter.carried_dish]
+				DishTypes.Type.keys()[dish]
 			)
 
 		player_waiter.TargetType.TABLE:
@@ -447,3 +459,19 @@ func move_kitchen_order_down(index: int) -> void:
 	kitchen_point.move_order_down(index)
 func cancel_kitchen_order(index: int) -> void:
 	kitchen_point.cancel_order(index)
+func request_specific_ready_dish(dish_id: int) -> void:
+	if player_waiter.carried_dish != DishTypes.Type.NONE:
+		print(
+			"El camarero ya lleva: ",
+			DishTypes.Type.keys()[player_waiter.carried_dish]
+		)
+		return
+
+	selected_ready_dish_id = dish_id
+
+	player_waiter.move_to_position(
+		kitchen_point.global_position,
+		player_waiter.TargetType.KITCHEN
+	)
+func get_ready_dish_ids() -> Array[int]:
+	return kitchen_point.get_ready_dish_ids()

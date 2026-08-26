@@ -13,6 +13,8 @@ const BASE_COUNTER_CAPACITY: int = 4
 var counter_capacity_bonus: int = 0
 const COUNTER_CAPACITY_PER_MICHELIN_LEVEL: int = 1
 var ready_dishes: Array[DishTypes.Type] = []
+var ready_dish_ids: Array[int] = []
+var next_ready_dish_id: int = 0
 func _ready() -> void:
 	cook_timer.timeout.connect(_on_cook_timer_timeout)
 	
@@ -23,7 +25,8 @@ func _on_cook_timer_timeout() -> void:
 	)
 
 	ready_dishes.append(current_dish)
-
+	ready_dish_ids.append(next_ready_dish_id)
+	next_ready_dish_id += 1
 	print(
 		"Platos preparados: ",
 		ready_dishes.size(),
@@ -80,7 +83,7 @@ func take_ready_dish() -> DishTypes.Type:
 		return DishTypes.Type.NONE
 
 	var dish: DishTypes.Type = ready_dishes.pop_front()
-
+	ready_dish_ids.pop_front()
 	print(
 		"Plato recogido del mostrador: ",
 		DishTypes.Type.keys()[dish],
@@ -167,3 +170,27 @@ func cancel_order(index: int) -> void:
 		return
 
 	order_queue.remove_at(index)
+
+func get_ready_dish_ids() -> Array[int]:
+	return ready_dish_ids.duplicate()
+func take_ready_dish_by_id(dish_id: int) -> DishTypes.Type:
+	var index: int = ready_dish_ids.find(dish_id)
+
+	if index == -1:
+		return DishTypes.Type.NONE
+
+	var dish: DishTypes.Type = ready_dishes[index]
+
+	ready_dishes.remove_at(index)
+	ready_dish_ids.remove_at(index)
+
+	print(
+		"Plato recogido por ID: ",
+		dish_id,
+		" | Plato: ",
+		DishTypes.Type.keys()[dish]
+	)
+
+	try_start_cooking()
+
+	return dish

@@ -33,7 +33,7 @@ func _ready() -> void:
 	hud.kitchen_order_move_up_requested.connect(_on_kitchen_order_move_up_requested)
 	hud.kitchen_order_move_down_requested.connect(_on_kitchen_order_move_down_requested)
 	hud.kitchen_order_cancel_requested.connect(_on_kitchen_order_cancel_requested)
-
+	hud.ready_dish_selected.connect(_on_ready_dish_selected)
 
 func _on_serve_customer_requested() -> void:
 	restaurant.serve_test_customer()
@@ -126,6 +126,8 @@ func _on_kitchen_order_move_down_requested(index: int) -> void:
 	restaurant.move_kitchen_order_down(index)
 func _on_kitchen_order_cancel_requested(index: int) -> void:
 	restaurant.cancel_kitchen_order(index)
+func _on_ready_dish_selected(index: int) -> void:
+	restaurant.request_specific_ready_dish(index)
 func _on_star_upgrade_requested(upgrade_id: String) -> void:
 	var bought: bool = michelin_manager.buy_upgrade(upgrade_id)
 
@@ -149,7 +151,6 @@ func _on_star_upgrade_requested(upgrade_id: String) -> void:
 func _on_kitchen_panel_requested() -> void:
 	hud.set_kitchen_ready_dishes(restaurant.get_ready_dishes_count(),restaurant.get_counter_capacity())
 
-	hud.set_kitchen_ready_dishes_list(restaurant.get_ready_dishes())
 
 	hud.open_kitchen_panel()
 
@@ -159,6 +160,6 @@ func _process(_delta: float) -> void:
 	if hud.kitchen_panel.visible:
 		hud.set_kitchen_cooking_progress(restaurant.get_cooking_progress())
 		hud.set_kitchen_ready_dishes(restaurant.get_ready_dishes_count(),restaurant.get_counter_capacity())
-		hud.set_kitchen_ready_dishes_list(restaurant.get_ready_dishes())
 		hud.set_current_cooking_dish(restaurant.get_current_dish_name())
 		hud.set_kitchen_order_queue_buttons(restaurant.get_order_queue())
+		hud.set_ready_dishes_buttons(restaurant.get_ready_dishes(),restaurant.get_ready_dish_ids())

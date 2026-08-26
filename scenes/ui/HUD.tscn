@@ -100,10 +100,8 @@ text = "Cocinando: Nada"
 [node name="CookingProgressBar" type="ProgressBar" parent="KitchenPanel/VBoxContainer" unique_id=911894895]
 layout_mode = 2
 
-[node name="ReadyDishesListLabel" type="Label" parent="KitchenPanel/VBoxContainer" unique_id=1146107618]
+[node name="ReadyDishesContainer" type="VBoxContainer" parent="KitchenPanel/VBoxContainer" unique_id=1979118764]
 layout_mode = 2
-text = "Platos:
-Ninguno"
 
 [node name="OrderQueueContainer" type="VBoxContainer" parent="KitchenPanel/VBoxContainer" unique_id=1234906589]
 layout_mode = 2
