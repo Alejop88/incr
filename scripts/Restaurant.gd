@@ -16,6 +16,8 @@ const MAX_COOK_SPEED_LEVEL: int = 10
 var cook_speed_level: int = 0
 const MAX_EATING_SPEED_LEVEL: int = 10
 var eating_speed_level: int = 0
+const MAX_PATIENCE_LEVEL: int = 10
+var patience_level: int = 0
 var permanent_cook_speed_bonus: int = 0
 var waiter_speed_level: int = 0
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
@@ -332,6 +334,20 @@ func update_eating_speed() -> void:
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
 		if table.has_method("set_eating_speed_level"):
 			table.set_eating_speed_level(eating_speed_level)
+func upgrade_patience() -> void:
+	if patience_level >= MAX_PATIENCE_LEVEL:
+		return
+
+	patience_level += 1
+	update_patience()
+
+	print("Nivel paciencia clientes: ", patience_level)
+
+
+func update_patience() -> void:
+	for table in get_tree().get_nodes_in_group("restaurant_tables"):
+		if table.has_method("set_patience_level"):
+			table.set_patience_level(patience_level)
 func set_permanent_cook_speed_bonus(bonus: int) -> void:
 	permanent_cook_speed_bonus = bonus
 	update_cook_speed()
@@ -358,6 +374,7 @@ func update_stats() -> void:
 	update_plate_price()
 	update_cook_speed()
 	update_eating_speed()
+	update_patience()
 func get_available_table(group_size: int = 1) -> Area2D:
 	var valid_tables: Array[Area2D] = []
 

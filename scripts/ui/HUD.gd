@@ -13,6 +13,7 @@ signal waiter_speed_upgrade_requested
 signal plate_price_upgrade_requested
 signal cook_speed_upgrade_requested
 signal eating_speed_upgrade_requested
+signal patience_upgrade_requested
 signal buy_table_requested
 signal star_upgrades_requested
 signal kitchen_order_move_up_requested(index: int)
@@ -20,6 +21,7 @@ signal kitchen_order_move_down_requested(index: int)
 signal manual_dish_requested(dish_type: int)
 signal kitchen_order_cancel_requested(index: int)
 signal ready_dish_selected(dish_id: int)
+
 @onready var star_upgrades_button: Button = $StarUpgradesButton
 @onready var waiter_speed_button: Button = $UpgradesPanel/VBoxContainer/WaiterSpeedButton
 @onready var plate_price_button: Button = $UpgradesPanel/VBoxContainer/PlatePriceButton
@@ -34,6 +36,7 @@ signal ready_dish_selected(dish_id: int)
 @onready var order_queue_container: VBoxContainer = $KitchenPanel/VBoxContainer/OrderQueueContainer
 @onready var ready_dishes_container: VBoxContainer = $KitchenPanel/VBoxContainer/ReadyDishesContainer
 @onready var eating_speed_button: Button = $UpgradesPanel/VBoxContainer/EatingSpeedButton
+@onready var patience_button: Button = $UpgradesPanel/VBoxContainer/PatienceButton
 func _ready() -> void:
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
 	upgrades_button.pressed.connect(_on_upgrades_button_pressed)
@@ -45,6 +48,7 @@ func _ready() -> void:
 	kitchen_close_button.pressed.connect(_on_kitchen_close_button_pressed)
 	cook_speed_button.pressed.connect(_on_cook_speed_button_pressed)
 	eating_speed_button.pressed.connect(_on_eating_speed_button_pressed)
+	patience_button.pressed.connect(_on_patience_button_pressed)
 func set_money(value: float) -> void:
 	money_label.text = "Dinero: %.1f €" % value
 func set_stars(value: int) -> void:
@@ -117,6 +121,19 @@ func set_eating_speed_upgrade(
 	eating_speed_button.disabled = false
 	eating_speed_button.text = \
 		"Velocidad al comer Nv.%d - %.0f €" % [level, cost]
+func set_patience_upgrade(
+	level: int,
+	cost: float,
+	max_level: int
+) -> void:
+	if level >= max_level:
+		patience_button.text = "Paciencia clientes - MÁXIMO"
+		patience_button.disabled = true
+		return
+
+	patience_button.disabled = false
+	patience_button.text = \
+		"Paciencia clientes Nv.%d - %.0f €" % [level, cost]
 func open_kitchen_panel() -> void:
 	kitchen_panel.visible = true
 
@@ -238,3 +255,5 @@ func _on_cook_speed_button_pressed() -> void:
 	cook_speed_upgrade_requested.emit()
 func _on_eating_speed_button_pressed() -> void:
 	eating_speed_upgrade_requested.emit()
+func _on_patience_button_pressed() -> void:
+	patience_upgrade_requested.emit()

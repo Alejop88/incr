@@ -19,6 +19,10 @@ var eating_speed_upgrade_cost: float = 20.0
 var eating_speed_level: int = 0
 
 const MAX_EATING_SPEED_LEVEL: int = 10
+var patience_upgrade_cost: float = 20.0
+var patience_level: int = 0
+
+const MAX_PATIENCE_LEVEL: int = 10
 func _ready() -> void:
 	restaurant.customer_paid.connect(_on_customer_paid)
 	restaurant.kitchen_panel_requested.connect(_on_kitchen_panel_requested)
@@ -46,7 +50,9 @@ func _ready() -> void:
 	hud.ready_dish_selected.connect(_on_ready_dish_selected)
 	hud.set_cook_speed_upgrade(cook_speed_level,cook_speed_upgrade_cost,MAX_COOK_SPEED_LEVEL)
 	hud.set_eating_speed_upgrade(eating_speed_level,eating_speed_upgrade_cost,MAX_EATING_SPEED_LEVEL)
+	hud.set_patience_upgrade(patience_level,patience_upgrade_cost,MAX_PATIENCE_LEVEL)
 	hud.eating_speed_upgrade_requested.connect(_on_eating_speed_upgrade_requested)
+	hud.patience_upgrade_requested.connect(_on_patience_upgrade_requested)
 func _on_serve_customer_requested() -> void:
 	restaurant.serve_test_customer()
 
@@ -129,6 +135,31 @@ func _on_eating_speed_upgrade_requested() -> void:
 		" | Próximo coste: ",
 		eating_speed_upgrade_cost
 	)
+func _on_patience_upgrade_requested() -> void:
+	if patience_level >= MAX_PATIENCE_LEVEL:
+		print("La paciencia de los clientes ya está al máximo")
+		return
+
+	var purchase_successful: bool = economy_manager.spend_money(
+		patience_upgrade_cost
+	)
+
+	if not purchase_successful:
+		print("No hay suficiente dinero para mejorar la paciencia")
+		return
+
+	patience_level += 1
+
+	restaurant.upgrade_patience()
+
+	patience_upgrade_cost *= 1.5
+	hud.set_patience_upgrade(patience_level,patience_upgrade_cost,MAX_PATIENCE_LEVEL)
+	print(
+		"Mejora paciencia comprada | Nivel: ",
+		patience_level,
+		" | Próximo coste: ",
+		patience_upgrade_cost
+	)
 func _on_plate_price_upgrade_requested() -> void:
 	if not economy_manager.spend_money(plate_price_upgrade_cost):
 		return
@@ -189,6 +220,7 @@ func _on_kitchen_order_cancel_requested(index: int) -> void:
 	restaurant.cancel_kitchen_order(index)
 func _on_ready_dish_selected(dish_id: int) -> void:
 	restaurant.request_specific_ready_dish(dish_id)
+	
 func _on_star_upgrade_requested(upgrade_id: String) -> void:
 	var bought: bool = michelin_manager.buy_upgrade(upgrade_id)
 

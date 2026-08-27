@@ -19,7 +19,12 @@ var eating_speed_level: int = 0
 var eating_time: float = BASE_EATING_TIME
 @export var payment_amount: float = 5.0
 @export var seat_capacity: int = 1
-@export var food_wait_time: float = 20.0
+const BASE_FOOD_WAIT_TIME: float = 20.0
+const FOOD_WAIT_TIME_INCREASE_PER_LEVEL: float = 2.0
+const MAX_FOOD_WAIT_TIME: float = 40.0
+
+var patience_level: int = 0
+var food_wait_time: float = BASE_FOOD_WAIT_TIME
 var seated_customer: CharacterBody2D = null
 var required_plates: int = 1
 var delivered_plates: int = 0
@@ -37,6 +42,7 @@ func _ready() -> void:
 			customer_seat_points.append(seat)
 	input_event.connect(_on_input_event)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
+	update_food_wait_time()
 	update_eating_time()
 	if not unlocked:
 		visible = false
@@ -249,3 +255,12 @@ func update_eating_time() -> void:
 func set_eating_speed_level(level: int) -> void:
 	eating_speed_level = max(level, 0)
 	update_eating_time()
+func update_food_wait_time() -> void:
+	food_wait_time = min(
+		MAX_FOOD_WAIT_TIME,
+		BASE_FOOD_WAIT_TIME + FOOD_WAIT_TIME_INCREASE_PER_LEVEL * patience_level
+	)
+
+func set_patience_level(level: int) -> void:
+	patience_level = max(level, 0)
+	update_food_wait_time()
