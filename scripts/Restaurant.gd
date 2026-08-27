@@ -14,6 +14,8 @@ const MAX_PLATE_PRICE_LEVEL: int = 10
 const MAX_WAITER_SPEED_LEVEL: int = 10
 const MAX_COOK_SPEED_LEVEL: int = 10
 var cook_speed_level: int = 0
+const MAX_EATING_SPEED_LEVEL: int = 10
+var eating_speed_level: int = 0
 var permanent_cook_speed_bonus: int = 0
 var waiter_speed_level: int = 0
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
@@ -26,6 +28,7 @@ var waiting_queue: Array[Node2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var customer_group_scene := preload("res://scenes/customer/CustomerGroup.tscn")
 var selected_ready_dish_id: int = -1
+
 func _ready() -> void:
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
 		if table is Area2D:
@@ -315,6 +318,20 @@ func update_cook_speed() -> void:
 		cook_speed_level + permanent_cook_speed_bonus
 
 	kitchen_point.set_cook_speed_level(total_level)
+func upgrade_eating_speed() -> void:
+	if eating_speed_level >= MAX_EATING_SPEED_LEVEL:
+		return
+
+	eating_speed_level += 1
+	update_eating_speed()
+
+	print("Nivel velocidad al comer: ", eating_speed_level)
+
+
+func update_eating_speed() -> void:
+	for table in get_tree().get_nodes_in_group("restaurant_tables"):
+		if table.has_method("set_eating_speed_level"):
+			table.set_eating_speed_level(eating_speed_level)
 func set_permanent_cook_speed_bonus(bonus: int) -> void:
 	permanent_cook_speed_bonus = bonus
 	update_cook_speed()
@@ -340,6 +357,7 @@ func update_stats() -> void:
 	update_waiter_speed()
 	update_plate_price()
 	update_cook_speed()
+	update_eating_speed()
 func get_available_table(group_size: int = 1) -> Area2D:
 	var valid_tables: Array[Area2D] = []
 
@@ -424,6 +442,7 @@ func unlock_next_table() -> bool:
 		if not table.unlocked:
 			table.unlock()
 			print("Mesa comprada: ", table.name)
+			try_seat_waiting_group()
 			return true
 
 	print("No quedan mesas bloqueadas")

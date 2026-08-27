@@ -11,7 +11,12 @@ enum State {
 	WAITING_PAYMENT
 }
 @export var unlocked: bool = true
-@export var eating_time: float = 5.0
+const BASE_EATING_TIME: float = 5.0
+const EATING_TIME_REDUCTION_PER_LEVEL: float = 0.2
+const MIN_EATING_TIME: float = 1.0
+
+var eating_speed_level: int = 0
+var eating_time: float = BASE_EATING_TIME
 @export var payment_amount: float = 5.0
 @export var seat_capacity: int = 1
 @export var food_wait_time: float = 20.0
@@ -32,6 +37,7 @@ func _ready() -> void:
 			customer_seat_points.append(seat)
 	input_event.connect(_on_input_event)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
+	update_eating_time()
 	if not unlocked:
 		visible = false
 func _process(_delta: float) -> void:
@@ -234,3 +240,12 @@ func find_customer_waiting_for_dish(
 			return customer
 
 	return null
+func update_eating_time() -> void:
+	eating_time = max(
+		MIN_EATING_TIME,
+		BASE_EATING_TIME - EATING_TIME_REDUCTION_PER_LEVEL * eating_speed_level
+	)
+
+func set_eating_speed_level(level: int) -> void:
+	eating_speed_level = max(level, 0)
+	update_eating_time()

@@ -205,12 +205,6 @@ func update_cook_time() -> void:
 		MIN_COOK_TIME,
 		BASE_COOK_TIME - COOK_TIME_REDUCTION_PER_LEVEL * cook_speed_level
 	)
-	print(
-		"Nivel efectivo cocina: ",
-		cook_speed_level,
-		" | Tiempo cocina: ",
-		cook_time,
-		" s")
 func set_cook_speed_level(level: int) -> void:
 	cook_speed_level = level
 	update_cook_time()

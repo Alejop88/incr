@@ -12,6 +12,7 @@ var last_ready_dishes: Array = []
 signal waiter_speed_upgrade_requested
 signal plate_price_upgrade_requested
 signal cook_speed_upgrade_requested
+signal eating_speed_upgrade_requested
 signal buy_table_requested
 signal star_upgrades_requested
 signal kitchen_order_move_up_requested(index: int)
@@ -32,7 +33,7 @@ signal ready_dish_selected(dish_id: int)
 @onready var manual_order_buttons: HBoxContainer = $KitchenPanel/VBoxContainer/ManualOrderButtons
 @onready var order_queue_container: VBoxContainer = $KitchenPanel/VBoxContainer/OrderQueueContainer
 @onready var ready_dishes_container: VBoxContainer = $KitchenPanel/VBoxContainer/ReadyDishesContainer
-
+@onready var eating_speed_button: Button = $UpgradesPanel/VBoxContainer/EatingSpeedButton
 func _ready() -> void:
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
 	upgrades_button.pressed.connect(_on_upgrades_button_pressed)
@@ -43,6 +44,7 @@ func _ready() -> void:
 	star_upgrades_button.pressed.connect(_on_star_upgrades_button_pressed)
 	kitchen_close_button.pressed.connect(_on_kitchen_close_button_pressed)
 	cook_speed_button.pressed.connect(_on_cook_speed_button_pressed)
+	eating_speed_button.pressed.connect(_on_eating_speed_button_pressed)
 func set_money(value: float) -> void:
 	money_label.text = "Dinero: %.1f €" % value
 func set_stars(value: int) -> void:
@@ -102,6 +104,19 @@ func set_cook_speed_upgrade(
 	cook_speed_button.disabled = false
 	cook_speed_button.text = \
 		"Velocidad cocina Nv.%d - %.0f €" % [level, cost]
+func set_eating_speed_upgrade(
+	level: int,
+	cost: float,
+	max_level: int
+) -> void:
+	if level >= max_level:
+		eating_speed_button.text = "Velocidad al comer - MÁXIMO"
+		eating_speed_button.disabled = true
+		return
+
+	eating_speed_button.disabled = false
+	eating_speed_button.text = \
+		"Velocidad al comer Nv.%d - %.0f €" % [level, cost]
 func open_kitchen_panel() -> void:
 	kitchen_panel.visible = true
 
@@ -221,3 +236,5 @@ func _on_ready_dish_pressed(dish_id: int) -> void:
 	ready_dish_selected.emit(dish_id)
 func _on_cook_speed_button_pressed() -> void:
 	cook_speed_upgrade_requested.emit()
+func _on_eating_speed_button_pressed() -> void:
+	eating_speed_upgrade_requested.emit()

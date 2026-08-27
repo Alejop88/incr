@@ -74,6 +74,10 @@ text = "Comprar mesa"
 layout_mode = 2
 text = "Velocidad cocina - 20 €"
 
+[node name="EatingSpeedButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=790986325]
+layout_mode = 2
+text = "Velocidad al comer - 20 €"
+
 [node name="CloseButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=1317944477]
 layout_mode = 2
 text = "CERRAR"
