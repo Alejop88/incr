@@ -2,6 +2,7 @@ extends Node2D
 
 signal customer_paid(amount: float)
 signal kitchen_panel_requested
+signal vip_completed
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
 @onready var kitchen_point: Area2D = $KitchenPoint
 @onready var trash_point: Area2D = $TrashPoint
@@ -9,6 +10,7 @@ signal kitchen_panel_requested
 const BASE_PLATE_PRICE: float = 5.0
 var plate_price: float = BASE_PLATE_PRICE
 var plate_price_level: int = 0
+const VIP_SPAWN_CHANCE: float = 0.05
 const PLATE_PRICE_INCREMENT: float = 1.0
 const MAX_PLATE_PRICE_LEVEL: int = 10
 const MAX_WAITER_SPEED_LEVEL: int = 10
@@ -20,6 +22,7 @@ const MAX_PATIENCE_LEVEL: int = 10
 var patience_level: int = 0
 var permanent_cook_speed_bonus: int = 0
 var waiter_speed_level: int = 0
+
 @onready var customer_spawn_point: Marker2D = $CustomerSpawnPoint
 @onready var customer_exit_point: Marker2D = $CustomerExitPoint
 @onready var customer_spawn_timer: Timer = $CustomerSpawnTimer
@@ -50,6 +53,8 @@ func _ready() -> void:
 		current_table.payment_collected.connect(_on_table_payment_collected.bind(current_table))
 	for current_table in tables:
 		current_table.customers_left_without_paying.connect(_on_customers_left_without_paying)
+	for current_table in tables:
+		current_table.eating_finished.connect(_on_table_eating_finished)
 	player_waiter.destination_reached.connect(_on_player_waiter_destination_reached)
 
 	update_stats()
@@ -110,6 +115,43 @@ func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int
 			" posición: ",
 			event.position
 		)
+func _on_table_eating_finished(current_table: Area2D) -> void:
+	var customer: CharacterBody2D = current_table.get_seated_customer()
+
+	if customer == null:
+		return
+
+	if customer is VIPCustomer:
+		var vip: VIPCustomer = customer
+
+		vip.dishes_eaten += 1
+
+		print(
+			"VIP ha comido ",
+			vip.dishes_eaten,
+			"/",
+			vip.total_dishes_to_eat,
+			" platos"
+		)
+
+		if vip.dishes_eaten < vip.total_dishes_to_eat:
+			var next_dish: DishTypes.Type = vip.prepare_next_dish()
+
+			current_table.start_next_food_round()
+
+			kitchen_point.add_order(next_dish)
+
+			print(
+				"VIP pide su siguiente plato: ",
+				DishTypes.Type.keys()[next_dish]
+			)
+
+		return
+
+	print(
+		"Cliente normal ha terminado de comer en: ",
+		current_table.name
+	)
 func _on_player_waiter_destination_reached() -> void:
 	print(
 		"CAMARERO LLEGÓ. Tipo de destino: ",
@@ -179,17 +221,25 @@ func _on_player_waiter_destination_reached() -> void:
 			player_waiter.carried_dish = DishTypes.Type.NONE
 
 func _on_table_payment_collected(amount: float,current_table: Area2D) -> void:
-	customer_paid.emit(amount)
-
 	var customer: CharacterBody2D = current_table.get_seated_customer()
 
-	if customer != null:
-		var customer_group: Node = customer.get_parent()
+	if customer == null:
+		return
 
-		if customer_group.has_method("leave_restaurant"):
-			customer_group.leave_restaurant(
-				customer_exit_point.global_position
-			)
+	if customer is VIPCustomer:
+		vip_completed.emit()
+
+		print("VIP completado: +1 estrella Michelin")
+	else:
+		customer_paid.emit(amount)
+
+	var customer_group: Node = customer.get_parent()
+
+	if customer_group.has_method("leave_restaurant"):
+		customer_group.leave_restaurant(
+			customer_exit_point.global_position
+		)
+
 	call_deferred("try_seat_waiting_group")
 func _on_customers_left_without_paying(
 	current_table: Area2D
@@ -240,12 +290,20 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 func spawn_customer() -> void:
 	print("Spawn solicitado")
 
-	var group_size: int = [1, 2, 3, 4].pick_random()
+	var is_vip: bool = randf() < VIP_SPAWN_CHANCE
+
+	var group_size: int
+
+	if is_vip:
+		group_size = 1
+	else:
+		group_size = [1, 2, 3, 4].pick_random()
 	print("Tamaño de grupo generado: ", group_size)
 
 	var customer_group: Node2D = customer_group_scene.instantiate()
 	customer_group.global_position = customer_spawn_point.global_position
 	add_child(customer_group)
+	customer_group.is_vip_group = is_vip
 	customer_group.setup(group_size)
 
 	var available_table: Area2D = get_available_table(group_size)

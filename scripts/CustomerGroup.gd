@@ -3,6 +3,8 @@ extends Node2D
 var group_size: int = 1
 var customers: Array[CharacterBody2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
+var vip_customer_scene := preload("res://scenes/customer/VIPCustomer.tscn")
+var is_vip_group: bool = false
 signal queue_patience_expired(customer_group)
 
 @export var queue_patience_time: float = 60.0
@@ -19,7 +21,11 @@ func setup(new_group_size: int) -> void:
 	
 func create_customers() -> void:
 	for i in range(group_size):
-		var customer: CharacterBody2D = customer_scene.instantiate()
+		var scene_to_use: PackedScene = customer_scene
+		if is_vip_group:
+			scene_to_use = vip_customer_scene
+		var customer: CharacterBody2D = scene_to_use.instantiate()
+		
 		customer.group_size = group_size
 		add_child(customer)
 		var available_dishes: Array[DishTypes.Type] = \

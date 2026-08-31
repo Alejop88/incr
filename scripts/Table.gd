@@ -3,6 +3,7 @@ extends Area2D
 signal payment_collected(amount: float)
 signal table_selected(table: Area2D)
 signal customers_left_without_paying(table: Area2D)
+signal eating_finished(table: Area2D)
 enum State {
 	FREE,
 	RESERVED,
@@ -136,14 +137,23 @@ func receive_food(dish: DishTypes.Type) -> bool:
 
 	return true
 
+func start_next_food_round() -> void:
+	delivered_plates = 0
 
+	state = State.WAITING_FOOD
+
+	food_wait_timer.start(food_wait_time)
+
+	patience_bar.max_value = food_wait_time
+	patience_bar.value = food_wait_time
+	patience_bar.visible = true
 func _on_eating_timer_timeout() -> void:
 	if state != State.EATING:
 		return
 
 	state = State.WAITING_PAYMENT
 	print("El cliente ha terminado. Esperando pago")
-
+	eating_finished.emit(self)
 
 func collect_payment() -> bool:
 	if state != State.WAITING_PAYMENT:

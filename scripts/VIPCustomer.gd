@@ -16,3 +16,14 @@ func _ready() -> void:
 		"VIP creado - Platos que pedirá: ",
 		total_dishes_to_eat
 	)
+func prepare_next_dish() -> DishTypes.Type:
+	var available_dishes: Array[DishTypes.Type] = [
+		DishTypes.Type.BURGER,
+		DishTypes.Type.PIZZA
+	]
+
+	has_received_food = false
+	set_requested_dish(available_dishes.pick_random())
+	show_order()
+
+	return requested_dish
