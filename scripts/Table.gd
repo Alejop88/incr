@@ -57,9 +57,15 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 
 	seated_customer = customer
 	state = State.WAITING_FOOD
-	food_wait_timer.start(food_wait_time)
-	patience_bar.max_value = food_wait_time
-	patience_bar.value = food_wait_time
+	var current_food_wait_time: float = food_wait_time
+
+	if customer is VIPCustomer:
+		current_food_wait_time = customer.FOOD_WAIT_TIME
+
+	food_wait_timer.start(current_food_wait_time)
+
+	patience_bar.max_value = current_food_wait_time
+	patience_bar.value = current_food_wait_time
 	patience_bar.visible = true
 	var customer_group: Node = customer.get_parent()
 
@@ -129,7 +135,13 @@ func receive_food(dish: DishTypes.Type) -> bool:
 		food_wait_timer.stop()
 		patience_bar.visible = false
 		state = State.EATING
-		eating_timer.start(eating_time)
+
+		var current_eating_time: float = eating_time
+
+		if seated_customer is VIPCustomer:
+			current_eating_time = seated_customer.EATING_TIME
+
+		eating_timer.start(current_eating_time)
 
 		print(
 			"Todos los clientes tienen su plato. El grupo empieza a comer"
@@ -137,15 +149,19 @@ func receive_food(dish: DishTypes.Type) -> bool:
 
 	return true
 
-func start_next_food_round() -> void:
+func start_next_food_round(customer: CharacterBody2D) -> void:
 	delivered_plates = 0
-
 	state = State.WAITING_FOOD
 
-	food_wait_timer.start(food_wait_time)
+	var current_food_wait_time: float = food_wait_time
 
-	patience_bar.max_value = food_wait_time
-	patience_bar.value = food_wait_time
+	if customer is VIPCustomer:
+		current_food_wait_time = customer.FOOD_WAIT_TIME
+
+	food_wait_timer.start(current_food_wait_time)
+
+	patience_bar.max_value = current_food_wait_time
+	patience_bar.value = current_food_wait_time
 	patience_bar.visible = true
 func _on_eating_timer_timeout() -> void:
 	if state != State.EATING:

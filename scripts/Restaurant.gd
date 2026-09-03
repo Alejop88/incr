@@ -10,7 +10,12 @@ signal vip_completed
 const BASE_PLATE_PRICE: float = 5.0
 var plate_price: float = BASE_PLATE_PRICE
 var plate_price_level: int = 0
-const VIP_SPAWN_CHANCE: float = 0.05
+const BASE_VIP_SPAWN_CHANCE: float = 0.05
+const VIP_SPAWN_CHANCE_PER_BONUS_LEVEL: float = 0.01
+const MAX_VIP_SPAWN_CHANCE: float = 0.25
+var max_vip_group_size: int = 1
+var vip_spawn_bonus_level: int = 0
+var vip_spawn_chance: float = BASE_VIP_SPAWN_CHANCE
 const PLATE_PRICE_INCREMENT: float = 1.0
 const MAX_PLATE_PRICE_LEVEL: int = 10
 const MAX_WAITER_SPEED_LEVEL: int = 10
@@ -122,22 +127,40 @@ func _on_table_eating_finished(current_table: Area2D) -> void:
 		return
 
 	if customer is VIPCustomer:
-		var vip: VIPCustomer = customer
+		var customer_group: Node = customer.get_parent()
 
-		vip.dishes_eaten += 1
+		if customer_group == null \
+				or not customer_group.has_method("get_customers"):
+			return
+
+		var group_customers: Array = customer_group.get_customers()
 
 		print(
-			"VIP ha comido ",
-			vip.dishes_eaten,
-			"/",
-			vip.total_dishes_to_eat,
-			" platos"
+			"VIPs encontrados en el grupo: ",
+			group_customers.size()
 		)
 
-		if vip.dishes_eaten < vip.total_dishes_to_eat:
-			var next_dish: DishTypes.Type = vip.prepare_next_dish()
+		for group_customer in group_customers:
+			if group_customer is VIPCustomer:
+				var group_vip := group_customer as VIPCustomer
 
-			current_table.start_next_food_round()
+				group_vip.dishes_eaten += 1
+
+				print(
+					"VIP ha comido ",
+					group_vip.dishes_eaten,
+					"/",
+					group_vip.total_dishes_to_eat,
+					" platos"
+				)
+
+		var vip := customer as VIPCustomer
+
+		if vip.dishes_eaten < vip.total_dishes_to_eat:
+			var next_dish: DishTypes.Type = \
+				vip.prepare_next_dish()
+
+			current_table.start_next_food_round(vip)
 
 			kitchen_point.add_order(next_dish)
 
@@ -152,6 +175,7 @@ func _on_table_eating_finished(current_table: Area2D) -> void:
 		"Cliente normal ha terminado de comer en: ",
 		current_table.name
 	)
+
 func _on_player_waiter_destination_reached() -> void:
 	print(
 		"CAMARERO LLEGÓ. Tipo de destino: ",
@@ -290,7 +314,7 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 func spawn_customer() -> void:
 	print("Spawn solicitado")
 
-	var is_vip: bool = randf() < VIP_SPAWN_CHANCE
+	var is_vip: bool = randf() < vip_spawn_chance
 
 	var group_size: int
 
@@ -406,6 +430,16 @@ func update_patience() -> void:
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
 		if table.has_method("set_patience_level"):
 			table.set_patience_level(patience_level)
+func update_vip_spawn_chance() -> void:
+	vip_spawn_chance = min(
+		MAX_VIP_SPAWN_CHANCE,
+		BASE_VIP_SPAWN_CHANCE
+			+ VIP_SPAWN_CHANCE_PER_BONUS_LEVEL
+			* vip_spawn_bonus_level
+	)
+func set_vip_spawn_bonus_level(level: int) -> void:
+	vip_spawn_bonus_level = max(level, 0)
+	update_vip_spawn_chance()
 func set_permanent_cook_speed_bonus(bonus: int) -> void:
 	permanent_cook_speed_bonus = bonus
 	update_cook_speed()
@@ -433,6 +467,7 @@ func update_stats() -> void:
 	update_cook_speed()
 	update_eating_speed()
 	update_patience()
+	update_vip_spawn_chance()
 func get_available_table(group_size: int = 1) -> Area2D:
 	var valid_tables: Array[Area2D] = []
 
@@ -589,3 +624,10 @@ func request_specific_ready_dish(dish_id: int) -> void:
 	)
 func get_ready_dish_ids() -> Array[int]:
 	return kitchen_point.get_ready_dish_ids()
+func set_max_vip_group_size(value: int) -> void:
+	max_vip_group_size = clamp(value, 1, 4)
+
+	print(
+		"Tamaño máximo de grupo VIP: ",
+		max_vip_group_size
+	)

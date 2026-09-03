@@ -120,7 +120,12 @@ func move_to_queue_position(queue_position: Vector2) -> void:
 			customer.TargetType.QUEUE
 		)
 func start_queue_patience() -> void:
-	queue_patience_timer.start(queue_patience_time)
+	var current_queue_patience_time: float = queue_patience_time
+
+	if is_vip_group:
+		current_queue_patience_time = VIPCustomer.QUEUE_WAIT_TIME
+
+	queue_patience_timer.start(current_queue_patience_time)
 
 
 func stop_queue_patience() -> void:

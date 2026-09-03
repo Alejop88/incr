@@ -1,10 +1,11 @@
 class_name VIPCustomer
 extends Customer
 
-
+const FOOD_WAIT_TIME: float = 10.0
+const QUEUE_WAIT_TIME: float = 20.0
+const EATING_TIME: float = 5.0
 var total_dishes_to_eat: int = 0
 var dishes_eaten: int = 0
-
 
 func _ready() -> void:
 	super._ready()

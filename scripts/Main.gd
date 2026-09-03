@@ -43,6 +43,8 @@ func _ready() -> void:
 	hud.manual_dish_requested.connect(_on_manual_dish_requested)
 	restaurant.set_counter_capacity_bonus(michelin_manager.counter_capacity_bonus)
 	restaurant.set_permanent_cook_speed_bonus(michelin_manager.cook_speed_bonus)
+	restaurant.set_vip_spawn_bonus_level(michelin_manager.vip_spawn_bonus)
+	restaurant.set_max_vip_group_size(michelin_manager.max_vip_group_size)
 	michelin_manager.counter_capacity_bonus_changed.connect(_on_counter_capacity_bonus_changed)
 	michelin_upgrades.upgrade_requested.connect(_on_star_upgrade_requested)
 	hud.kitchen_order_move_up_requested.connect(_on_kitchen_order_move_up_requested)
@@ -232,6 +234,8 @@ func _on_star_upgrade_requested(upgrade_id: String) -> void:
 
 	michelin_upgrades.set_upgrade_bought(upgrade_id, true)
 	restaurant.set_permanent_cook_speed_bonus(michelin_manager.cook_speed_bonus)
+	restaurant.set_vip_spawn_bonus_level(michelin_manager.vip_spawn_bonus)
+	restaurant.set_max_vip_group_size(michelin_manager.max_vip_group_size)
 	for current_upgrade_id in michelin_upgrades.get_upgrade_ids():
 		michelin_upgrades.set_upgrade_locked(
 			current_upgrade_id,
