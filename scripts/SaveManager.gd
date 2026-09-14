@@ -1,7 +1,7 @@
 extends Node
 
 const SAVE_VERSION: int = 1
-var save_path: String = "user://partida.json"
+@export_file("*.json") var save_path: String = "user://partida.json"
 var last_error: String = ""
 
 func save_game(data: Dictionary) -> bool:
@@ -30,6 +30,16 @@ func save_game(data: Dictionary) -> bool:
 	)
 	if rename_error != OK:
 		last_error = "No se pudo reemplazar el guardado anterior."
+		return false
+	return true
+
+func delete_save() -> bool:
+	last_error = ""
+	if not FileAccess.file_exists(save_path):
+		return true
+	var error: Error = DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
+	if error != OK:
+		last_error = "No se pudo borrar el guardado. La partida actual se conserva."
 		return false
 	return true
 

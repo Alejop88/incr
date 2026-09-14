@@ -66,6 +66,33 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Guardar partida"
 
+[node name="NewGameButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1184375355]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Nueva partida"
+
+[node name="NewGameConfirmation" type="VBoxContainer" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1150385634]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Warning" type="Label" parent="Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation" unique_id=931222311]
+layout_mode = 2
+text = "¿Empezar una nueva partida?
+Se borrarán el guardado y todo el progreso,
+incluidas las estrellas y las mejoras permanentes."
+horizontal_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation" unique_id=1843748543]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Borrar progreso y empezar"
+
+[node name="CancelButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation" unique_id=1843074600]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Cancelar"
+
 [node name="Hint" type="Label" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1769816833]
 layout_mode = 2
 text = "Guardado manual. Al volver, conservas tu

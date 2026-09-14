@@ -27,6 +27,7 @@ const MAX_PATIENCE_LEVEL: int = 10
 func _ready() -> void:
 	_load_saved_progress()
 	pause_menu.save_requested.connect(_on_save_requested)
+	pause_menu.new_game_requested.connect(_on_new_game_requested)
 	restaurant.customer_paid.connect(_on_customer_paid)
 	restaurant.vip_completed.connect(_on_vip_completed)
 	restaurant.kitchen_panel_requested.connect(_on_kitchen_panel_requested)
@@ -82,6 +83,16 @@ func _on_save_requested() -> void:
 		pause_menu.show_status("Partida guardada correctamente.")
 	else:
 		pause_menu.show_status(save_manager.last_error)
+
+func _on_new_game_requested() -> void:
+	if not save_manager.delete_save():
+		pause_menu.show_status(save_manager.last_error)
+		return
+	get_tree().paused = false
+	var error: Error = get_tree().reload_current_scene()
+	if error != OK:
+		pause_menu.open_menu()
+		pause_menu.show_status("No se pudo reiniciar el restaurante.")
 
 func _load_saved_progress() -> void:
 	var data: Dictionary = save_manager.load_game()
