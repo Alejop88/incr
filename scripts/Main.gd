@@ -28,6 +28,7 @@ func _ready() -> void:
 	_load_saved_progress()
 	pause_menu.save_requested.connect(_on_save_requested)
 	pause_menu.new_game_requested.connect(_on_new_game_requested)
+	pause_menu.quit_requested.connect(_on_quit_requested)
 	restaurant.customer_paid.connect(_on_customer_paid)
 	restaurant.vip_completed.connect(_on_vip_completed)
 	restaurant.kitchen_panel_requested.connect(_on_kitchen_panel_requested)
@@ -62,7 +63,7 @@ func _ready() -> void:
 	hud.patience_upgrade_requested.connect(_on_patience_upgrade_requested)
 	restaurant.spawn_customer()
 
-func _on_save_requested() -> void:
+func _on_save_requested() -> bool:
 	var unlocked_tables: Array[String] = []
 	for table in restaurant.tables:
 		if table.unlocked:
@@ -81,8 +82,15 @@ func _on_save_requested() -> void:
 	}
 	if save_manager.save_game(data):
 		pause_menu.show_status("Partida guardada correctamente.")
+		return true
 	else:
 		pause_menu.show_status(save_manager.last_error)
+		return false
+
+func _on_quit_requested(save_first: bool) -> void:
+	if save_first and not _on_save_requested():
+		return
+	get_tree().quit()
 
 func _on_new_game_requested() -> void:
 	if not save_manager.delete_save():

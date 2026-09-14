@@ -2,6 +2,7 @@ extends CanvasLayer
 
 signal save_requested
 signal new_game_requested
+signal quit_requested(save_first: bool)
 
 @onready var overlay: Control = $Overlay
 @onready var resume_button: Button = $Overlay/Center/Panel/Margin/Buttons/ResumeButton
@@ -11,6 +12,11 @@ signal new_game_requested
 @onready var confirmation: VBoxContainer = $Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation
 @onready var confirm_button: Button = $Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation/ConfirmButton
 @onready var cancel_button: Button = $Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation/CancelButton
+@onready var quit_button: Button = $Overlay/Center/Panel/Margin/Buttons/QuitButton
+@onready var quit_confirmation: VBoxContainer = $Overlay/Center/Panel/Margin/Buttons/QuitConfirmation
+@onready var save_quit_button: Button = $Overlay/Center/Panel/Margin/Buttons/QuitConfirmation/SaveQuitButton
+@onready var discard_quit_button: Button = $Overlay/Center/Panel/Margin/Buttons/QuitConfirmation/DiscardQuitButton
+@onready var cancel_quit_button: Button = $Overlay/Center/Panel/Margin/Buttons/QuitConfirmation/CancelQuitButton
 
 func _ready() -> void:
 	resume_button.pressed.connect(close_menu)
@@ -18,11 +24,17 @@ func _ready() -> void:
 	new_game_button.pressed.connect(_show_new_game_confirmation)
 	cancel_button.pressed.connect(_cancel_new_game)
 	confirm_button.pressed.connect(_confirm_new_game)
+	quit_button.pressed.connect(_show_quit_confirmation)
+	cancel_quit_button.pressed.connect(_cancel_quit)
+	save_quit_button.pressed.connect(func(): quit_requested.emit(true))
+	discard_quit_button.pressed.connect(func(): quit_requested.emit(false))
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		get_viewport().set_input_as_handled()
-		if confirmation.visible:
+		if quit_confirmation.visible:
+			_cancel_quit()
+		elif confirmation.visible:
 			_cancel_new_game()
 		elif overlay.visible:
 			close_menu()
@@ -35,6 +47,7 @@ func open_menu() -> void:
 	resume_button.grab_focus()
 
 func close_menu() -> void:
+	quit_confirmation.hide()
 	_set_confirmation_visible(false)
 	overlay.hide()
 	get_tree().paused = false
@@ -56,6 +69,22 @@ func _confirm_new_game() -> void:
 
 func _set_confirmation_visible(value: bool) -> void:
 	confirmation.visible = value
-	resume_button.visible = not value
-	save_button.visible = not value
-	new_game_button.visible = not value
+	_update_menu_buttons()
+
+func _update_menu_buttons() -> void:
+	var show_buttons: bool = not confirmation.visible and not quit_confirmation.visible
+	resume_button.visible = show_buttons
+	save_button.visible = show_buttons
+	new_game_button.visible = show_buttons
+	quit_button.visible = show_buttons
+
+func _show_quit_confirmation() -> void:
+	confirmation.hide()
+	quit_confirmation.show()
+	_update_menu_buttons()
+	cancel_quit_button.grab_focus()
+
+func _cancel_quit() -> void:
+	quit_confirmation.hide()
+	_update_menu_buttons()
+	quit_button.grab_focus()

@@ -93,6 +93,36 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Cancelar"
 
+[node name="QuitButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Salir del juego"
+
+[node name="QuitConfirmation" type="VBoxContainer" parent="Overlay/Center/Panel/Margin/Buttons"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Question" type="Label" parent="Overlay/Center/Panel/Margin/Buttons/QuitConfirmation"]
+layout_mode = 2
+text = "¿Quieres guardar antes de salir?\nSi sales sin guardar, perderás los cambios\ndesde el último guardado."
+horizontal_alignment = 1
+
+[node name="SaveQuitButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons/QuitConfirmation"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Guardar y salir"
+
+[node name="DiscardQuitButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons/QuitConfirmation"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Salir sin guardar"
+
+[node name="CancelQuitButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons/QuitConfirmation"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Cancelar"
+
 [node name="Hint" type="Label" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1769816833]
 layout_mode = 2
 text = "Guardado manual. Al volver, conservas tu
