@@ -223,8 +223,8 @@ func _on_kitchen_order_cancel_requested(index: int) -> void:
 	restaurant.cancel_kitchen_order(index)
 func _on_ready_dish_selected(dish_id: int) -> void:
 	restaurant.request_specific_ready_dish(dish_id)
-func _on_vip_completed() -> void:
-	michelin_manager.add_stars(1)
+func _on_vip_completed(amount: int) -> void:
+	michelin_manager.add_stars(amount)
 func _on_star_upgrade_requested(upgrade_id: String) -> void:
 	var bought: bool = michelin_manager.buy_upgrade(upgrade_id)
 

@@ -15,7 +15,9 @@ var upgrade_costs: Dictionary = {
 	"cook_speed_1": 2,
 	"vip_spawn_1": 2,
 	"vip_spawn_2": 4,
-	"vip_group_2": 3
+	"vip_group_2": 3,
+	"vip_group_3": 5,
+	"vip_group_4": 8
 }
 var upgrade_descriptions: Dictionary = {
 	"counter_capacity_1": "Añade +1 espacio para platos preparados.",
@@ -23,7 +25,9 @@ var upgrade_descriptions: Dictionary = {
 	"cook_speed_1": "Aumenta la velocidad de cocina.",
 	"vip_spawn_1": "Aumenta la probabilidad de aparición de clientes VIP.",
 	"vip_spawn_2": "Aumenta todavía más la probabilidad de aparición de clientes VIP.",
-	"vip_group_2": "Permite que los clientes VIP puedan aparecer en pareja."
+	"vip_group_2": "Permite que los clientes VIP puedan aparecer en pareja.",
+	"vip_group_3": "Permite que los clientes VIP puedan aparecer en grupos de tres.",
+	"vip_group_4": "Permite que los clientes VIP puedan aparecer en grupos de cuatro."
 }
 var upgrade_names: Dictionary = {
 	"counter_capacity_1": "Mostrador ampliado",
@@ -31,7 +35,9 @@ var upgrade_names: Dictionary = {
 	"cook_speed_1": "Cocinero más rápido",
 	"vip_spawn_1": "Más clientes VIP",
 	"vip_spawn_2": "Más clientes VIP II",
-	"vip_group_2": "VIP en pareja"
+	"vip_group_2": "VIP en pareja",
+	"vip_group_3": "VIP en trío",
+	"vip_group_4": "VIP en grupo de cuatro"
 }
 var upgrade_requirements: Dictionary = {
 	"counter_capacity_1": [],
@@ -39,7 +45,9 @@ var upgrade_requirements: Dictionary = {
 	"cook_speed_1": [],
 	"vip_spawn_1": [],
 	"vip_spawn_2": ["vip_spawn_1"],
-	"vip_group_2": ["vip_spawn_1"]
+	"vip_group_2": ["vip_spawn_1"],
+	"vip_group_3": ["vip_group_2"],
+	"vip_group_4": ["vip_group_3"]
 }
 var upgrade_counter_capacity_bonus: Dictionary = {
 	"counter_capacity_1": 1,
@@ -53,7 +61,9 @@ var upgrade_vip_spawn_bonus: Dictionary = {
 	"vip_spawn_2": 1
 }
 var upgrade_vip_group_size: Dictionary = {
-	"vip_group_2": 2
+	"vip_group_2": 2,
+	"vip_group_3": 3,
+	"vip_group_4": 4
 }
 func add_stars(amount: int) -> void:
 	stars += amount
@@ -67,6 +77,17 @@ func spend_stars(amount: int) -> bool:
 	return true
 func get_stars() -> int:
 	return stars
+
+func get_save_data() -> Dictionary:
+	var purchased_upgrade_ids: Array[String] = []
+	for upgrade_id in bought_upgrades:
+		if is_upgrade_bought(upgrade_id):
+			purchased_upgrade_ids.append(upgrade_id)
+
+	return {
+		"stars": stars,
+		"bought_upgrades": purchased_upgrade_ids
+	}
 
 func buy_upgrade(upgrade_id: String) -> bool:
 	if not are_upgrade_requirements_met(upgrade_id):

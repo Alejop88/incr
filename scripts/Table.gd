@@ -149,8 +149,10 @@ func receive_food(dish: DishTypes.Type) -> bool:
 
 	return true
 
-func start_next_food_round(customer: CharacterBody2D) -> void:
+func start_next_food_round(customer: CharacterBody2D,plates_needed: int) -> void:
 	delivered_plates = 0
+	required_plates = plates_needed
+
 	state = State.WAITING_FOOD
 
 	var current_food_wait_time: float = food_wait_time
@@ -163,6 +165,11 @@ func start_next_food_round(customer: CharacterBody2D) -> void:
 	patience_bar.max_value = current_food_wait_time
 	patience_bar.value = current_food_wait_time
 	patience_bar.visible = true
+
+	print(
+		"Nueva ronda VIP. Platos necesarios: ",
+		required_plates
+	)
 func _on_eating_timer_timeout() -> void:
 	if state != State.EATING:
 		return

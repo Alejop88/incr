@@ -2,7 +2,7 @@ extends Node2D
 
 signal customer_paid(amount: float)
 signal kitchen_panel_requested
-signal vip_completed
+signal vip_completed(amount: int)
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
 @onready var kitchen_point: Area2D = $KitchenPoint
 @onready var trash_point: Area2D = $TrashPoint
@@ -121,61 +121,93 @@ func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int
 			event.position
 		)
 func _on_table_eating_finished(current_table: Area2D) -> void:
-	var customer: CharacterBody2D = current_table.get_seated_customer()
+	var customer: CharacterBody2D = \
+		current_table.get_seated_customer()
 
 	if customer == null:
 		return
 
-	if customer is VIPCustomer:
-		var customer_group: Node = customer.get_parent()
-
-		if customer_group == null \
-				or not customer_group.has_method("get_customers"):
-			return
-
-		var group_customers: Array = customer_group.get_customers()
-
+	if not customer is VIPCustomer:
 		print(
-			"VIPs encontrados en el grupo: ",
-			group_customers.size()
+			"Cliente normal ha terminado de comer en: ",
+			current_table.name
 		)
-
-		for group_customer in group_customers:
-			if group_customer is VIPCustomer:
-				var group_vip := group_customer as VIPCustomer
-
-				group_vip.dishes_eaten += 1
-
-				print(
-					"VIP ha comido ",
-					group_vip.dishes_eaten,
-					"/",
-					group_vip.total_dishes_to_eat,
-					" platos"
-				)
-
-		var vip := customer as VIPCustomer
-
-		if vip.dishes_eaten < vip.total_dishes_to_eat:
-			var next_dish: DishTypes.Type = \
-				vip.prepare_next_dish()
-
-			current_table.start_next_food_round(vip)
-
-			kitchen_point.add_order(next_dish)
-
-			print(
-				"VIP pide su siguiente plato: ",
-				DishTypes.Type.keys()[next_dish]
-			)
-
 		return
 
+	var customer_group: Node = customer.get_parent()
+
+	if customer_group == null \
+			or not customer_group.has_method("get_customers"):
+		return
+
+	var group_customers: Array = \
+		customer_group.get_customers()
+
 	print(
-		"Cliente normal ha terminado de comer en: ",
-		current_table.name
+		"VIPs encontrados en el grupo: ",
+		group_customers.size()
 	)
 
+	# Primero contamos la ronda que acaba de terminar.
+	for group_customer in group_customers:
+		if not group_customer is VIPCustomer:
+			continue
+
+		var group_vip := group_customer as VIPCustomer
+
+		# Solo contamos el plato si este VIP todavía
+		# no había completado todos los suyos.
+		if group_vip.dishes_eaten \
+				< group_vip.total_dishes_to_eat:
+
+			group_vip.dishes_eaten += 1
+
+			print(
+				"VIP ha comido ",
+				group_vip.dishes_eaten,
+				"/",
+				group_vip.total_dishes_to_eat,
+				" platos"
+			)
+
+	# Ahora preparamos la siguiente ronda solamente
+	# para los VIP que todavía no han terminado.
+	var vip_still_eating: Array[VIPCustomer] = []
+
+	for group_customer in group_customers:
+		if not group_customer is VIPCustomer:
+			continue
+
+		var group_vip := group_customer as VIPCustomer
+
+		if group_vip.dishes_eaten \
+				< group_vip.total_dishes_to_eat:
+
+			vip_still_eating.append(group_vip)
+
+	# Si ninguno necesita más platos,
+	# la mesa permanece en WAITING_PAYMENT.
+	if vip_still_eating.is_empty():
+		print("Todos los VIP han terminado su visita")
+		return
+
+	# Cada VIP que continúa elige su siguiente plato.
+	for vip in vip_still_eating:
+		var next_dish: DishTypes.Type = \
+			vip.prepare_next_dish()
+
+		kitchen_point.add_order(next_dish)
+
+		print(
+			"VIP pide su siguiente plato: ",
+			DishTypes.Type.keys()[next_dish]
+		)
+
+	# Reiniciamos la mesa para la siguiente ronda.
+	current_table.start_next_food_round(
+		customer,
+		vip_still_eating.size()
+	)
 func _on_player_waiter_destination_reached() -> void:
 	print(
 		"CAMARERO LLEGÓ. Tipo de destino: ",
@@ -244,22 +276,43 @@ func _on_player_waiter_destination_reached() -> void:
 
 			player_waiter.carried_dish = DishTypes.Type.NONE
 
-func _on_table_payment_collected(amount: float,current_table: Area2D) -> void:
-	var customer: CharacterBody2D = current_table.get_seated_customer()
+func _on_table_payment_collected(
+	amount: float,
+	current_table: Area2D
+) -> void:
+	var customer: CharacterBody2D = \
+		current_table.get_seated_customer()
 
 	if customer == null:
 		return
 
-	if customer is VIPCustomer:
-		vip_completed.emit()
+	var customer_group: Node = customer.get_parent()
 
-		print("VIP completado: +1 estrella Michelin")
+	if customer is VIPCustomer:
+		var vip_count: int = 1
+
+		if customer_group != null \
+				and customer_group.has_method("get_customers"):
+
+			vip_count = 0
+
+			for group_customer in customer_group.get_customers():
+				if group_customer is VIPCustomer:
+					vip_count += 1
+
+		vip_completed.emit(vip_count)
+
+		print(
+			"Grupo VIP completado: +",
+			vip_count,
+			" estrellas Michelin"
+		)
 	else:
 		customer_paid.emit(amount)
 
-	var customer_group: Node = customer.get_parent()
+	if customer_group != null \
+			and customer_group.has_method("leave_restaurant"):
 
-	if customer_group.has_method("leave_restaurant"):
 		customer_group.leave_restaurant(
 			customer_exit_point.global_position
 		)
@@ -314,12 +367,11 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 func spawn_customer() -> void:
 	print("Spawn solicitado")
 
-	var is_vip: bool = randf() < vip_spawn_chance
-
+	var is_vip: bool = true
 	var group_size: int
 
 	if is_vip:
-		group_size = 1
+		group_size = randi_range(1, max_vip_group_size)
 	else:
 		group_size = [1, 2, 3, 4].pick_random()
 	print("Tamaño de grupo generado: ", group_size)
