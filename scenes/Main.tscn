@@ -6,9 +6,14 @@
 [ext_resource type="Script" uid="uid://d2tkxe0qudbcu" path="res://scripts/MichelinManager.gd" id="3_vcsgt"]
 [ext_resource type="PackedScene" uid="uid://ntxm0vr40r75" path="res://scenes/ui/HUD.tscn" id="4_vcsgt"]
 [ext_resource type="PackedScene" uid="uid://dgx3onchuarpc" path="res://scenes/ui/MichelinUpgrades.tscn" id="6_c01mt"]
+[ext_resource type="Script" path="res://scripts/SaveManager.gd" id="7_save"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="8_pause"]
 
 [node name="Main" type="Node" unique_id=574707317]
 script = ExtResource("1_rvslj")
+
+[node name="SaveManager" type="Node" parent="."]
+script = ExtResource("7_save")
 
 [node name="EconomyManager" type="Node" parent="." unique_id=1600470306]
 script = ExtResource("2_0bbpv")
@@ -28,3 +33,5 @@ offset_bottom = 7.0
 
 [node name="MichelinUpgrades" parent="CanvasLayer" unique_id=348600953 instance=ExtResource("6_c01mt")]
 visible = false
+
+[node name="PauseMenu" parent="." instance=ExtResource("8_pause")]

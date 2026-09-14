@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://dpn2dvyrx0c2b"]
+
+[ext_resource type="Script" uid="uid://dax4tll8qvf67" path="res://scripts/PauseMenu.gd" id="1_pause"]
+
+[node name="PauseMenu" type="CanvasLayer" unique_id=35072506]
+process_mode = 3
+layer = 100
+script = ExtResource("1_pause")
+
+[node name="Overlay" type="Control" parent="." unique_id=915126361]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Shade" type="ColorRect" parent="Overlay" unique_id=1624814576]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="Center" type="CenterContainer" parent="Overlay" unique_id=113182098]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Overlay/Center" unique_id=1451781790]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Overlay/Center/Panel" unique_id=691985949]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Buttons" type="VBoxContainer" parent="Overlay/Center/Panel/Margin" unique_id=1060920523]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1000243673]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Pausa"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=327515251]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Continuar"
+
+[node name="SaveButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=493503125]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Guardar partida"
+
+[node name="Hint" type="Label" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1769816833]
+layout_mode = 2
+text = "Guardado manual. Al volver, conservas tu
+progreso; clientes y pedidos empiezan de nuevo."
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=874030540]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Pulsa Escape para volver al restaurante."
+horizontal_alignment = 1
+autowrap_mode = 2

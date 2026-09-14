@@ -89,6 +89,22 @@ func get_save_data() -> Dictionary:
 		"bought_upgrades": purchased_upgrade_ids
 	}
 
+func load_save_data(data: Dictionary) -> void:
+	stars = int(data["stars"])
+	bought_upgrades.clear()
+	counter_capacity_bonus = 0
+	cook_speed_bonus = 0
+	vip_spawn_bonus = 0
+	max_vip_group_size = 1
+	for upgrade_id in data["bought_upgrades"]:
+		if not upgrade_costs.has(upgrade_id) or is_upgrade_bought(upgrade_id):
+			continue
+		bought_upgrades[upgrade_id] = true
+		counter_capacity_bonus += int(upgrade_counter_capacity_bonus.get(upgrade_id, 0))
+		cook_speed_bonus += int(upgrade_cook_speed_bonus.get(upgrade_id, 0))
+		vip_spawn_bonus += int(upgrade_vip_spawn_bonus.get(upgrade_id, 0))
+		max_vip_group_size = maxi(max_vip_group_size, int(upgrade_vip_group_size.get(upgrade_id, 1)))
+
 func buy_upgrade(upgrade_id: String) -> bool:
 	if not are_upgrade_requirements_met(upgrade_id):
 		return false

@@ -5,7 +5,8 @@ extends Node
 @onready var restaurant: Node2D = $Restaurant
 @onready var hud: Control = $CanvasLayer/HUD
 @onready var michelin_upgrades: Control = $CanvasLayer/MichelinUpgrades
-@onready var ready_dishes_list_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesListLabel
+@onready var save_manager: Node = $SaveManager
+@onready var pause_menu: CanvasLayer = $PauseMenu
 var waiter_speed_level: int = 0
 var waiter_speed_upgrade_cost: float = 10.0
 const MAX_WAITER_SPEED_LEVEL: int = 10
@@ -24,6 +25,8 @@ var patience_level: int = 0
 
 const MAX_PATIENCE_LEVEL: int = 10
 func _ready() -> void:
+	_load_saved_progress()
+	pause_menu.save_requested.connect(_on_save_requested)
 	restaurant.customer_paid.connect(_on_customer_paid)
 	restaurant.vip_completed.connect(_on_vip_completed)
 	restaurant.kitchen_panel_requested.connect(_on_kitchen_panel_requested)
@@ -56,6 +59,63 @@ func _ready() -> void:
 	hud.set_patience_upgrade(patience_level,patience_upgrade_cost,MAX_PATIENCE_LEVEL)
 	hud.eating_speed_upgrade_requested.connect(_on_eating_speed_upgrade_requested)
 	hud.patience_upgrade_requested.connect(_on_patience_upgrade_requested)
+	restaurant.spawn_customer()
+
+func _on_save_requested() -> void:
+	var unlocked_tables: Array[String] = []
+	for table in restaurant.tables:
+		if table.unlocked:
+			unlocked_tables.append(str(table.name))
+	var data: Dictionary = {
+		"money": economy_manager.money,
+		"michelin": michelin_manager.get_save_data(),
+		"levels": {
+			"waiter_speed": restaurant.waiter_speed_level,
+			"plate_price": restaurant.plate_price_level,
+			"cook_speed": restaurant.cook_speed_level,
+			"eating_speed": restaurant.eating_speed_level,
+			"patience": restaurant.patience_level
+		},
+		"unlocked_tables": unlocked_tables
+	}
+	if save_manager.save_game(data):
+		pause_menu.show_status("Partida guardada correctamente.")
+	else:
+		pause_menu.show_status(save_manager.last_error)
+
+func _load_saved_progress() -> void:
+	var data: Dictionary = save_manager.load_game()
+	if data.is_empty():
+		if not save_manager.last_error.is_empty():
+			pause_menu.show_status(save_manager.last_error)
+			pause_menu.open_menu()
+		return
+	economy_manager.money = float(data["money"])
+	michelin_manager.load_save_data(data["michelin"])
+	var levels: Dictionary = data["levels"]
+	waiter_speed_level = int(levels["waiter_speed"])
+	cook_speed_level = int(levels["cook_speed"])
+	eating_speed_level = int(levels["eating_speed"])
+	patience_level = int(levels["patience"])
+	restaurant.waiter_speed_level = waiter_speed_level
+	restaurant.plate_price_level = int(levels["plate_price"])
+	restaurant.cook_speed_level = cook_speed_level
+	restaurant.eating_speed_level = eating_speed_level
+	restaurant.patience_level = patience_level
+	waiter_speed_upgrade_cost = 10.0 * pow(1.5, waiter_speed_level)
+	plate_price_upgrade_cost = 10.0 * pow(1.5, restaurant.plate_price_level)
+	cook_speed_upgrade_cost = 20.0 * pow(1.5, cook_speed_level)
+	eating_speed_upgrade_cost = 20.0 * pow(1.5, eating_speed_level)
+	patience_upgrade_cost = 20.0 * pow(1.5, patience_level)
+	var purchased_table_count: int = 0
+	for table in restaurant.tables:
+		if str(table.name) in data["unlocked_tables"] and not table.unlocked:
+			table.unlock()
+			purchased_table_count += 1
+	table_purchase_cost = 50.0 * pow(1.5, purchased_table_count)
+	restaurant.update_stats()
+	pause_menu.show_status("Partida guardada recuperada.")
+
 func _on_serve_customer_requested() -> void:
 	restaurant.serve_test_customer()
 

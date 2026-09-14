@@ -63,7 +63,6 @@ func _ready() -> void:
 	player_waiter.destination_reached.connect(_on_player_waiter_destination_reached)
 
 	update_stats()
-	spawn_customer()
 	customer_spawn_timer.timeout.connect(_on_customer_spawn_timer_timeout)
 func serve_test_customer() -> void:
 	customer_paid.emit(plate_price)
