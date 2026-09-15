@@ -30,6 +30,7 @@ var seated_customer: CharacterBody2D = null
 var required_plates: int = 1
 var delivered_plates: int = 0
 var occupied_seats: int = 0
+var food_round: int = 0
 @onready var eating_timer: Timer = $EatingTimer
 @onready var customer_seat_points: Array[Marker2D] = []
 @onready var food_wait_timer: Timer = $FoodWaitTimer
@@ -56,6 +57,7 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 		return false
 
 	seated_customer = customer
+	food_round += 1
 	state = State.WAITING_FOOD
 	var current_food_wait_time: float = food_wait_time
 
@@ -96,12 +98,23 @@ func reserve(customer_group: Node2D) -> bool:
 
 	return true
 
-func receive_food(dish: DishTypes.Type) -> bool:
+func can_serve_customer(customer: CharacterBody2D, dish: DishTypes.Type) -> bool:
+	if state != State.WAITING_FOOD or not is_instance_valid(seated_customer) or not is_instance_valid(customer):
+		return false
+	var group: Node = seated_customer.get_parent()
+	return group.has_method("get_customers") and customer in group.get_customers() \
+		and not customer.has_received_food and customer.requested_dish == dish
+
+func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null) -> bool:
 	if state != State.WAITING_FOOD:
 		print("Esta mesa no está esperando comida")
 		return false
 
-	var customer: CharacterBody2D = find_customer_waiting_for_dish(dish)
+	var customer: CharacterBody2D = target_customer
+	if customer == null:
+		customer = find_customer_waiting_for_dish(dish)
+	elif not can_serve_customer(customer, dish):
+		return false
 
 	if customer == null:
 		print(
@@ -150,6 +163,7 @@ func receive_food(dish: DishTypes.Type) -> bool:
 	return true
 
 func start_next_food_round(customer: CharacterBody2D,plates_needed: int) -> void:
+	food_round += 1
 	delivered_plates = 0
 	required_plates = plates_needed
 

@@ -1,8 +1,12 @@
 extends Control
 
+const VISIBLE_QUEUED_DISHES: int = 5
+
 signal serve_customer_requested
 var last_order_queue= null
 var last_ready_dishes: Array = []
+var last_ready_dish_ids: Array[int] = []
+var ready_dishes_initialized: bool = false
 @onready var money_label: Label = $VBoxContainer/MoneyLabel
 @onready var stars_label: Label = $StarsLabel
 @onready var test_serve_button: Button = $VBoxContainer/TestServeButton
@@ -15,6 +19,7 @@ signal cook_speed_upgrade_requested
 signal eating_speed_upgrade_requested
 signal patience_upgrade_requested
 signal buy_table_requested
+signal hire_waiter_requested
 signal star_upgrades_requested
 signal kitchen_order_move_up_requested(index: int)
 signal kitchen_order_move_down_requested(index: int)
@@ -27,13 +32,15 @@ signal ready_dish_selected(dish_id: int)
 @onready var plate_price_button: Button = $UpgradesPanel/VBoxContainer/PlatePriceButton
 @onready var cook_speed_button: Button = $UpgradesPanel/VBoxContainer/CookSpeedButton
 @onready var buy_table_button: Button = $UpgradesPanel/VBoxContainer/BuyTableButton
+@onready var hire_waiter_button: Button = $UpgradesPanel/VBoxContainer/HireWaiterButton
 @onready var kitchen_panel: Control = $KitchenPanel
 @onready var kitchen_close_button: Button = $KitchenPanel/VBoxContainer/CloseButton
 @onready var ready_dishes_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesLabel
 @onready var cooking_progress_bar: ProgressBar = $KitchenPanel/VBoxContainer/CookingProgressBar
 @onready var current_dish_label: Label = $KitchenPanel/VBoxContainer/CurrentDishLabel
 @onready var manual_order_buttons: HBoxContainer = $KitchenPanel/VBoxContainer/ManualOrderButtons
-@onready var order_queue_container: VBoxContainer = $KitchenPanel/VBoxContainer/OrderQueueContainer
+@onready var order_queue_container: VBoxContainer = $KitchenPanel/VBoxContainer/OrderQueueScroll/OrderQueueContainer
+@onready var order_queue_scroll: ScrollContainer = $KitchenPanel/VBoxContainer/OrderQueueScroll
 @onready var ready_dishes_container: VBoxContainer = $KitchenPanel/VBoxContainer/ReadyDishesContainer
 @onready var eating_speed_button: Button = $UpgradesPanel/VBoxContainer/EatingSpeedButton
 @onready var patience_button: Button = $UpgradesPanel/VBoxContainer/PatienceButton
@@ -44,6 +51,7 @@ func _ready() -> void:
 	waiter_speed_button.pressed.connect(_on_waiter_speed_button_pressed)
 	plate_price_button.pressed.connect(_on_plate_price_button_pressed)
 	buy_table_button.pressed.connect(_on_buy_table_button_pressed)
+	hire_waiter_button.pressed.connect(func(): hire_waiter_requested.emit())
 	star_upgrades_button.pressed.connect(_on_star_upgrades_button_pressed)
 	kitchen_close_button.pressed.connect(_on_kitchen_close_button_pressed)
 	cook_speed_button.pressed.connect(_on_cook_speed_button_pressed)
@@ -67,12 +75,12 @@ func _on_waiter_speed_button_pressed() -> void:
 	
 func set_waiter_speed_upgrade(level: int,cost: float,max_level: int) -> void:
 	if level >= max_level:
-		waiter_speed_button.text = "Velocidad camarero - MÁXIMO"
+		waiter_speed_button.text = "Velocidad jugador - MÁXIMO"
 		waiter_speed_button.disabled = true
 		return
 
 	waiter_speed_button.disabled = false
-	waiter_speed_button.text = "Velocidad camarero - Nivel %d - %.1f €" % [level,cost]
+	waiter_speed_button.text = "Velocidad jugador - Nivel %d - %.1f €" % [level,cost]
 func set_plate_price_upgrade(level: int, cost: float, max_level: int) -> void:
 	if level >= max_level:
 		plate_price_button.text = "Precio del plato - MÁXIMO"
@@ -95,6 +103,13 @@ func set_table_purchase(cost: float,has_locked_tables: bool,current_money: float
 
 	buy_table_button.text = "Comprar mesa - %.1f €" % cost
 	buy_table_button.disabled = current_money < cost
+func set_hire_waiter(count: int, maximum: int, cost: float, money: float) -> void:
+	hire_waiter_button.disabled = count >= maximum or money < cost
+	if count >= maximum:
+		hire_waiter_button.text = "Camarero contratado (%d / %d)" % [count, maximum]
+	else:
+		hire_waiter_button.text = "Contratar camarero - %.0f €" % cost
+
 func set_cook_speed_upgrade(
 	level: int,
 	cost: float,
@@ -218,6 +233,12 @@ func set_kitchen_order_queue_buttons(dishes: Array) -> void:
 		row.add_child(down_button)
 		row.add_child(cancel_button)
 		order_queue_container.add_child(row)
+		if i == 0:
+			var row_height: float = row.get_combined_minimum_size().y
+			var spacing: int = order_queue_container.get_theme_constant("separation")
+			order_queue_scroll.custom_minimum_size.y = (
+				row_height * VISIBLE_QUEUED_DISHES + spacing * (VISIBLE_QUEUED_DISHES - 1)
+			)
 func _on_kitchen_order_move_up_pressed(index: int) -> void:
 	kitchen_order_move_up_requested.emit(index)
 func _on_kitchen_order_move_down_pressed(index: int) -> void:
@@ -225,10 +246,12 @@ func _on_kitchen_order_move_down_pressed(index: int) -> void:
 func _on_kitchen_order_cancel_pressed(index: int) -> void:
 	kitchen_order_cancel_requested.emit(index)
 func set_ready_dishes_buttons(dishes: Array,dish_ids: Array[int]) -> void:
-	if dishes == last_ready_dishes:
+	if ready_dishes_initialized and dishes == last_ready_dishes and dish_ids == last_ready_dish_ids:
 		return
 
+	ready_dishes_initialized = true
 	last_ready_dishes = dishes.duplicate()
+	last_ready_dish_ids = dish_ids.duplicate()
 
 	for child in ready_dishes_container.get_children():
 		child.queue_free()

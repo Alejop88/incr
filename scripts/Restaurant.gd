@@ -4,6 +4,7 @@ signal customer_paid(amount: float)
 signal kitchen_panel_requested
 signal vip_completed(amount: int)
 @onready var player_waiter: CharacterBody2D = $PlayerWaiter
+@onready var waiter_manager: Node = $WaiterManager
 @onready var kitchen_point: Area2D = $KitchenPoint
 @onready var trash_point: Area2D = $TrashPoint
 @onready var tables: Array[Area2D] = []

@@ -77,6 +77,11 @@ func _is_valid_save(data: Dictionary) -> bool:
 		return false
 	if not _is_string_array(data.get("unlocked_tables")):
 		return false
+	var hired_waiters: Variant = data.get("hired_waiters", 0)
+	if not _is_nonnegative_number(hired_waiters):
+		return false
+	if hired_waiters > 1 or hired_waiters != floor(hired_waiters):
+		return false
 	for key in ["waiter_speed", "plate_price", "cook_speed", "eating_speed", "patience"]:
 		var value: Variant = data["levels"].get(key)
 		if not _is_nonnegative_number(value):

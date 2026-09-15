@@ -43,6 +43,8 @@ func _ready() -> void:
 	hud.set_plate_price_upgrade(restaurant.plate_price_level,plate_price_upgrade_cost,restaurant.MAX_PLATE_PRICE_LEVEL)
 	hud.plate_price_upgrade_requested.connect(_on_plate_price_upgrade_requested)
 	hud.buy_table_requested.connect(_on_buy_table_requested)
+	hud.hire_waiter_requested.connect(_on_hire_waiter_requested)
+	_update_hire_waiter_button()
 	hud.star_upgrades_requested.connect(_on_star_upgrades_requested)
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
 	hud.manual_dish_requested.connect(_on_manual_dish_requested)
@@ -70,6 +72,7 @@ func _on_save_requested() -> bool:
 			unlocked_tables.append(str(table.name))
 	var data: Dictionary = {
 		"money": economy_manager.money,
+		"hired_waiters": restaurant.waiter_manager.get_hired_count(),
 		"michelin": michelin_manager.get_save_data(),
 		"levels": {
 			"waiter_speed": restaurant.waiter_speed_level,
@@ -133,6 +136,7 @@ func _load_saved_progress() -> void:
 			purchased_table_count += 1
 	table_purchase_cost = 50.0 * pow(1.5, purchased_table_count)
 	restaurant.update_stats()
+	restaurant.waiter_manager.restore_hired_count(int(data.get("hired_waiters", 0)))
 	pause_menu.show_status("Partida guardada recuperada.")
 
 func _on_serve_customer_requested() -> void:
@@ -145,6 +149,7 @@ func _on_money_changed(new_money: float) -> void:
 	hud.set_money(new_money)
 
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),new_money)
+	_update_hire_waiter_button()
 	
 func _on_stars_changed(new_stars: int) -> void:
 	hud.set_stars(new_stars)
@@ -267,6 +272,19 @@ func _on_buy_table_requested() -> void:
 	table_purchase_cost *= 1.5
 
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
+func _on_hire_waiter_requested() -> void:
+	var manager: Node = restaurant.waiter_manager
+	if not manager.can_hire():
+		return
+	if not economy_manager.spend_money(manager.HIRE_COST):
+		return
+	manager.create_waiter()
+	_update_hire_waiter_button()
+
+func _update_hire_waiter_button() -> void:
+	var manager: Node = restaurant.waiter_manager
+	hud.set_hire_waiter(manager.get_hired_count(), manager.MAX_HIRED_WAITERS, manager.HIRE_COST, economy_manager.money)
+
 func _on_counter_capacity_bonus_changed(new_level: int) -> void:
 	restaurant.set_counter_capacity_bonus(new_level)
 func _on_star_upgrades_requested() -> void:

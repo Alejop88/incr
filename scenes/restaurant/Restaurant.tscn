@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://c6685hw1lxn1" path="res://assets/art/SpriteChef.png" id="4_bewk8"]
 [ext_resource type="Script" uid="uid://cdyy1ecx3ujb2" path="res://scripts/Kitchen.gd" id="4_y38bg"]
 [ext_resource type="Script" uid="uid://dui07flapa3um" path="res://scripts/Table.gd" id="5_ycgdg"]
+[ext_resource type="Script" path="res://scripts/WaiterManager.gd" id="6_waiters"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vcsgt"]
 size = Vector2(101, 104)
@@ -21,6 +22,9 @@ size = Vector2(40, 40)
 
 [node name="Restaurant" type="Node2D" unique_id=1967190223]
 script = ExtResource("1_3a4hs")
+
+[node name="WaiterManager" type="Node" parent="."]
+script = ExtResource("6_waiters")
 
 [node name="PlayerWaiter" type="CharacterBody2D" parent="." unique_id=682314277]
 position = Vector2(400, 400)
