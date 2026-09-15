@@ -9,6 +9,7 @@ var waiters: Array[CharacterBody2D] = []
 # Each waiter reserves a prepared dish ID and a customer's current food round.
 # The player can still take that dish or serve that customer first.
 var assignments: Dictionary = {}
+var payment_assignments: Dictionary = {}
 
 func can_hire() -> bool:
 	return waiters.size() < MAX_HIRED_WAITERS
@@ -23,13 +24,51 @@ func restore_hired_count(count: int) -> void:
 func create_waiter() -> CharacterBody2D:
 	var waiter: CharacterBody2D = WAITER_SCENE.instantiate()
 	waiter.coordinator = self
-	waiter.position = restaurant.kitchen_point.position + Vector2(90 + waiters.size() * 35, 65)
+	waiter.waiting_offset = Vector2(90 + waiters.size() * 35, 65)
+	waiter.position = restaurant.kitchen_point.position + waiter.waiting_offset
 	restaurant.add_child(waiter)
 	waiters.append(waiter)
 	return waiter
 
 func release_assignment(waiter: CharacterBody2D) -> void:
 	assignments.erase(waiter)
+	payment_assignments.erase(waiter)
+
+func reserve_payment(waiter: CharacterBody2D) -> bool:
+	release_assignment(waiter)
+	_clean_freed_waiters()
+	var best: Dictionary = {}
+	var nearest: float = INF
+	for table in restaurant.tables:
+		if table.state != table.State.WAITING_PAYMENT or not is_instance_valid(table.get_seated_customer()):
+			continue
+		if _is_payment_reserved(table):
+			continue
+		var distance: float = waiter.global_position.distance_squared_to(table.global_position)
+		if distance < nearest:
+			nearest = distance
+			best = {"table": table, "customer": table.get_seated_customer(), "round": table.food_round}
+	if best.is_empty():
+		return false
+	payment_assignments[waiter] = best
+	return true
+
+func is_payment_valid(waiter: CharacterBody2D) -> bool:
+	return payment_assignments.has(waiter) and _is_payment_target_valid(payment_assignments[waiter])
+
+func get_payment_position(waiter: CharacterBody2D) -> Vector2:
+	return payment_assignments[waiter]["table"].global_position + Vector2(0, 45)
+
+func collect_payment(waiter: CharacterBody2D) -> bool:
+	if not is_payment_valid(waiter):
+		release_assignment(waiter)
+		return false
+	var collected: bool = payment_assignments[waiter]["table"].collect_payment()
+	release_assignment(waiter)
+	return collected
+
+func get_waiting_position(waiter: CharacterBody2D) -> Vector2:
+	return restaurant.kitchen_point.global_position + waiter.waiting_offset
 
 func reserve_pickup(waiter: CharacterBody2D) -> bool:
 	release_assignment(waiter)
@@ -151,3 +190,19 @@ func _clean_freed_waiters() -> void:
 	for waiter in assignments.keys():
 		if not is_instance_valid(waiter):
 			assignments.erase(waiter)
+	for waiter in payment_assignments.keys():
+		if not is_instance_valid(waiter):
+			payment_assignments.erase(waiter)
+
+func _is_payment_target_valid(assignment: Dictionary) -> bool:
+	var table: Variant = assignment.get("table")
+	var customer: Variant = assignment.get("customer")
+	return is_instance_valid(table) and is_instance_valid(customer) \
+		and table.state == table.State.WAITING_PAYMENT \
+		and table.get_seated_customer() == customer and table.food_round == assignment["round"]
+
+func _is_payment_reserved(table: Node) -> bool:
+	for assignment in payment_assignments.values():
+		if _is_payment_target_valid(assignment) and assignment["table"] == table:
+			return true
+	return false

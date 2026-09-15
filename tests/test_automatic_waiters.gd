@@ -58,7 +58,7 @@ func begin_delivery(actor: Node) -> void:
 	arrive(actor)
 
 func run_tests() -> void:
-	# Latest prepared dish, physical movement, exact delivery, no automatic payment.
+	# Latest prepared dish, physical movement, exact delivery.
 	var r: Node = world()
 	seat(r, "Table01Point", [BURGER])
 	var group: Node = seat(r, "Table02Point", [PIZZA])
@@ -78,7 +78,7 @@ func run_tests() -> void:
 	check(group.get_customer(0).has_received_food, "Waiter must physically reach and serve the table")
 	check(a.carried_dish == NONE, "Served food must leave the waiter's hands")
 	r.get_node("Table02Point")._on_eating_timer_timeout()
-	check(r.get_node("Table02Point").state == r.get_node("Table02Point").State.WAITING_PAYMENT, "Waiter must leave payment for the player")
+	check(r.get_node("Table02Point").state == r.get_node("Table02Point").State.WAITING_PAYMENT, "Payment must wait until someone collects it")
 	r.free()
 
 	# Player steals the reserved plate; retry a different real plate without duplication.
@@ -187,6 +187,8 @@ func run_tests() -> void:
 	# Complete a VIP's three rounds through the actual timers and movement loop.
 	r = world()
 	group = seat(r, "Table01Point", [BURGER], true)
+	var reward: Dictionary = {"stars": 0}
+	r.vip_completed.connect(func(amount: int): reward["stars"] += amount)
 	group.get_customer(0).total_dishes_to_eat = 3
 	r.kitchen_point.cook_time = 0.03
 	r.kitchen_point.add_order(BURGER)
@@ -195,14 +197,14 @@ func run_tests() -> void:
 	a.set_physics_process(true)
 	table = r.get_node("Table01Point")
 	for i in range(900):
-		if group.get_customer(0).dishes_eaten == 3:
+		if reward["stars"] == 1:
 			break
 		if table.eating_timer.time_left > 0.1:
 			table.eating_timer.start(0.03)
 		await physics_frame
-	check(group.get_customer(0).dishes_eaten == 3, "Waiter must complete all VIP food rounds automatically")
-	check(table.state == table.State.WAITING_PAYMENT, "Completed VIP must wait for manual collection")
-	check(r.waiter_manager.assignments.is_empty(), "VIP completion must leave no stale reservations")
+	check(reward["stars"] == 1, "Waiter must finish all VIP rounds and collect the star automatically")
+	check(table.state == table.State.FREE, "Completed VIP payment must free the table")
+	check(r.waiter_manager.assignments.is_empty() and r.waiter_manager.payment_assignments.is_empty(), "VIP completion must leave no stale reservations")
 	r.free()
 	print("AUTOMATIC WAITER TESTS: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

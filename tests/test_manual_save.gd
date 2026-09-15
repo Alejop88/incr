@@ -52,7 +52,11 @@ func run_tests() -> void:
 	game._on_buy_table_requested()
 	game.get_node("MichelinManager").add_stars(100)
 	for upgrade in ["counter_capacity_1", "counter_capacity_2", "cook_speed_1", "vip_spawn_1", "vip_spawn_2", "vip_group_2", "vip_group_3", "vip_group_4"]:
-		game._on_star_upgrade_requested(upgrade)
+		game.michelin_manager.buy_upgrade(upgrade)
+	# Seed existing permanent progression; UI purchase/reset has its own test.
+	game.restaurant.set_permanent_cook_speed_bonus(game.michelin_manager.cook_speed_bonus)
+	game.restaurant.set_vip_spawn_bonus_level(game.michelin_manager.vip_spawn_bonus)
+	game.restaurant.set_max_vip_group_size(game.michelin_manager.max_vip_group_size)
 	menu.open_menu()
 	menu.save_button.pressed.emit()
 	check(menu.status_label.text == "Partida guardada correctamente.", "Save button must report success")

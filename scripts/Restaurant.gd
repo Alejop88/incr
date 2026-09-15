@@ -367,7 +367,7 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 func spawn_customer() -> void:
 	print("Spawn solicitado")
 
-	var is_vip: bool = true
+	var is_vip: bool = randf() < vip_spawn_chance
 	var group_size: int
 
 	if is_vip:

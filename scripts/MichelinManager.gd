@@ -5,6 +5,7 @@ signal counter_capacity_bonus_changed(new_bonus: int)
 
 var stars: int = 5
 var bought_upgrades: Dictionary = {}
+var selected_upgrades: Array[String] = []
 var counter_capacity_bonus: int = 0
 var cook_speed_bonus: int = 0
 var vip_spawn_bonus: int = 0
@@ -91,6 +92,7 @@ func get_save_data() -> Dictionary:
 
 func load_save_data(data: Dictionary) -> void:
 	stars = int(data["stars"])
+	selected_upgrades.clear()
 	bought_upgrades.clear()
 	counter_capacity_bonus = 0
 	cook_speed_bonus = 0
@@ -190,11 +192,49 @@ func get_upgrade_description(upgrade_id: String) -> String:
 	return upgrade_descriptions.get(upgrade_id, "")
 func get_upgrade_name(upgrade_id: String) -> String:
 	return upgrade_names.get(upgrade_id, "")
-func are_upgrade_requirements_met(upgrade_id: String) -> bool:
+func are_upgrade_requirements_met(upgrade_id: String, include_selected: bool = false) -> bool:
 	var requirements: Array = upgrade_requirements.get(upgrade_id, [])
 
 	for required_upgrade_id in requirements:
-		if not is_upgrade_bought(required_upgrade_id):
+		if not is_upgrade_bought(required_upgrade_id) \
+				and not (include_selected and required_upgrade_id in selected_upgrades):
 			return false
 
 	return true
+
+func toggle_selection(upgrade_id: String) -> void:
+	if not upgrade_costs.has(upgrade_id) or is_upgrade_bought(upgrade_id):
+		return
+	if upgrade_id in selected_upgrades:
+		selected_upgrades.erase(upgrade_id)
+		# Removing one prerequisite can invalidate several levels of descendants.
+		var changed: bool = true
+		while changed:
+			changed = false
+			for selected_id in selected_upgrades.duplicate():
+				if not are_upgrade_requirements_met(selected_id, true):
+					selected_upgrades.erase(selected_id)
+					changed = true
+	elif are_upgrade_requirements_met(upgrade_id, true):
+		selected_upgrades.append(upgrade_id)
+
+func get_selected_cost() -> int:
+	var total: int = 0
+	for upgrade_id in selected_upgrades:
+		total += get_upgrade_cost(upgrade_id)
+	return total
+
+func get_selected_purchase_data() -> Dictionary:
+	# Preview only: do not spend stars or apply any bonus until the reset is saved.
+	if selected_upgrades.is_empty() or get_selected_cost() > stars:
+		return {}
+	var seen: Dictionary = {}
+	for upgrade_id in selected_upgrades:
+		if not upgrade_costs.has(upgrade_id) or is_upgrade_bought(upgrade_id) \
+				or seen.has(upgrade_id) or not are_upgrade_requirements_met(upgrade_id, true):
+			return {}
+		seen[upgrade_id] = true
+	var result: Dictionary = get_save_data()
+	result["stars"] = stars - get_selected_cost()
+	result["bought_upgrades"].append_array(selected_upgrades)
+	return result

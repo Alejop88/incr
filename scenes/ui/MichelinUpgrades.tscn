@@ -9,18 +9,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-tooltip_text = "Mostrador ampliado II
-
-Añade +2 espacios para platos preparados.
-
-Coste: ⭐ 3"
 script = ExtResource("1_n6na1")
 
 [node name="Background" type="Panel" parent="." unique_id=401538527]
 layout_mode = 0
 offset_left = 3.0
-offset_right = 378.0
-offset_bottom = 212.0
+offset_right = 480.0
+offset_bottom = 510.0
 
 [node name="TitleLabel" type="Label" parent="." unique_id=1252073161]
 layout_mode = 0
@@ -105,7 +100,49 @@ text = "VIP x4"
 
 [node name="CloseButton" type="Button" parent="." unique_id=81587447]
 layout_mode = 0
-offset_left = 357.0
-offset_right = 375.0
+offset_left = 452.0
+offset_right = 477.0
 offset_bottom = 31.0
 text = "X"
+
+[node name="PurchasePanel" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 222.0
+offset_right = 464.0
+offset_bottom = 494.0
+theme_override_constants/separation = 12
+
+[node name="SummaryLabel" type="Label" parent="PurchasePanel"]
+layout_mode = 2
+text = "Selecciona las mejoras que quieras comprar."
+autowrap_mode = 2
+
+[node name="PurchaseButton" type="Button" parent="PurchasePanel"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+disabled = true
+text = "Comprar seleccionadas"
+
+[node name="Confirmation" type="VBoxContainer" parent="PurchasePanel"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="WarningLabel" type="Label" parent="PurchasePanel/Confirmation"]
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="ConfirmButton" type="Button" parent="PurchasePanel/Confirmation"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Comprar y reiniciar"
+
+[node name="CancelButton" type="Button" parent="PurchasePanel/Confirmation"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Cancelar"
+
+[node name="StatusLabel" type="Label" parent="PurchasePanel"]
+layout_mode = 2
+autowrap_mode = 2

@@ -24,7 +24,10 @@ var patience_upgrade_cost: float = 20.0
 var patience_level: int = 0
 
 const MAX_PATIENCE_LEVEL: int = 10
+var initial_run_data: Dictionary = {}
+var prestige_pending: bool = false
 func _ready() -> void:
+	initial_run_data = _get_save_data().duplicate(true)
 	_load_saved_progress()
 	pause_menu.save_requested.connect(_on_save_requested)
 	pause_menu.new_game_requested.connect(_on_new_game_requested)
@@ -54,6 +57,8 @@ func _ready() -> void:
 	restaurant.set_max_vip_group_size(michelin_manager.max_vip_group_size)
 	michelin_manager.counter_capacity_bonus_changed.connect(_on_counter_capacity_bonus_changed)
 	michelin_upgrades.upgrade_requested.connect(_on_star_upgrade_requested)
+	michelin_upgrades.purchase_requested.connect(_on_star_purchase_requested)
+	michelin_upgrades.purchase_confirmed.connect(_on_star_purchase_confirmed)
 	hud.kitchen_order_move_up_requested.connect(_on_kitchen_order_move_up_requested)
 	hud.kitchen_order_move_down_requested.connect(_on_kitchen_order_move_down_requested)
 	hud.kitchen_order_cancel_requested.connect(_on_kitchen_order_cancel_requested)
@@ -65,7 +70,7 @@ func _ready() -> void:
 	hud.patience_upgrade_requested.connect(_on_patience_upgrade_requested)
 	restaurant.spawn_customer()
 
-func _on_save_requested() -> bool:
+func _get_save_data() -> Dictionary:
 	var unlocked_tables: Array[String] = []
 	for table in restaurant.tables:
 		if table.unlocked:
@@ -83,7 +88,12 @@ func _on_save_requested() -> bool:
 		},
 		"unlocked_tables": unlocked_tables
 	}
-	if save_manager.save_game(data):
+	return data
+
+func _on_save_requested() -> bool:
+	if prestige_pending:
+		return false
+	if save_manager.save_game(_get_save_data()):
 		pause_menu.show_status("Partida guardada correctamente.")
 		return true
 	else:
@@ -154,6 +164,7 @@ func _on_money_changed(new_money: float) -> void:
 func _on_stars_changed(new_stars: int) -> void:
 	hud.set_stars(new_stars)
 	michelin_upgrades.set_stars(new_stars)
+	_refresh_star_upgrades()
 func _on_waiter_speed_upgrade_requested() -> void:
 	if waiter_speed_level >= MAX_WAITER_SPEED_LEVEL:
 		print("La velocidad del camarero ya está al máximo")
@@ -288,6 +299,10 @@ func _update_hire_waiter_button() -> void:
 func _on_counter_capacity_bonus_changed(new_level: int) -> void:
 	restaurant.set_counter_capacity_bonus(new_level)
 func _on_star_upgrades_requested() -> void:
+	_refresh_star_upgrades()
+	michelin_upgrades.visible = true
+
+func _refresh_star_upgrades() -> void:
 	michelin_upgrades.set_stars(
 		michelin_manager.get_stars()
 	)
@@ -300,8 +315,9 @@ func _on_star_upgrades_requested() -> void:
 
 		michelin_upgrades.set_upgrade_locked(
 			upgrade_id,
-			not michelin_manager.are_upgrade_requirements_met(upgrade_id)
+			not michelin_manager.are_upgrade_requirements_met(upgrade_id, true)
 		)
+		michelin_upgrades.set_upgrade_selected(upgrade_id, upgrade_id in michelin_manager.selected_upgrades)
 
 		michelin_upgrades.set_upgrade_info(
 			upgrade_id,
@@ -309,7 +325,11 @@ func _on_star_upgrades_requested() -> void:
 			michelin_manager.get_upgrade_description(upgrade_id),
 			michelin_manager.get_upgrade_cost(upgrade_id)
 		)
-	michelin_upgrades.visible = true
+	michelin_upgrades.set_purchase_summary(
+		michelin_manager.selected_upgrades.size(),
+		michelin_manager.get_selected_cost(),
+		michelin_manager.get_stars()
+	)
 func _on_manual_dish_requested(dish_type: int) -> void:
 	restaurant.add_manual_kitchen_order(dish_type)
 func _on_kitchen_order_move_up_requested(index: int) -> void:
@@ -323,28 +343,43 @@ func _on_ready_dish_selected(dish_id: int) -> void:
 func _on_vip_completed(amount: int) -> void:
 	michelin_manager.add_stars(amount)
 func _on_star_upgrade_requested(upgrade_id: String) -> void:
-	var bought: bool = michelin_manager.buy_upgrade(upgrade_id)
-
-	if not bought:
-		print("No se ha podido comprar la mejora: ",upgrade_id)
+	if prestige_pending:
 		return
+	michelin_upgrades.cancel_purchase_confirmation()
+	michelin_upgrades.show_purchase_status("")
+	michelin_manager.toggle_selection(upgrade_id)
+	_refresh_star_upgrades()
 
-	michelin_upgrades.set_upgrade_bought(upgrade_id, true)
-	restaurant.set_permanent_cook_speed_bonus(michelin_manager.cook_speed_bonus)
-	restaurant.set_vip_spawn_bonus_level(michelin_manager.vip_spawn_bonus)
-	restaurant.set_max_vip_group_size(michelin_manager.max_vip_group_size)
-	for current_upgrade_id in michelin_upgrades.get_upgrade_ids():
-		michelin_upgrades.set_upgrade_locked(
-			current_upgrade_id,
-			not michelin_manager.are_upgrade_requirements_met(
-				current_upgrade_id
-			)
-		)
-		michelin_upgrades.set_upgrade_info(
-			current_upgrade_id,
-			michelin_manager.get_upgrade_name(current_upgrade_id),
-			michelin_manager.get_upgrade_description(current_upgrade_id),
-			michelin_manager.get_upgrade_cost(current_upgrade_id))
+func _on_star_purchase_requested() -> void:
+	if prestige_pending or michelin_manager.get_selected_purchase_data().is_empty():
+		return
+	michelin_upgrades.show_purchase_confirmation(michelin_manager.get_selected_cost())
+
+func _on_star_purchase_confirmed() -> void:
+	if prestige_pending:
+		return
+	var permanent_data: Dictionary = michelin_manager.get_selected_purchase_data()
+	if permanent_data.is_empty():
+		michelin_upgrades.cancel_purchase_confirmation()
+		_refresh_star_upgrades()
+		michelin_upgrades.show_purchase_status("Revisa la selección y las estrellas disponibles.")
+		return
+	var previous_data: Dictionary = _get_save_data()
+	var new_run: Dictionary = initial_run_data.duplicate(true)
+	new_run["michelin"] = permanent_data
+	if not save_manager.save_game(new_run):
+		michelin_upgrades.show_purchase_status(save_manager.last_error)
+		return
+	prestige_pending = true
+	get_tree().paused = false
+	var error: Error = get_tree().reload_current_scene()
+	if error != OK:
+		# Keep the playable run and its money/stars if scene reload fails.
+		if save_manager.save_game(previous_data):
+			prestige_pending = false
+			michelin_upgrades.show_purchase_status("No se pudo reiniciar. La compra no se ha aplicado.")
+		else:
+			michelin_upgrades.show_purchase_status("La compra está guardada. Cierra y vuelve a abrir el juego.")
 func _on_kitchen_panel_requested() -> void:
 	hud.set_kitchen_ready_dishes(restaurant.get_ready_dishes_count(),restaurant.get_counter_capacity())
 
