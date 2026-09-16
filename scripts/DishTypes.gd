@@ -19,6 +19,22 @@ const CATALOG: Dictionary = {
 	Type.PAELLA: {"name": "Paella", "icon": "🥘​​", "image": ""}
 }
 const MAX_MENU_DISHES: int = 2
+const NEW_DISH_COST: float = 50.0
+
+static func random_starting_dishes() -> Array[Type]:
+	var pool: Array = CATALOG.keys()
+	pool.shuffle()
+	var result: Array[Type] = []
+	for dish in pool.slice(0, mini(2, pool.size())):
+		result.append(dish)
+	return result
+
+static func unlocked_from_keys(keys: Array) -> Array[Type]:
+	var result: Array[Type] = []
+	for key in keys:
+		if Type.has(key) and CATALOG.has(Type[key]) and not result.has(Type[key]):
+			result.append(Type[key])
+	return result
 
 static func default_menu() -> Array[Type]:
 	return [Type.BURGER, Type.PIZZA]

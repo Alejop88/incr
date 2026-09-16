@@ -38,6 +38,8 @@ func run_tests() -> void:
 	var game: Node = load("res://scenes/Main.tscn").instantiate()
 	game.get_node("SaveManager").save_path = "res://tests/menu-unused-%s.json" % Time.get_ticks_usec()
 	root.add_child(game)
+	game.restaurant.unlocked_dishes = DishTypes.default_menu()
+	game.restaurant.set_menu_dishes(DishTypes.default_menu())
 	game.hud.get_node("KitchenPanel/VBoxContainer/MenuButton").pressed.emit()
 	check(game.hud.menu_editor.visible, "Kitchen menu button must open the editor")
 	game.hud.menu_editor._toggle_dish(BURGER)

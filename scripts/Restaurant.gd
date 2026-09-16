@@ -36,13 +36,42 @@ var waiter_speed_level: int = 0
 var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
 var menu_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
+var unlocked_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
+
+func start_random_menu() -> void:
+	unlocked_dishes = DishTypes.random_starting_dishes()
+	menu_dishes = unlocked_dishes.duplicate()
+
+func get_locked_dishes() -> Array[DishTypes.Type]:
+	var result: Array[DishTypes.Type] = []
+	for dish in DishTypes.CATALOG:
+		if not unlocked_dishes.has(dish):
+			result.append(dish)
+	return result
+
+func restore_dish_progress(data: Dictionary) -> void:
+	var saved_menu: Array[DishTypes.Type] = DishTypes.menu_from_keys(data.get("menu_dishes", []))
+	# Old saves retain their selected recipes; new saves restore the full collection.
+	unlocked_dishes = DishTypes.unlocked_from_keys(data.get("unlocked_dishes", DishTypes.menu_keys(saved_menu)))
+	if unlocked_dishes.is_empty():
+		unlocked_dishes = DishTypes.random_starting_dishes()
+	if not data.has("unlocked_dishes"):
+		var pool: Array[DishTypes.Type] = get_locked_dishes()
+		pool.shuffle()
+		while unlocked_dishes.size() < 2 and not pool.is_empty():
+			unlocked_dishes.append(pool.pop_back())
+	var valid_menu: Array[DishTypes.Type] = []
+	for dish in saved_menu:
+		if unlocked_dishes.has(dish):
+			valid_menu.append(dish)
+	menu_dishes = valid_menu if not valid_menu.is_empty() else unlocked_dishes.slice(0, DishTypes.MAX_MENU_DISHES)
 
 func set_menu_dishes(dishes: Array) -> bool:
 	if dishes.is_empty() or dishes.size() > DishTypes.MAX_MENU_DISHES:
 		return false
 	var validated: Array[DishTypes.Type] = []
 	for dish in dishes:
-		if not DishTypes.CATALOG.has(dish) or validated.has(dish):
+		if not unlocked_dishes.has(dish) or validated.has(dish):
 			return false
 		validated.append(dish)
 	menu_dishes = validated

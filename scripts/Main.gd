@@ -27,6 +27,7 @@ const MAX_PATIENCE_LEVEL: int = 10
 var initial_run_data: Dictionary = {}
 var prestige_pending: bool = false
 func _ready() -> void:
+	restaurant.start_random_menu()
 	initial_run_data = _get_save_data().duplicate(true)
 	_load_saved_progress()
 	restaurant.waiter_manager.apply_permanent_upgrades(
@@ -68,7 +69,11 @@ func _ready() -> void:
 	hud.kitchen_order_move_down_requested.connect(_on_kitchen_order_move_down_requested)
 	hud.kitchen_order_cancel_requested.connect(_on_kitchen_order_cancel_requested)
 	hud.ready_dish_selected.connect(_on_ready_dish_selected)
-	hud.menu_requested.connect(func(): hud.menu_editor.open_menu(restaurant.menu_dishes))
+	hud.menu_requested.connect(func():
+		_refresh_dish_shop()
+		hud.menu_editor.open_menu(restaurant.menu_dishes)
+	)
+	hud.menu_editor.purchase_requested.connect(_on_dish_purchase_requested)
 	hud.menu_editor.menu_applied.connect(func(dishes: Array):
 		if restaurant.set_menu_dishes(dishes):
 			hud.set_manual_order_dishes(restaurant.get_available_manual_dishes())
@@ -88,6 +93,7 @@ func _get_save_data() -> Dictionary:
 	var data: Dictionary = {
 		"money": economy_manager.money,
 		"menu_dishes": DishTypes.menu_keys(restaurant.menu_dishes),
+		"unlocked_dishes": DishTypes.menu_keys(restaurant.unlocked_dishes),
 		"hired_waiters": restaurant.waiter_manager.get_hired_count(),
 		"michelin": michelin_manager.get_save_data(),
 		"levels": {
@@ -134,7 +140,7 @@ func _load_saved_progress() -> void:
 			pause_menu.open_menu()
 		return
 	economy_manager.money = float(data["money"])
-	restaurant.set_menu_dishes(DishTypes.menu_from_keys(data.get("menu_dishes", [])))
+	restaurant.restore_dish_progress(data)
 	michelin_manager.load_save_data(data["michelin"])
 	var levels: Dictionary = data["levels"]
 	waiter_speed_level = int(levels["waiter_speed"])
@@ -380,6 +386,7 @@ func _on_star_purchase_confirmed() -> void:
 	var new_run: Dictionary = initial_run_data.duplicate(true)
 	new_run["michelin"] = permanent_data
 	new_run["menu_dishes"] = DishTypes.menu_keys(restaurant.menu_dishes)
+	new_run["unlocked_dishes"] = DishTypes.menu_keys(restaurant.unlocked_dishes)
 	if not save_manager.save_game(new_run):
 		michelin_upgrades.show_purchase_status(save_manager.last_error)
 		return
@@ -402,6 +409,8 @@ func _on_kitchen_panel_requested() -> void:
 	hud.set_manual_order_dishes(restaurant.get_available_manual_dishes())
 
 func _process(_delta: float) -> void:
+	if hud.menu_editor.visible:
+		_refresh_dish_shop()
 	if hud.kitchen_panel.visible:
 		hud.set_manual_order_dishes(restaurant.get_available_manual_dishes())
 		hud.set_kitchen_cooking_progress(restaurant.get_cooking_progress())
@@ -410,3 +419,19 @@ func _process(_delta: float) -> void:
 		hud.set_kitchen_order_queue_buttons(restaurant.get_order_queue())
 		hud.set_ready_dishes_buttons(restaurant.get_ready_dishes(),restaurant.get_ready_dish_ids())
 		hud.set_ready_dish_selection(restaurant.get_selected_ready_dish_ids(), restaurant.player_waiter.get_free_carry_slots())
+
+func _refresh_dish_shop() -> void:
+	hud.menu_editor.set_unlocks(restaurant.unlocked_dishes, economy_manager.money)
+
+func _on_dish_purchase_requested() -> void:
+	if prestige_pending:
+		return
+	var pool: Array = restaurant.get_locked_dishes()
+	if pool.is_empty() or economy_manager.money < DishTypes.NEW_DISH_COST:
+		_refresh_dish_shop()
+		return
+	var dish: DishTypes.Type = pool.pick_random()
+	if economy_manager.spend_money(DishTypes.NEW_DISH_COST):
+		restaurant.unlocked_dishes.append(dish)
+		hud.menu_editor.purchase_result.text = "Nuevo plato: " + DishTypes.title(dish)
+		_refresh_dish_shop()
