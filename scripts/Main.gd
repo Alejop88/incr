@@ -29,6 +29,10 @@ var prestige_pending: bool = false
 func _ready() -> void:
 	initial_run_data = _get_save_data().duplicate(true)
 	_load_saved_progress()
+	restaurant.waiter_manager.apply_permanent_upgrades(
+		michelin_manager.is_upgrade_bought("permanent_waiter"),
+		michelin_manager.is_upgrade_bought("waiter_capacity_2")
+	)
 	pause_menu.save_requested.connect(_on_save_requested)
 	pause_menu.new_game_requested.connect(_on_new_game_requested)
 	pause_menu.quit_requested.connect(_on_quit_requested)

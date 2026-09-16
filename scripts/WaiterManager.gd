@@ -10,19 +10,36 @@ var waiters: Array[CharacterBody2D] = []
 # The player can still take that dish or serve that customer first.
 var assignments: Dictionary = {}
 var payment_assignments: Dictionary = {}
+var second_assignments: Dictionary = {}
+var carry_capacity: int = 1
+
+func apply_permanent_upgrades(permanent: bool, double_capacity: bool) -> void:
+	carry_capacity = 2 if double_capacity else 1
+	var has_permanent: bool = false
+	for waiter in waiters:
+		waiter.carry_capacity = carry_capacity
+		has_permanent = has_permanent or waiter.is_permanent
+	if permanent and not has_permanent:
+		create_waiter(true)
 
 func can_hire() -> bool:
-	return waiters.size() < MAX_HIRED_WAITERS
+	return get_hired_count() < MAX_HIRED_WAITERS
 
 func get_hired_count() -> int:
-	return waiters.size()
+	var count: int = 0
+	for waiter in waiters:
+		if is_instance_valid(waiter) and not waiter.is_permanent:
+			count += 1
+	return count
 
 func restore_hired_count(count: int) -> void:
-	while waiters.size() < clampi(count, 0, MAX_HIRED_WAITERS):
+	while get_hired_count() < clampi(count, 0, MAX_HIRED_WAITERS):
 		create_waiter()
 
-func create_waiter() -> CharacterBody2D:
+func create_waiter(permanent: bool = false) -> CharacterBody2D:
 	var waiter: CharacterBody2D = WAITER_SCENE.instantiate()
+	waiter.is_permanent = permanent
+	waiter.carry_capacity = carry_capacity
 	waiter.coordinator = self
 	waiter.waiting_offset = Vector2(90 + waiters.size() * 35, 65)
 	waiter.position = restaurant.kitchen_point.position + waiter.waiting_offset
@@ -32,6 +49,7 @@ func create_waiter() -> CharacterBody2D:
 
 func release_assignment(waiter: CharacterBody2D) -> void:
 	assignments.erase(waiter)
+	second_assignments.erase(waiter)
 	payment_assignments.erase(waiter)
 
 func reserve_payment(waiter: CharacterBody2D) -> bool:
@@ -87,8 +105,18 @@ func reserve_pickup(waiter: CharacterBody2D) -> bool:
 		target["dish_id"] = ids[i]
 		target["dish"] = dishes[i]
 		assignments[waiter] = target
-		return true
-	return false
+		if waiter.carry_capacity == 1 or second_assignments.has(waiter):
+			if second_assignments.has(waiter):
+				assignments[waiter] = second_assignments[waiter]
+				second_assignments[waiter] = target
+			return true
+		# Keep the first reservation visible while choosing a different customer and plate.
+		second_assignments[waiter] = assignments[waiter]
+		assignments.erase(waiter)
+	if second_assignments.has(waiter):
+		assignments[waiter] = second_assignments[waiter]
+		second_assignments.erase(waiter)
+	return assignments.has(waiter)
 
 func pickup(waiter: CharacterBody2D) -> DishTypes.Type:
 	if not assignments.has(waiter):
@@ -96,18 +124,61 @@ func pickup(waiter: CharacterBody2D) -> DishTypes.Type:
 	var assignment: Dictionary = assignments[waiter]
 	var dish: DishTypes.Type = restaurant.kitchen_point.take_ready_dish_by_id(assignment["dish_id"])
 	if dish == DishTypes.Type.NONE:
-		release_assignment(waiter)
+		assignments.erase(waiter)
 	else:
 		assignment["dish_id"] = -1
+	if second_assignments.has(waiter):
+		var second: Dictionary = second_assignments[waiter]
+		waiter.second_dish = restaurant.kitchen_point.take_ready_dish_by_id(second["dish_id"])
+		if waiter.second_dish == DishTypes.Type.NONE:
+			second_assignments.erase(waiter)
+		else:
+			second["dish_id"] = -1
+	if dish == DishTypes.Type.NONE and waiter.second_dish != DishTypes.Type.NONE:
+		dish = waiter.second_dish
+		waiter.second_dish = DishTypes.Type.NONE
+		assignments[waiter] = second_assignments[waiter]
+		second_assignments.erase(waiter)
 	return dish
+
+func advance_dish(waiter: CharacterBody2D) -> void:
+	assignments.erase(waiter)
+	waiter.carried_dish = waiter.second_dish
+	waiter.second_dish = DishTypes.Type.NONE
+	if second_assignments.has(waiter):
+		assignments[waiter] = second_assignments[waiter]
+		second_assignments.erase(waiter)
+
+func _swap_dishes(waiter: CharacterBody2D) -> void:
+	var dish: DishTypes.Type = waiter.carried_dish
+	waiter.carried_dish = waiter.second_dish
+	waiter.second_dish = dish
+	var first: Dictionary = assignments.get(waiter, {})
+	var second: Dictionary = second_assignments.get(waiter, {})
+	assignments.erase(waiter)
+	second_assignments.erase(waiter)
+	if not second.is_empty():
+		assignments[waiter] = second
+	if not first.is_empty():
+		second_assignments[waiter] = first
 
 func is_delivery_valid(waiter: CharacterBody2D) -> bool:
 	return assignments.has(waiter) and _is_target_valid(assignments[waiter])
 
 func plan_delivery(waiter: CharacterBody2D) -> String:
+	var result: String = _plan_current_dish(waiter)
+	if result != "deliver" and waiter.second_dish != DishTypes.Type.NONE:
+		_swap_dishes(waiter)
+		var second_result: String = _plan_current_dish(waiter)
+		if second_result == "deliver":
+			return second_result
+		_swap_dishes(waiter)
+	return result
+
+func _plan_current_dish(waiter: CharacterBody2D) -> String:
 	if is_delivery_valid(waiter):
 		return "deliver"
-	release_assignment(waiter)
+	assignments.erase(waiter)
 	_clean_freed_waiters()
 	var target: Dictionary = _find_customer(waiter, waiter.carried_dish)
 	if not target.is_empty():
@@ -132,7 +203,7 @@ func deliver(waiter: CharacterBody2D) -> bool:
 		return false
 	var assignment: Dictionary = assignments[waiter]
 	var delivered: bool = assignment["table"].receive_food(waiter.carried_dish, assignment["customer"])
-	release_assignment(waiter)
+	assignments.erase(waiter)
 	return delivered
 
 func _find_customer(waiter: CharacterBody2D, dish: DishTypes.Type) -> Dictionary:
@@ -175,18 +246,21 @@ func _is_target_valid(assignment: Dictionary) -> bool:
 		and table.can_serve_customer(customer, assignment["dish"])
 
 func _is_customer_reserved(customer: CharacterBody2D) -> bool:
-	for assignment in assignments.values():
+	for assignment in assignments.values() + second_assignments.values():
 		if _is_target_valid(assignment) and assignment["customer"] == customer:
 			return true
 	return false
 
 func _is_plate_reserved(dish_id: int) -> bool:
-	for assignment in assignments.values():
+	for assignment in assignments.values() + second_assignments.values():
 		if assignment["dish_id"] == dish_id:
 			return true
 	return false
 
 func _clean_freed_waiters() -> void:
+	for waiter in second_assignments.keys():
+		if not is_instance_valid(waiter):
+			second_assignments.erase(waiter)
 	for waiter in assignments.keys():
 		if not is_instance_valid(waiter):
 			assignments.erase(waiter)

@@ -5,6 +5,9 @@ enum State { IDLE, TO_KITCHEN, TO_TABLE, WAITING_CUSTOMER, TO_TRASH, TO_PAYMENT,
 var coordinator: Node
 var state: State = State.IDLE
 var carried_dish: DishTypes.Type = DishTypes.Type.NONE
+var second_dish: DishTypes.Type = DishTypes.Type.NONE
+var carry_capacity: int = 1
+var is_permanent: bool = false
 var target_position: Vector2
 var decision_delay: float = 0.0
 var waiting_offset: Vector2 = Vector2(90, 65)
@@ -51,7 +54,7 @@ func _arrive() -> void:
 				_plan_delivery()
 		State.TO_TABLE:
 			if coordinator.deliver(self):
-				_finish_task()
+				_finish_dish()
 			else:
 				_plan_delivery()
 		State.TO_PAYMENT:
@@ -64,7 +67,14 @@ func _arrive() -> void:
 			# Last check in case somebody ordered this dish on the way here.
 			_plan_delivery()
 			if state == State.TO_TRASH:
-				_finish_task()
+				_finish_dish()
+
+func _finish_dish() -> void:
+	coordinator.advance_dish(self)
+	if carried_dish == DishTypes.Type.NONE:
+		_finish_task()
+	else:
+		_plan_delivery()
 
 func _plan_delivery() -> void:
 	decision_delay = 0.2
@@ -96,14 +106,17 @@ func _find_work() -> void:
 func _finish_task() -> void:
 	coordinator.release_assignment(self)
 	carried_dish = DishTypes.Type.NONE
+	second_dish = DishTypes.Type.NONE
 	state = State.IDLE
 	decision_delay = 0.0
 	_update_label()
 
 func _update_label() -> void:
-	status_label.text = "Camarero"
+	status_label.text = "Camarero permanente" if is_permanent else "Camarero"
 	if carried_dish != DishTypes.Type.NONE:
 		status_label.text += "\n" + DishTypes.Type.keys()[carried_dish]
+		if second_dish != DishTypes.Type.NONE:
+			status_label.text += " + " + DishTypes.Type.keys()[second_dish]
 	elif state == State.TO_PAYMENT:
 		status_label.text += "\nCobrar"
 	elif state == State.RETURNING:
