@@ -98,6 +98,13 @@ offset_right = 133.0
 offset_bottom = 204.0
 text = "VIP x4"
 
+[node name="player_capacity_2" type="Button" parent="."]
+offset_left = 227.0
+offset_top = 93.0
+offset_right = 445.0
+offset_bottom = 133.0
+text = "Llevar 2 platos"
+
 [node name="CloseButton" type="Button" parent="." unique_id=81587447]
 layout_mode = 0
 offset_left = 452.0

@@ -266,6 +266,8 @@ func set_ready_dishes_buttons(dishes: Array,dish_ids: Array[int]) -> void:
 		var button := Button.new()
 
 		button.text = DishTypes.Type.keys()[dishes[i]]
+		button.toggle_mode = true
+		button.set_meta("dish_id", dish_ids[i])
 
 		button.pressed.connect(
 			_on_ready_dish_pressed.bind(dish_ids[i])
@@ -274,6 +276,13 @@ func set_ready_dishes_buttons(dishes: Array,dish_ids: Array[int]) -> void:
 		ready_dishes_container.add_child(button)
 func _on_ready_dish_pressed(dish_id: int) -> void:
 	ready_dish_selected.emit(dish_id)
+
+func set_ready_dish_selection(selected_ids: Array[int], free_slots: int) -> void:
+	for child in ready_dishes_container.get_children():
+		if child is Button and not child.is_queued_for_deletion():
+			var selected: bool = selected_ids.has(child.get_meta("dish_id"))
+			child.set_pressed_no_signal(selected)
+			child.disabled = not selected and selected_ids.size() >= free_slots
 func _on_cook_speed_button_pressed() -> void:
 	cook_speed_upgrade_requested.emit()
 func _on_eating_speed_button_pressed() -> void:

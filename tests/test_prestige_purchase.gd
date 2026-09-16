@@ -45,15 +45,16 @@ func run_tests() -> void:
 	panel.upgrade_buttons["vip_group_2"].pressed.emit()
 	panel.upgrade_buttons["vip_spawn_1"].pressed.emit()
 	check(manager.selected_upgrades.is_empty(), "Deselecting a prerequisite must also deselect dependents")
-	for id in ["vip_spawn_1", "vip_group_2", "counter_capacity_2", "cook_speed_1"]:
+	for id in ["vip_spawn_1", "vip_group_2", "counter_capacity_2", "cook_speed_1", "player_capacity_2"]:
 		panel.upgrade_buttons[id].pressed.emit()
-	check(manager.get_selected_cost() == 10, "Batch cost must equal all selected upgrades")
+	check(manager.get_selected_cost() == 15, "Batch cost must equal all selected upgrades")
 	check(game.economy_manager.money == 500 and game.restaurant.waiter_manager.get_hired_count() == 1, "Selection must not reset the run")
+	check(game.restaurant.player_waiter.carry_capacity == 1, "Selection must not apply player capacity early")
 	check(game.restaurant.max_vip_group_size == 1, "Selection must not apply bonuses early")
 	check(FileAccess.get_file_as_string(save_path) == original_file, "Selection must not change the save file")
 	panel.close_button.pressed.emit()
 	game._on_star_upgrades_requested()
-	check(manager.selected_upgrades.size() == 4, "Closing and reopening must preserve the pending selection")
+	check(manager.selected_upgrades.size() == 5, "Closing and reopening must preserve the pending selection")
 	manager.stars = 1
 	game._on_stars_changed(1)
 	check(panel.purchase_button.disabled and manager.get_selected_purchase_data().is_empty(), "Unaffordable batch must be rejected as a whole")
@@ -65,7 +66,7 @@ func run_tests() -> void:
 	check(panel.purchase_confirmation.visible, "Buy button must ask for final confirmation")
 	check(manager.stars == 20 and game.economy_manager.money == 500, "Opening confirmation must not spend or reset")
 	panel.cancel_button.pressed.emit()
-	check(not panel.purchase_confirmation.visible and manager.selected_upgrades.size() == 4, "Cancel must preserve the selection without purchasing")
+	check(not panel.purchase_confirmation.visible and manager.selected_upgrades.size() == 5, "Cancel must preserve the selection without purchasing")
 	check(FileAccess.get_file_as_string(save_path) == original_file, "Cancelling must leave the saved game unchanged")
 	panel.purchase_button.pressed.emit()
 	game.save_manager.save_path = "res://tests/missing-directory/prestige.json"
@@ -82,8 +83,8 @@ func run_tests() -> void:
 	await process_frame
 	game = current_scene
 	manager = game.michelin_manager
-	check(manager.stars == 10, "Batch must charge exactly once and retain unspent stars")
-	check(manager.bought_upgrades.size() == 5, "Existing permanent upgrade and four new purchases must survive")
+	check(manager.stars == 5, "Batch must charge exactly once and retain unspent stars")
+	check(manager.bought_upgrades.size() == 6, "Existing permanent upgrade and five new purchases must survive")
 	check(manager.selected_upgrades.is_empty(), "Purchased selection must clear after restarting")
 	check(game.economy_manager.money == 0, "Prestige must reset money")
 	check(game.restaurant.waiter_manager.get_hired_count() == 0, "Prestige must remove hired staff")
@@ -95,12 +96,13 @@ func run_tests() -> void:
 	check(is_equal_approx(game.restaurant.kitchen_point.cook_time, 4.8), "Permanent cook upgrade must apply without the old money bonus")
 	check(game.restaurant.max_vip_group_size == 2 and is_equal_approx(game.restaurant.vip_spawn_chance, 0.06), "Permanent VIP upgrades must apply")
 	var persisted: Dictionary = game.save_manager.load_game()
-	check(persisted["money"] == 0 and persisted["michelin"]["stars"] == 10 and persisted["hired_waiters"] == 0, "Restarted run must be persisted immediately")
+	check(persisted["money"] == 0 and persisted["michelin"]["stars"] == 5 and persisted["hired_waiters"] == 0, "Restarted run must be persisted immediately")
 	check(reload_current_scene() == OK, "Persisted prestige run must reload")
 	await process_frame
 	await process_frame
 	game = current_scene
-	check(game.michelin_manager.stars == 10 and game.restaurant.get_counter_capacity() == 7, "Later reload must retain permanent effects without another charge")
+	check(game.michelin_manager.stars == 5 and game.restaurant.get_counter_capacity() == 7, "Later reload must retain permanent effects without another charge")
+	check(game.restaurant.player_waiter.carry_capacity == 2, "Purchased player capacity must survive prestige and reload")
 	check(game.economy_manager.money == 0, "Later reload must not resurrect the old run")
 	game.save_manager.delete_save()
 	game.free()

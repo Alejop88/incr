@@ -38,7 +38,8 @@ var selected_table: Area2D = null
 var waiting_queue: Array[Node2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var customer_group_scene := preload("res://scenes/customer/CustomerGroup.tscn")
-var selected_ready_dish_id: int = -1
+var selected_ready_dish_ids: Array[int] = []
+var manual_pickup: bool = false
 
 func _ready() -> void:
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
@@ -71,14 +72,9 @@ func serve_test_customer() -> void:
 func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			if player_waiter.carried_dish != DishTypes.Type.NONE:
-				print(
-					"El camarero ya lleva: ",
-					DishTypes.Type.keys()[player_waiter.carried_dish]
-				)
+			_clear_pickup_selection()
+			if player_waiter.get_free_carry_slots() == 0:
 				return
-
-			print("Clic izquierdo en cocina")
 
 			player_waiter.move_to_position(
 				kitchen_point.global_position,
@@ -98,6 +94,7 @@ func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int
 	" | Posición: ",
 	current_table.global_position
 )
+		_clear_pickup_selection()
 		selected_table = current_table
 
 		player_waiter.move_to_position(current_table.global_position,player_waiter.TargetType.TABLE)
@@ -209,73 +206,26 @@ func _on_table_eating_finished(current_table: Area2D) -> void:
 		vip_still_eating.size()
 	)
 func _on_player_waiter_destination_reached() -> void:
-	print(
-		"CAMARERO LLEGÓ. Tipo de destino: ",
-		player_waiter.target_type
-	)
-
 	match player_waiter.target_type:
 		player_waiter.TargetType.KITCHEN:
-			if player_waiter.carried_dish != DishTypes.Type.NONE:
-				print("El camarero ya lleva: ",DishTypes.Type.keys()[player_waiter.carried_dish])
-				selected_ready_dish_id = -1
-				return
-			var dish: DishTypes.Type
-
-			if selected_ready_dish_id >= 0:
-				dish = kitchen_point.take_ready_dish_by_id(
-					selected_ready_dish_id
-				)
-
-				selected_ready_dish_id = -1
+			if manual_pickup:
+				for dish_id in selected_ready_dish_ids:
+					if player_waiter.get_free_carry_slots() == 0:
+						break
+					player_waiter.add_carried_dish(kitchen_point.take_ready_dish_by_id(dish_id))
 			else:
-				dish = kitchen_point.take_ready_dish()
-
-			if dish == DishTypes.Type.NONE:
-				print("No hay ningún plato preparado para recoger")
-				return
-
-			player_waiter.carried_dish = dish
-
-			print(
-				"El camarero ha recogido: ",
-				DishTypes.Type.keys()[dish]
-			)
-
+				for i in range(player_waiter.get_free_carry_slots()):
+					player_waiter.add_carried_dish(kitchen_point.take_ready_dish())
+			_clear_pickup_selection()
 		player_waiter.TargetType.TABLE:
-			if selected_table == null:
-				print("No hay ninguna mesa seleccionada")
+			if not is_instance_valid(selected_table):
 				return
-
-			print(
-				"El camarero llegó a la mesa: ",
-				selected_table.name
-			)
-
-			if player_waiter.carried_dish != DishTypes.Type.NONE:
-				var delivered: bool = selected_table.receive_food(player_waiter.carried_dish)
-
-				if delivered:
-					print("El camarero ha entregado ",DishTypes.Type.keys()[player_waiter.carried_dish]," en ",selected_table.name)
-
-					player_waiter.carried_dish = DishTypes.Type.NONE
-			else:
-				print("El camarero ha llegado sin plato")
-
-			if selected_table.collect_payment():
-				print("El camarero ha cobrado la mesa")
+			for dish in player_waiter.carried_dishes.duplicate():
+				if selected_table.receive_food(dish):
+					player_waiter.remove_carried_dish(dish)
+			selected_table.collect_payment()
 		player_waiter.TargetType.TRASH:
-			if player_waiter.carried_dish == DishTypes.Type.NONE:
-				print("El camarero ha llegado a la papelera sin plato")
-				return
-
-			print(
-				"Plato tirado: ",
-				DishTypes.Type.keys()[player_waiter.carried_dish]
-			)
-
-			player_waiter.carried_dish = DishTypes.Type.NONE
-
+			player_waiter.clear_carried_dishes()
 func _on_table_payment_collected(
 	amount: float,
 	current_table: Area2D
@@ -626,10 +576,11 @@ func _on_trash_point_input_event(
 			and event.button_index == MOUSE_BUTTON_LEFT \
 			and event.pressed:
 
-		if player_waiter.carried_dish == DishTypes.Type.NONE:
+		if player_waiter.carried_dishes.is_empty():
 			print("El camarero no lleva ningún plato")
 			return
 
+		_clear_pickup_selection()
 		player_waiter.move_to_position(
 			trash_point.global_position,
 			player_waiter.TargetType.TRASH
@@ -660,20 +611,34 @@ func move_kitchen_order_down(index: int) -> void:
 	kitchen_point.move_order_down(index)
 func cancel_kitchen_order(index: int) -> void:
 	kitchen_point.cancel_order(index)
+func _clear_pickup_selection() -> void:
+	selected_ready_dish_ids.clear()
+	manual_pickup = false
+
+func get_selected_ready_dish_ids() -> Array[int]:
+	var available: Array[int] = kitchen_point.get_ready_dish_ids()
+	for dish_id in selected_ready_dish_ids.duplicate():
+		if not available.has(dish_id):
+			selected_ready_dish_ids.erase(dish_id)
+	return selected_ready_dish_ids.duplicate()
+
 func request_specific_ready_dish(dish_id: int) -> void:
-	if player_waiter.carried_dish != DishTypes.Type.NONE:
-		print(
-			"El camarero ya lleva: ",
-			DishTypes.Type.keys()[player_waiter.carried_dish]
-		)
+	get_selected_ready_dish_ids()
+	if selected_ready_dish_ids.has(dish_id):
+		selected_ready_dish_ids.erase(dish_id)
+		if selected_ready_dish_ids.is_empty():
+			player_waiter.has_target = false
+			player_waiter.velocity = Vector2.ZERO
+			player_waiter.target_type = player_waiter.TargetType.NONE
+			manual_pickup = false
 		return
-
-	selected_ready_dish_id = dish_id
-
-	player_waiter.move_to_position(
-		kitchen_point.global_position,
-		player_waiter.TargetType.KITCHEN
-	)
+	if not kitchen_point.get_ready_dish_ids().has(dish_id):
+		return
+	if selected_ready_dish_ids.size() >= player_waiter.get_free_carry_slots():
+		return
+	manual_pickup = true
+	selected_ready_dish_ids.append(dish_id)
+	player_waiter.move_to_position(kitchen_point.global_position, player_waiter.TargetType.KITCHEN)
 func get_ready_dish_ids() -> Array[int]:
 	return kitchen_point.get_ready_dish_ids()
 func set_max_vip_group_size(value: int) -> void:

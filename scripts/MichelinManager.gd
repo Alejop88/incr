@@ -11,6 +11,7 @@ var cook_speed_bonus: int = 0
 var vip_spawn_bonus: int = 0
 var max_vip_group_size: int = 1
 var upgrade_costs: Dictionary = {
+	"player_capacity_2": 5,
 	"counter_capacity_1": 1,
 	"counter_capacity_2": 3,
 	"cook_speed_1": 2,
@@ -21,6 +22,7 @@ var upgrade_costs: Dictionary = {
 	"vip_group_4": 8
 }
 var upgrade_descriptions: Dictionary = {
+	"player_capacity_2": "Tu personaje puede llevar hasta 2 platos a la vez.",
 	"counter_capacity_1": "Añade +1 espacio para platos preparados.",
 	"counter_capacity_2": "Añade +2 espacios para platos preparados.",
 	"cook_speed_1": "Aumenta la velocidad de cocina.",
@@ -31,6 +33,7 @@ var upgrade_descriptions: Dictionary = {
 	"vip_group_4": "Permite que los clientes VIP puedan aparecer en grupos de cuatro."
 }
 var upgrade_names: Dictionary = {
+	"player_capacity_2": "Llevar 2 platos",
 	"counter_capacity_1": "Mostrador ampliado",
 	"counter_capacity_2": "Mostrador ampliado II",
 	"cook_speed_1": "Cocinero más rápido",
@@ -41,6 +44,7 @@ var upgrade_names: Dictionary = {
 	"vip_group_4": "VIP en grupo de cuatro"
 }
 var upgrade_requirements: Dictionary = {
+	"player_capacity_2": [],
 	"counter_capacity_1": [],
 	"counter_capacity_2": ["counter_capacity_1"],
 	"cook_speed_1": [],
@@ -108,6 +112,11 @@ func load_save_data(data: Dictionary) -> void:
 		max_vip_group_size = maxi(max_vip_group_size, int(upgrade_vip_group_size.get(upgrade_id, 1)))
 
 func buy_upgrade(upgrade_id: String) -> bool:
+	if upgrade_id == "player_capacity_2":
+		if is_upgrade_bought(upgrade_id) or not spend_stars(get_upgrade_cost(upgrade_id)):
+			return false
+		bought_upgrades[upgrade_id] = true
+		return true
 	if not are_upgrade_requirements_met(upgrade_id):
 		return false
 

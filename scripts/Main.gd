@@ -55,6 +55,7 @@ func _ready() -> void:
 	restaurant.set_permanent_cook_speed_bonus(michelin_manager.cook_speed_bonus)
 	restaurant.set_vip_spawn_bonus_level(michelin_manager.vip_spawn_bonus)
 	restaurant.set_max_vip_group_size(michelin_manager.max_vip_group_size)
+	restaurant.player_waiter.carry_capacity = 2 if michelin_manager.is_upgrade_bought("player_capacity_2") else 1
 	michelin_manager.counter_capacity_bonus_changed.connect(_on_counter_capacity_bonus_changed)
 	michelin_upgrades.upgrade_requested.connect(_on_star_upgrade_requested)
 	michelin_upgrades.purchase_requested.connect(_on_star_purchase_requested)
@@ -395,3 +396,4 @@ func _process(_delta: float) -> void:
 		hud.set_current_cooking_dish(restaurant.get_current_dish_name())
 		hud.set_kitchen_order_queue_buttons(restaurant.get_order_queue())
 		hud.set_ready_dishes_buttons(restaurant.get_ready_dishes(),restaurant.get_ready_dish_ids())
+		hud.set_ready_dish_selection(restaurant.get_selected_ready_dish_ids(), restaurant.player_waiter.get_free_carry_slots())
