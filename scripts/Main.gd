@@ -68,6 +68,11 @@ func _ready() -> void:
 	hud.kitchen_order_move_down_requested.connect(_on_kitchen_order_move_down_requested)
 	hud.kitchen_order_cancel_requested.connect(_on_kitchen_order_cancel_requested)
 	hud.ready_dish_selected.connect(_on_ready_dish_selected)
+	hud.menu_requested.connect(func(): hud.menu_editor.open_menu(restaurant.menu_dishes))
+	hud.menu_editor.menu_applied.connect(func(dishes: Array):
+		if restaurant.set_menu_dishes(dishes):
+			hud.set_manual_order_dishes(restaurant.get_available_manual_dishes())
+	)
 	hud.set_cook_speed_upgrade(cook_speed_level,cook_speed_upgrade_cost,MAX_COOK_SPEED_LEVEL)
 	hud.set_eating_speed_upgrade(eating_speed_level,eating_speed_upgrade_cost,MAX_EATING_SPEED_LEVEL)
 	hud.set_patience_upgrade(patience_level,patience_upgrade_cost,MAX_PATIENCE_LEVEL)
@@ -82,6 +87,7 @@ func _get_save_data() -> Dictionary:
 			unlocked_tables.append(str(table.name))
 	var data: Dictionary = {
 		"money": economy_manager.money,
+		"menu_dishes": DishTypes.menu_keys(restaurant.menu_dishes),
 		"hired_waiters": restaurant.waiter_manager.get_hired_count(),
 		"michelin": michelin_manager.get_save_data(),
 		"levels": {
@@ -128,6 +134,7 @@ func _load_saved_progress() -> void:
 			pause_menu.open_menu()
 		return
 	economy_manager.money = float(data["money"])
+	restaurant.set_menu_dishes(DishTypes.menu_from_keys(data.get("menu_dishes", [])))
 	michelin_manager.load_save_data(data["michelin"])
 	var levels: Dictionary = data["levels"]
 	waiter_speed_level = int(levels["waiter_speed"])
@@ -372,6 +379,7 @@ func _on_star_purchase_confirmed() -> void:
 	var previous_data: Dictionary = _get_save_data()
 	var new_run: Dictionary = initial_run_data.duplicate(true)
 	new_run["michelin"] = permanent_data
+	new_run["menu_dishes"] = DishTypes.menu_keys(restaurant.menu_dishes)
 	if not save_manager.save_game(new_run):
 		michelin_upgrades.show_purchase_status(save_manager.last_error)
 		return
@@ -395,6 +403,7 @@ func _on_kitchen_panel_requested() -> void:
 
 func _process(_delta: float) -> void:
 	if hud.kitchen_panel.visible:
+		hud.set_manual_order_dishes(restaurant.get_available_manual_dishes())
 		hud.set_kitchen_cooking_progress(restaurant.get_cooking_progress())
 		hud.set_kitchen_ready_dishes(restaurant.get_ready_dishes_count(),restaurant.get_counter_capacity())
 		hud.set_current_cooking_dish(restaurant.get_current_dish_name())

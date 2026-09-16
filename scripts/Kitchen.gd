@@ -137,14 +137,11 @@ func get_current_dish_name() -> String:
 	if not is_cooking:
 		return ""
 
-	return DishTypes.Type.keys()[current_dish]
+	return DishTypes.title(current_dish)
 func get_order_queue() -> Array:
 	return order_queue.duplicate()
 func get_available_manual_dishes() -> Array:
-	return [
-		DishTypes.Type.PIZZA,
-		DishTypes.Type.BURGER
-	]
+	return DishTypes.CATALOG.keys()
 func add_manual_order(dish: DishTypes.Type) -> void:
 	order_queue.append(dish)
 	try_start_cooking()

@@ -57,15 +57,19 @@ func set_requested_dish(dish: DishTypes.Type) -> void:
 
 
 func update_order_label() -> void:
-	match requested_dish:
-		DishTypes.Type.BURGER:
-			order_label.text = "🍔"
-
-		DishTypes.Type.PIZZA:
-			order_label.text = "🍕"
-
-		_:
-			order_label.text = ""
+	order_label.text = DishTypes.CATALOG.get(requested_dish, {}).get("icon", "")
+	var picture: TextureRect = order_label.get_node_or_null("DishPicture")
+	if picture == null:
+		picture = TextureRect.new()
+		picture.name = "DishPicture"
+		picture.size = Vector2(32, 32)
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		order_label.add_child(picture)
+	picture.texture = DishTypes.texture(requested_dish)
+	picture.visible = picture.texture != null
+	if picture.visible:
+		order_label.text = ""
 func show_order() -> void:
 	order_label.visible = true
 

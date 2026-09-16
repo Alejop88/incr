@@ -5,6 +5,7 @@ var customers: Array[CharacterBody2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var vip_customer_scene := preload("res://scenes/customer/VIPCustomer.tscn")
 var is_vip_group: bool = false
+var available_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
 signal queue_patience_expired(customer_group)
 
 @export var queue_patience_time: float = 60.0
@@ -28,11 +29,6 @@ func create_customers() -> void:
 		
 		customer.group_size = group_size
 		add_child(customer)
-		var available_dishes: Array[DishTypes.Type] = \
-		[
-			DishTypes.Type.BURGER,
-			DishTypes.Type.PIZZA
-		]
 		customer.set_requested_dish(available_dishes.pick_random())
 		customer.visible = false
 		customers.append(customer)

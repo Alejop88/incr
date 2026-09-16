@@ -82,7 +82,7 @@ offset_right = 63.0
 offset_bottom = 118.0
 text = "+1 VIP"
 
-[node name="vip_group_3" type="Button" parent="."]
+[node name="vip_group_3" type="Button" parent="." unique_id=1330929066]
 layout_mode = 0
 offset_left = 7.0
 offset_top = 130.0
@@ -90,7 +90,7 @@ offset_right = 133.0
 offset_bottom = 161.0
 text = "VIP en trío"
 
-[node name="vip_group_4" type="Button" parent="."]
+[node name="vip_group_4" type="Button" parent="." unique_id=1961779366]
 layout_mode = 0
 offset_left = 7.0
 offset_top = 173.0
@@ -98,21 +98,24 @@ offset_right = 133.0
 offset_bottom = 204.0
 text = "VIP x4"
 
-[node name="player_capacity_2" type="Button" parent="."]
+[node name="player_capacity_2" type="Button" parent="." unique_id=129579497]
+layout_mode = 0
 offset_left = 227.0
 offset_top = 93.0
 offset_right = 445.0
 offset_bottom = 133.0
 text = "Llevar 2 platos"
 
-[node name="permanent_waiter" type="Button" parent="."]
+[node name="permanent_waiter" type="Button" parent="." unique_id=1627042319]
+layout_mode = 0
 offset_left = 227.0
 offset_top = 140.0
 offset_right = 445.0
 offset_bottom = 171.0
 text = "Camarero permanente"
 
-[node name="waiter_capacity_2" type="Button" parent="."]
+[node name="waiter_capacity_2" type="Button" parent="." unique_id=1321123250]
+layout_mode = 0
 offset_left = 227.0
 offset_top = 178.0
 offset_right = 445.0
@@ -126,7 +129,7 @@ offset_right = 477.0
 offset_bottom = 31.0
 text = "X"
 
-[node name="PurchasePanel" type="VBoxContainer" parent="."]
+[node name="PurchasePanel" type="VBoxContainer" parent="." unique_id=555732751]
 layout_mode = 0
 offset_left = 16.0
 offset_top = 222.0
@@ -134,36 +137,36 @@ offset_right = 464.0
 offset_bottom = 494.0
 theme_override_constants/separation = 12
 
-[node name="SummaryLabel" type="Label" parent="PurchasePanel"]
+[node name="SummaryLabel" type="Label" parent="PurchasePanel" unique_id=751681570]
 layout_mode = 2
 text = "Selecciona las mejoras que quieras comprar."
 autowrap_mode = 2
 
-[node name="PurchaseButton" type="Button" parent="PurchasePanel"]
+[node name="PurchaseButton" type="Button" parent="PurchasePanel" unique_id=1248002921]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 disabled = true
 text = "Comprar seleccionadas"
 
-[node name="Confirmation" type="VBoxContainer" parent="PurchasePanel"]
+[node name="Confirmation" type="VBoxContainer" parent="PurchasePanel" unique_id=1021394907]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="WarningLabel" type="Label" parent="PurchasePanel/Confirmation"]
+[node name="WarningLabel" type="Label" parent="PurchasePanel/Confirmation" unique_id=433393949]
 layout_mode = 2
 autowrap_mode = 2
 
-[node name="ConfirmButton" type="Button" parent="PurchasePanel/Confirmation"]
+[node name="ConfirmButton" type="Button" parent="PurchasePanel/Confirmation" unique_id=1908382286]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Comprar y reiniciar"
 
-[node name="CancelButton" type="Button" parent="PurchasePanel/Confirmation"]
+[node name="CancelButton" type="Button" parent="PurchasePanel/Confirmation" unique_id=1551545395]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Cancelar"
 
-[node name="StatusLabel" type="Label" parent="PurchasePanel"]
+[node name="StatusLabel" type="Label" parent="PurchasePanel" unique_id=592819566]
 layout_mode = 2
 autowrap_mode = 2

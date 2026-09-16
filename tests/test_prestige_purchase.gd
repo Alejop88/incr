@@ -21,6 +21,7 @@ func run_tests() -> void:
 	saver.save_path = save_path
 	check(saver.save_game({
 		"money": 500.0, "hired_waiters": 1,
+		"menu_dishes": ["PIZZA"],
 		"michelin": {"stars": 20, "bought_upgrades": ["counter_capacity_1"]},
 		"levels": {"waiter_speed": 2, "plate_price": 3, "cook_speed": 1, "eating_speed": 2, "patience": 2},
 		"unlocked_tables": ["Table01Point", "Table02Point"]
@@ -32,6 +33,7 @@ func run_tests() -> void:
 	current_scene = game
 	await process_frame
 	var manager: Node = game.michelin_manager
+	check(game.restaurant.menu_dishes == [DishTypes.Type.PIZZA], "Saved menu must load before spawning customers")
 	var panel: Node = game.michelin_upgrades
 	var original_file: String = FileAccess.get_file_as_string(save_path)
 	game._on_star_upgrades_requested()
@@ -83,6 +85,7 @@ func run_tests() -> void:
 	await process_frame
 	game = current_scene
 	manager = game.michelin_manager
+	check(game.restaurant.menu_dishes == [DishTypes.Type.PIZZA], "Prestige must preserve the chosen menu")
 	check(manager.stars == 5, "Batch must charge exactly once and retain unspent stars")
 	check(manager.bought_upgrades.size() == 6, "Existing permanent upgrade and five new purchases must survive")
 	check(manager.selected_upgrades.is_empty(), "Purchased selection must clear after restarting")
@@ -104,6 +107,7 @@ func run_tests() -> void:
 	check(game.michelin_manager.stars == 5 and game.restaurant.get_counter_capacity() == 7, "Later reload must retain permanent effects without another charge")
 	check(game.restaurant.player_waiter.carry_capacity == 2, "Purchased player capacity must survive prestige and reload")
 	check(game.economy_manager.money == 0, "Later reload must not resurrect the old run")
+	check(game.restaurant.menu_dishes == [DishTypes.Type.PIZZA], "Menu must persist across later reloads")
 	game.save_manager.delete_save()
 	game.free()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(fixture_path))

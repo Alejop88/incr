@@ -1,9 +1,12 @@
 extends Control
 
 const VISIBLE_QUEUED_DISHES: int = 5
+signal menu_requested
+var menu_editor: PanelContainer
 
 signal serve_customer_requested
 var last_order_queue= null
+var last_manual_dishes: Variant = null
 var last_ready_dishes: Array = []
 var last_ready_dish_ids: Array[int] = []
 var ready_dishes_initialized: bool = false
@@ -45,6 +48,9 @@ signal ready_dish_selected(dish_id: int)
 @onready var eating_speed_button: Button = $UpgradesPanel/VBoxContainer/EatingSpeedButton
 @onready var patience_button: Button = $UpgradesPanel/VBoxContainer/PatienceButton
 func _ready() -> void:
+	menu_editor = preload("res://scripts/ui/MenuEditor.gd").new()
+	add_child(menu_editor)
+	$KitchenPanel/VBoxContainer/MenuButton.pressed.connect(func(): menu_requested.emit())
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
 	upgrades_button.pressed.connect(_on_upgrades_button_pressed)
 	close_button.pressed.connect(_on_close_button_pressed)
@@ -168,13 +174,19 @@ func set_current_cooking_dish(dish_name: String) -> void:
 
 
 func set_manual_order_dishes(dishes: Array) -> void:
+	if last_manual_dishes != null and last_manual_dishes == dishes:
+		return
+	last_manual_dishes = dishes.duplicate()
 	for child in manual_order_buttons.get_children():
 		child.queue_free()
 
 	for dish in dishes:
 		var button := Button.new()
 
-		button.text = DishTypes.Type.keys()[dish]
+		button.text = DishTypes.title(dish)
+		button.icon = DishTypes.texture(dish)
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 28)
 
 		button.pressed.connect(
 			func():
@@ -201,7 +213,7 @@ func set_kitchen_order_queue_buttons(dishes: Array) -> void:
 		var label := Label.new()
 		label.text = "%d. %s" % [
 			i + 1,
-			DishTypes.Type.keys()[dishes[i]]
+			DishTypes.title(dishes[i])
 		]
 
 		var up_button := Button.new()
@@ -265,7 +277,10 @@ func set_ready_dishes_buttons(dishes: Array,dish_ids: Array[int]) -> void:
 	for i in range(dishes.size()):
 		var button := Button.new()
 
-		button.text = DishTypes.Type.keys()[dishes[i]]
+		button.text = DishTypes.title(dishes[i])
+		button.icon = DishTypes.texture(dishes[i])
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 28)
 		button.toggle_mode = true
 		button.set_meta("dish_id", dish_ids[i])
 

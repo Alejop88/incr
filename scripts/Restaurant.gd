@@ -35,6 +35,18 @@ var waiter_speed_level: int = 0
 @onready var queue_points: Array[Marker2D] = []
 var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
+var menu_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
+
+func set_menu_dishes(dishes: Array) -> bool:
+	if dishes.is_empty() or dishes.size() > DishTypes.MAX_MENU_DISHES:
+		return false
+	var validated: Array[DishTypes.Type] = []
+	for dish in dishes:
+		if not DishTypes.CATALOG.has(dish) or validated.has(dish):
+			return false
+		validated.append(dish)
+	menu_dishes = validated
+	return true
 var waiting_queue: Array[Node2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var customer_group_scene := preload("res://scenes/customer/CustomerGroup.tscn")
@@ -191,7 +203,7 @@ func _on_table_eating_finished(current_table: Area2D) -> void:
 	# Cada VIP que continúa elige su siguiente plato.
 	for vip in vip_still_eating:
 		var next_dish: DishTypes.Type = \
-			vip.prepare_next_dish()
+			vip.prepare_next_dish(menu_dishes)
 
 		kitchen_point.add_order(next_dish)
 
@@ -330,6 +342,7 @@ func spawn_customer() -> void:
 	customer_group.global_position = customer_spawn_point.global_position
 	add_child(customer_group)
 	customer_group.is_vip_group = is_vip
+	customer_group.available_dishes = menu_dishes.duplicate()
 	customer_group.setup(group_size)
 
 	var available_table: Area2D = get_available_table(group_size)
@@ -602,9 +615,17 @@ func get_current_dish_name() -> String:
 func get_order_queue() -> Array:
 	return kitchen_point.get_order_queue()
 func get_available_manual_dishes() -> Array:
-	return kitchen_point.get_available_manual_dishes()
+	# Keep outstanding old orders available after changing the menu.
+	var dishes: Array = menu_dishes.duplicate()
+	for child in get_children():
+		if child.has_method("get_customers"):
+			for customer in child.get_customers():
+				if not customer.has_received_food and customer.target_type != customer.TargetType.EXIT and not dishes.has(customer.requested_dish):
+					dishes.append(customer.requested_dish)
+	return dishes
 func add_manual_kitchen_order(dish: DishTypes.Type) -> void:
-	kitchen_point.add_manual_order(dish)
+	if get_available_manual_dishes().has(dish):
+		kitchen_point.add_manual_order(dish)
 func move_kitchen_order_up(index: int) -> void:
 	kitchen_point.move_order_up(index)
 func move_kitchen_order_down(index: int) -> void:
