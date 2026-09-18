@@ -59,7 +59,7 @@ func _ready() -> void:
 	hud.staff_speed_upgrade_requested.connect(_on_staff_speed_upgrade_requested)
 	_update_hire_waiter_button()
 	hud.star_upgrades_requested.connect(_on_star_upgrades_requested)
-	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
+	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money,restaurant.get_next_table_description())
 	hud.manual_dish_requested.connect(_on_manual_dish_requested)
 	restaurant.set_counter_capacity_bonus(michelin_manager.counter_capacity_bonus)
 	restaurant.set_permanent_cook_speed_bonus(michelin_manager.cook_speed_bonus)
@@ -185,7 +185,7 @@ func _on_customer_paid(amount: float) -> void:
 func _on_money_changed(new_money: float) -> void:
 	hud.set_money(new_money)
 
-	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),new_money)
+	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),new_money,restaurant.get_next_table_description())
 	_update_hire_waiter_button()
 	
 func _on_stars_changed(new_stars: int) -> void:
@@ -309,7 +309,7 @@ func _on_buy_table_requested() -> void:
 
 	table_purchase_cost *= 1.5
 
-	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
+	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money,restaurant.get_next_table_description())
 func _on_hire_waiter_requested() -> void:
 	var manager: Node = restaurant.waiter_manager
 	if not manager.can_hire():

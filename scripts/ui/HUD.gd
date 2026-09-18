@@ -105,13 +105,13 @@ func _on_buy_table_button_pressed() -> void:
 	buy_table_requested.emit()
 func _on_star_upgrades_button_pressed() -> void:
 	star_upgrades_requested.emit()
-func set_table_purchase(cost: float,has_locked_tables: bool,current_money: float) -> void:
+func set_table_purchase(cost: float,has_locked_tables: bool,current_money: float, description: String = "Comprar mesa") -> void:
 	if not has_locked_tables:
 		buy_table_button.text = "Comprar mesa - MÁXIMO"
 		buy_table_button.disabled = true
 		return
 
-	buy_table_button.text = "Comprar mesa - %.1f €" % cost
+	buy_table_button.text = "%s - %.1f €" % [description, cost]
 	buy_table_button.disabled = current_money < cost
 func set_hire_waiter(count: int, maximum: int, cost: float, money: float) -> void:
 	hire_waiter_button.disabled = count >= maximum or money < cost

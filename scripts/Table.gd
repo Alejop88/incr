@@ -38,6 +38,11 @@ var food_round: int = 0
 var state: State = State.FREE
 
 func _ready() -> void:
+	var capacity_label := Label.new()
+	capacity_label.text = "%s · %d plazas" % [str(name).trim_prefix("Table").trim_suffix("Point"), seat_capacity]
+	capacity_label.position = Vector2(-48, 44)
+	capacity_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(capacity_label)
 	add_to_group("restaurant_tables")
 	for seat in $SeatPoints.get_children():
 		if seat is Marker2D:
@@ -51,6 +56,20 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if state == State.WAITING_FOOD:
 		patience_bar.value = food_wait_timer.time_left
+
+func _draw() -> void:
+	draw_style_box(_table_style(), Rect2(-40, -40, 80, 80))
+	for seat in customer_seat_points:
+		draw_circle(seat.position, 16, Color("a57849"))
+		draw_arc(seat.position, 16, 0, TAU, 24, Color("503726"), 2)
+
+func _table_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("b78350")
+	style.border_color = Color("503726")
+	style.set_border_width_all(3)
+	style.set_corner_radius_all(12)
+	return style
 
 func seat_customer(customer: CharacterBody2D) -> bool:
 	if state != State.RESERVED:
