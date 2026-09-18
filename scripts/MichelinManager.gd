@@ -11,6 +11,7 @@ var cook_speed_bonus: int = 0
 var vip_spawn_bonus: int = 0
 var max_vip_group_size: int = 1
 var upgrade_costs: Dictionary = {
+	"permanent_vip": 5,
 	"permanent_waiter": 5,
 	"waiter_capacity_2": 8,
 	"player_capacity_2": 5,
@@ -24,6 +25,7 @@ var upgrade_costs: Dictionary = {
 	"vip_group_4": 8
 }
 var upgrade_descriptions: Dictionary = {
+	"permanent_vip": "Habilita los clientes VIP desde el inicio de cada partida sin pagar su desbloqueo con dinero.",
 	"permanent_waiter": "Empiezas cada partida tras comprar mejoras con un camarero permanente adicional.",
 	"waiter_capacity_2": "Todos los camareros automáticos pueden recoger y repartir hasta 2 platos. Requiere el camarero permanente.",
 	"player_capacity_2": "Tu personaje puede llevar hasta 2 platos a la vez.",
@@ -37,6 +39,7 @@ var upgrade_descriptions: Dictionary = {
 	"vip_group_4": "Permite que los clientes VIP puedan aparecer en grupos de cuatro."
 }
 var upgrade_names: Dictionary = {
+	"permanent_vip": "VIP desde el inicio",
 	"permanent_waiter": "Camarero permanente",
 	"waiter_capacity_2": "Camareros: 2 platos",
 	"player_capacity_2": "Llevar 2 platos",
@@ -50,6 +53,7 @@ var upgrade_names: Dictionary = {
 	"vip_group_4": "VIP en grupo de cuatro"
 }
 var upgrade_requirements: Dictionary = {
+	"permanent_vip": [],
 	"permanent_waiter": [],
 	"waiter_capacity_2": ["permanent_waiter"],
 	"player_capacity_2": [],
@@ -120,7 +124,7 @@ func load_save_data(data: Dictionary) -> void:
 		max_vip_group_size = maxi(max_vip_group_size, int(upgrade_vip_group_size.get(upgrade_id, 1)))
 
 func buy_upgrade(upgrade_id: String) -> bool:
-	if upgrade_id in ["player_capacity_2", "permanent_waiter", "waiter_capacity_2"]:
+	if upgrade_id in ["player_capacity_2", "permanent_waiter", "waiter_capacity_2", "permanent_vip"]:
 		if not are_upgrade_requirements_met(upgrade_id):
 			return false
 		if is_upgrade_bought(upgrade_id) or not spend_stars(get_upgrade_cost(upgrade_id)):

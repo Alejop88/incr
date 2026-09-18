@@ -2,6 +2,17 @@ extends Node
 
 const MAX_HIRED_WAITERS: int = 1
 const HIRE_COST: float = 100.0
+const MAX_SPEED_LEVEL: int = 10
+var speed_level: int = 0
+
+func set_speed_level(level: int) -> void:
+	speed_level = clampi(level, 0, MAX_SPEED_LEVEL)
+	for waiter in waiters:
+		if is_instance_valid(waiter):
+			waiter.set_speed_upgrade_level(speed_level)
+
+func get_speed_upgrade_cost() -> float:
+	return 25.0 * pow(1.5, speed_level)
 const WAITER_SCENE = preload("res://scenes/restaurant/AutomaticWaiter.tscn")
 
 @onready var restaurant: Node2D = get_parent()
@@ -38,6 +49,7 @@ func restore_hired_count(count: int) -> void:
 
 func create_waiter(permanent: bool = false) -> CharacterBody2D:
 	var waiter: CharacterBody2D = WAITER_SCENE.instantiate()
+	waiter.set_speed_upgrade_level(speed_level)
 	waiter.is_permanent = permanent
 	waiter.carry_capacity = carry_capacity
 	waiter.coordinator = self

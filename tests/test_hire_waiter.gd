@@ -36,7 +36,7 @@ func run_tests() -> void:
 	check(manager.get_hired_count() == 1 and game.economy_manager.money == 200.0, "Initial one-waiter limit must prevent duplicate purchases")
 	check(hud.hire_waiter_button.disabled, "Hire button must disable at the limit")
 	game._on_waiter_speed_upgrade_requested()
-	check(manager.waiters[0].speed == 180.0, "Player speed upgrades must not change hired staff")
+	check(manager.waiters[0].speed == 90.0, "Player speed upgrades must not change hired staff")
 	game.pause_menu.open_menu()
 	check(not manager.waiters[0].can_process(), "Pause menu must also pause automatic waiters")
 	game.pause_menu.save_button.pressed.emit()

@@ -16,7 +16,12 @@ const VIP_SPAWN_CHANCE_PER_BONUS_LEVEL: float = 0.01
 const MAX_VIP_SPAWN_CHANCE: float = 0.25
 var max_vip_group_size: int = 1
 var vip_spawn_bonus_level: int = 0
-var vip_spawn_chance: float = BASE_VIP_SPAWN_CHANCE
+var vip_spawn_chance: float = 0.0
+var vip_unlocked: bool = false
+
+func set_vip_unlocked(value: bool) -> void:
+	vip_unlocked = value
+	update_vip_spawn_chance()
 const PLATE_PRICE_INCREMENT: float = 1.0
 const MAX_PLATE_PRICE_LEVEL: int = 10
 const MAX_WAITER_SPEED_LEVEL: int = 10
@@ -358,7 +363,7 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 func spawn_customer() -> void:
 	print("Spawn solicitado")
 
-	var is_vip: bool = randf() < vip_spawn_chance
+	var is_vip: bool = vip_unlocked and randf() < vip_spawn_chance
 	var group_size: int
 
 	if is_vip:
@@ -475,6 +480,9 @@ func update_patience() -> void:
 		if table.has_method("set_patience_level"):
 			table.set_patience_level(patience_level)
 func update_vip_spawn_chance() -> void:
+	if not vip_unlocked:
+		vip_spawn_chance = 0.0
+		return
 	vip_spawn_chance = min(
 		MAX_VIP_SPAWN_CHANCE,
 		BASE_VIP_SPAWN_CHANCE

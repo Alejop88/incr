@@ -97,7 +97,7 @@ func run_tests() -> void:
 	check(game.waiter_speed_upgrade_cost == 10 and game.table_purchase_cost == 50, "Purchase prices must return to their defaults")
 	check(game.restaurant.get_counter_capacity() == 7, "Old and new permanent capacity upgrades must both apply")
 	check(is_equal_approx(game.restaurant.kitchen_point.cook_time, 4.8), "Permanent cook upgrade must apply without the old money bonus")
-	check(game.restaurant.max_vip_group_size == 2 and is_equal_approx(game.restaurant.vip_spawn_chance, 0.06), "Permanent VIP upgrades must apply")
+	check(game.restaurant.max_vip_group_size == 2 and game.restaurant.vip_spawn_chance == 0.0, "VIP bonuses must not bypass the VIP unlock")
 	var persisted: Dictionary = game.save_manager.load_game()
 	check(persisted["money"] == 0 and persisted["michelin"]["stars"] == 5 and persisted["hired_waiters"] == 0, "Restarted run must be persisted immediately")
 	check(reload_current_scene() == OK, "Persisted prestige run must reload")
@@ -115,7 +115,9 @@ func run_tests() -> void:
 	# Boundary probabilities verify spawn uses the configured chance, not test mode.
 	var restaurant: Node = load("res://scenes/restaurant/Restaurant.tscn").instantiate()
 	root.add_child(restaurant)
-	check(is_equal_approx(restaurant.vip_spawn_chance, 0.05), "Default VIP rate must be five percent")
+	check(restaurant.vip_spawn_chance == 0.0, "VIPs must start locked")
+	restaurant.set_vip_unlocked(true)
+	check(is_equal_approx(restaurant.vip_spawn_chance, 0.05), "Unlocked VIP rate must be five percent")
 	restaurant.vip_spawn_chance = 0.0
 	restaurant.spawn_customer()
 	var newest_group: Node = restaurant.get_child(restaurant.get_child_count() - 1)

@@ -1,7 +1,12 @@
 extends CharacterBody2D
 
 enum State { IDLE, TO_KITCHEN, TO_TABLE, WAITING_CUSTOMER, TO_TRASH, TO_PAYMENT, RETURNING }
-@export var speed: float = 180.0
+const BASE_SPEED: float = 90.0
+const SPEED_PER_LEVEL: float = 15.0
+@export var speed: float = BASE_SPEED
+
+func set_speed_upgrade_level(level: int) -> void:
+	speed = BASE_SPEED + SPEED_PER_LEVEL * level
 var coordinator: Node
 var state: State = State.IDLE
 var carried_dish: DishTypes.Type = DishTypes.Type.NONE

@@ -23,6 +23,8 @@ signal eating_speed_upgrade_requested
 signal patience_upgrade_requested
 signal buy_table_requested
 signal hire_waiter_requested
+signal vip_unlock_requested
+signal staff_speed_upgrade_requested
 signal star_upgrades_requested
 signal kitchen_order_move_up_requested(index: int)
 signal kitchen_order_move_down_requested(index: int)
@@ -58,6 +60,8 @@ func _ready() -> void:
 	plate_price_button.pressed.connect(_on_plate_price_button_pressed)
 	buy_table_button.pressed.connect(_on_buy_table_button_pressed)
 	hire_waiter_button.pressed.connect(func(): hire_waiter_requested.emit())
+	$UpgradesPanel/VBoxContainer/VipUnlockButton.pressed.connect(func(): vip_unlock_requested.emit())
+	$UpgradesPanel/VBoxContainer/StaffSpeedButton.pressed.connect(func(): staff_speed_upgrade_requested.emit())
 	star_upgrades_button.pressed.connect(_on_star_upgrades_button_pressed)
 	kitchen_close_button.pressed.connect(_on_kitchen_close_button_pressed)
 	cook_speed_button.pressed.connect(_on_cook_speed_button_pressed)
@@ -115,6 +119,19 @@ func set_hire_waiter(count: int, maximum: int, cost: float, money: float) -> voi
 		hire_waiter_button.text = "Camarero contratado (%d / %d)" % [count, maximum]
 	else:
 		hire_waiter_button.text = "Contratar camarero - %.0f €" % cost
+
+func set_vip_unlock(unlocked: bool, permanent: bool, cost: float, money: float) -> void:
+	var button: Button = $UpgradesPanel/VBoxContainer/VipUnlockButton
+	button.visible = not permanent
+	button.disabled = unlocked or money < cost
+	button.text = "Clientes VIP desbloqueados" if unlocked else "Desbloquear clientes VIP - %.0f €" % cost
+	button.tooltip_text = "Permite que aparezcan VIP durante esta partida. Se reinicia al comprar mejoras de estrellas."
+
+func set_staff_speed_upgrade(level: int, cost: float, maximum: int, money: float) -> void:
+	var button: Button = $UpgradesPanel/VBoxContainer/StaffSpeedButton
+	button.disabled = level >= maximum or money < cost
+	button.text = "Velocidad camareros - MÁXIMO" if level >= maximum else "Velocidad camareros - Nivel %d - %.1f €" % [level, cost]
+	button.tooltip_text = "Aumenta la velocidad de todos los camareros automáticos, incluido el permanente."
 
 func set_cook_speed_upgrade(
 	level: int,

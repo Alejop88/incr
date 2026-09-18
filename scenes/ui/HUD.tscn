@@ -78,6 +78,14 @@ text = "Velocidad cocina - 20 €"
 layout_mode = 2
 text = "Contratar camarero - 100 €"
 
+[node name="VipUnlockButton" type="Button" parent="UpgradesPanel/VBoxContainer"]
+layout_mode = 2
+text = "Desbloquear clientes VIP - 100 €"
+
+[node name="StaffSpeedButton" type="Button" parent="UpgradesPanel/VBoxContainer"]
+layout_mode = 2
+text = "Velocidad camareros - 25 €"
+
 [node name="EatingSpeedButton" type="Button" parent="UpgradesPanel/VBoxContainer" unique_id=790986325]
 layout_mode = 2
 text = "Velocidad al comer - 20 €"

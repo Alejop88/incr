@@ -26,10 +26,13 @@ var patience_level: int = 0
 const MAX_PATIENCE_LEVEL: int = 10
 var initial_run_data: Dictionary = {}
 var prestige_pending: bool = false
+const VIP_UNLOCK_COST: float = 100.0
+var vip_run_unlocked: bool = false
 func _ready() -> void:
 	restaurant.start_random_menu()
 	initial_run_data = _get_save_data().duplicate(true)
 	_load_saved_progress()
+	restaurant.set_vip_unlocked(vip_run_unlocked or michelin_manager.is_upgrade_bought("permanent_vip"))
 	restaurant.waiter_manager.apply_permanent_upgrades(
 		michelin_manager.is_upgrade_bought("permanent_waiter"),
 		michelin_manager.is_upgrade_bought("waiter_capacity_2")
@@ -52,6 +55,8 @@ func _ready() -> void:
 	hud.plate_price_upgrade_requested.connect(_on_plate_price_upgrade_requested)
 	hud.buy_table_requested.connect(_on_buy_table_requested)
 	hud.hire_waiter_requested.connect(_on_hire_waiter_requested)
+	hud.vip_unlock_requested.connect(_on_vip_unlock_requested)
+	hud.staff_speed_upgrade_requested.connect(_on_staff_speed_upgrade_requested)
 	_update_hire_waiter_button()
 	hud.star_upgrades_requested.connect(_on_star_upgrades_requested)
 	hud.set_table_purchase(table_purchase_cost,restaurant.has_locked_tables(),economy_manager.money)
@@ -92,11 +97,13 @@ func _get_save_data() -> Dictionary:
 			unlocked_tables.append(str(table.name))
 	var data: Dictionary = {
 		"money": economy_manager.money,
+		"vip_unlocked": vip_run_unlocked,
 		"menu_dishes": DishTypes.menu_keys(restaurant.menu_dishes),
 		"unlocked_dishes": DishTypes.menu_keys(restaurant.unlocked_dishes),
 		"hired_waiters": restaurant.waiter_manager.get_hired_count(),
 		"michelin": michelin_manager.get_save_data(),
 		"levels": {
+			"staff_speed": restaurant.waiter_manager.speed_level,
 			"waiter_speed": restaurant.waiter_speed_level,
 			"plate_price": restaurant.plate_price_level,
 			"cook_speed": restaurant.cook_speed_level,
@@ -140,9 +147,11 @@ func _load_saved_progress() -> void:
 			pause_menu.open_menu()
 		return
 	economy_manager.money = float(data["money"])
+	vip_run_unlocked = data.get("vip_unlocked", false)
 	restaurant.restore_dish_progress(data)
 	michelin_manager.load_save_data(data["michelin"])
 	var levels: Dictionary = data["levels"]
+	restaurant.waiter_manager.set_speed_level(int(levels.get("staff_speed", 0)))
 	waiter_speed_level = int(levels["waiter_speed"])
 	cook_speed_level = int(levels["cook_speed"])
 	eating_speed_level = int(levels["eating_speed"])
@@ -311,8 +320,28 @@ func _on_hire_waiter_requested() -> void:
 	_update_hire_waiter_button()
 
 func _update_hire_waiter_button() -> void:
+	hud.set_vip_unlock(vip_run_unlocked, michelin_manager.is_upgrade_bought("permanent_vip"), VIP_UNLOCK_COST, economy_manager.money)
 	var manager: Node = restaurant.waiter_manager
 	hud.set_hire_waiter(manager.get_hired_count(), manager.MAX_HIRED_WAITERS, manager.HIRE_COST, economy_manager.money)
+	hud.set_staff_speed_upgrade(manager.speed_level, manager.get_speed_upgrade_cost(), manager.MAX_SPEED_LEVEL, economy_manager.money)
+
+func _on_staff_speed_upgrade_requested() -> void:
+	var manager: Node = restaurant.waiter_manager
+	if prestige_pending or manager.speed_level >= manager.MAX_SPEED_LEVEL:
+		return
+	if not economy_manager.spend_money(manager.get_speed_upgrade_cost()):
+		return
+	manager.set_speed_level(manager.speed_level + 1)
+	_update_hire_waiter_button()
+
+func _on_vip_unlock_requested() -> void:
+	if prestige_pending or vip_run_unlocked or michelin_manager.is_upgrade_bought("permanent_vip"):
+		return
+	if not economy_manager.spend_money(VIP_UNLOCK_COST):
+		return
+	vip_run_unlocked = true
+	restaurant.set_vip_unlocked(true)
+	_update_hire_waiter_button()
 
 func _on_counter_capacity_bonus_changed(new_level: int) -> void:
 	restaurant.set_counter_capacity_bonus(new_level)
