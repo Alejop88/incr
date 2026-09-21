@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/SaveManager.gd" id="7_save"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="8_pause"]
 
+[ext_resource type="Script" path="res://scripts/RestaurantCamera.gd" id="9_camera"]
+
 [node name="Main" type="Node" unique_id=574707317]
 script = ExtResource("1_rvslj")
 
@@ -23,6 +25,11 @@ script = ExtResource("3_vcsgt")
 
 [node name="Restaurant" parent="." unique_id=1967190223 instance=ExtResource("3_rarhs")]
 position = Vector2(300, 241)
+
+[node name="RestaurantCamera" type="Camera2D" parent="."]
+position = Vector2(650, 450)
+zoom = Vector2(0.8, 0.8)
+script = ExtResource("9_camera")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=937811976]
 

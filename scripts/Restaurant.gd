@@ -522,10 +522,15 @@ func update_stats() -> void:
 	update_vip_spawn_chance()
 func get_available_table(group_size: int = 1) -> Area2D:
 	var valid_tables: Array[Area2D] = []
+	var smallest_capacity: int = 2147483647
 
 	for current_table in tables:
 		if current_table.can_seat_group(group_size):
-			valid_tables.append(current_table)
+			if current_table.seat_capacity < smallest_capacity:
+				smallest_capacity = current_table.seat_capacity
+				valid_tables.clear()
+			if current_table.seat_capacity == smallest_capacity:
+				valid_tables.append(current_table)
 
 	if valid_tables.is_empty():
 		return null

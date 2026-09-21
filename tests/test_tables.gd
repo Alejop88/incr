@@ -22,6 +22,20 @@ func run_tests() -> void:
 		table._on_eating_timer_timeout()
 		check(table.collect_payment() and table.is_available(), "New table pays and becomes available again")
 	check(not r.has_locked_tables() and not r.unlock_next_table(), "No further purchases after the last table")
+	for size in [1, 2]:
+		for attempt in range(20):
+			check(r.get_available_table(size).seat_capacity == 2, "Small groups must prefer two-seat tables")
+	for table in r.tables:
+		if table.seat_capacity == 2:
+			table.state = table.State.RESERVED
+	for size in [1, 2, 3, 4]:
+		check(r.get_available_table(size).seat_capacity == 4, "Full small tables must allow fallback to four seats")
+	r.tables[0].state = r.tables[0].State.FREE
+	check(r.get_available_table(1) == r.tables[0] and r.get_available_table(2) == r.tables[0], "Newly freed small table immediately regains priority")
+	check(r.get_available_table(3).seat_capacity == 4, "Large groups cannot be assigned to a small table")
+	for table in r.tables:
+		table.state = table.State.RESERVED
+	check(r.get_available_table(1) == null, "No free tables means waiting")
 	r.free()
 	print("TABLE TESTS: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

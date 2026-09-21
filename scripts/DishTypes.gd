@@ -8,7 +8,10 @@ enum Type {
 	SALAD,
 	TACO,
 	PAELLA,
-	SOUP
+	SOUP,
+	SANDWICH,
+	NIGIRI,
+	FALAFEL
 }
 
 # Añade nuevos valores al FINAL del enum y su ficha aquí. Ver docs/ANADIR_PLATOS.md.
@@ -18,7 +21,10 @@ const CATALOG: Dictionary = {
 	Type.SALAD: {"name": "Ensalada", "icon": "🥗", "image": ""},
 	Type.TACO: {"name": "Taco", "icon": "🌮​", "image": ""},
 	Type.PAELLA: {"name": "Paella", "icon": "🥘​​", "image": ""},
-	Type.SOUP: {"name": "Sopa", "icon": "🥘​​", "image": ""}
+	Type.SOUP: {"name": "Sopa", "icon": "🍲​​​", "image": ""},
+	Type.SANDWICH: {"name": "Sandwich", "icon": "🥪​​​​", "image": ""},
+	Type.NIGIRI: {"name": "Nigiri", "icon": "🍣​​​​​", "image": ""},
+	Type.FALAFEL: {"name": "Falafel", "icon": "​🧆​", "image": ""}
 }
 const MAX_MENU_DISHES: int = 2
 const NEW_DISH_COST: float = 50.0
