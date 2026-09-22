@@ -97,6 +97,8 @@ func _get_save_data() -> Dictionary:
 			unlocked_tables.append(str(table.name))
 	var data: Dictionary = {
 		"money": economy_manager.money,
+		"camera_zoom": $RestaurantCamera.zoom.x,
+		"camera_position": {"x": $RestaurantCamera.position.x, "y": $RestaurantCamera.position.y},
 		"vip_unlocked": vip_run_unlocked,
 		"menu_dishes": DishTypes.menu_keys(restaurant.menu_dishes),
 		"unlocked_dishes": DishTypes.menu_keys(restaurant.unlocked_dishes),
@@ -147,9 +149,14 @@ func _load_saved_progress() -> void:
 			pause_menu.open_menu()
 		return
 	economy_manager.money = float(data["money"])
+	$RestaurantCamera.restore_zoom(float(data.get("camera_zoom", 0.8)))
+	if data.has("camera_position"):
+		$RestaurantCamera.position = Vector2(float(data["camera_position"]["x"]), float(data["camera_position"]["y"]))
+		$RestaurantCamera.force_update_scroll()
 	vip_run_unlocked = data.get("vip_unlocked", false)
-	restaurant.restore_dish_progress(data)
 	michelin_manager.load_save_data(data["michelin"])
+	restaurant.set_menu_capacity_bonus(1 if michelin_manager.is_upgrade_bought("menu_capacity_1") else 0)
+	restaurant.restore_dish_progress(data)
 	var levels: Dictionary = data["levels"]
 	restaurant.waiter_manager.set_speed_level(int(levels.get("staff_speed", 0)))
 	waiter_speed_level = int(levels["waiter_speed"])
@@ -286,6 +293,8 @@ func _on_patience_upgrade_requested() -> void:
 		patience_upgrade_cost
 	)
 func _on_plate_price_upgrade_requested() -> void:
+	if restaurant.plate_price_level >= restaurant.MAX_PLATE_PRICE_LEVEL:
+		return
 	if not economy_manager.spend_money(plate_price_upgrade_cost):
 		return
 
@@ -414,8 +423,22 @@ func _on_star_purchase_confirmed() -> void:
 	var previous_data: Dictionary = _get_save_data()
 	var new_run: Dictionary = initial_run_data.duplicate(true)
 	new_run["michelin"] = permanent_data
+	new_run["camera_zoom"] = $RestaurantCamera.zoom.x
+	new_run["camera_position"] = {"x": $RestaurantCamera.position.x, "y": $RestaurantCamera.position.y}
 	new_run["menu_dishes"] = DishTypes.menu_keys(restaurant.menu_dishes)
 	new_run["unlocked_dishes"] = DishTypes.menu_keys(restaurant.unlocked_dishes)
+	if "menu_capacity_1" in michelin_manager.selected_upgrades and restaurant.unlocked_dishes.size() == 2:
+		var locked: Array = restaurant.get_locked_dishes()
+		if not locked.is_empty():
+			new_run["unlocked_dishes"].append(DishTypes.Type.keys()[locked.pick_random()])
+	if "menu_capacity_1" in michelin_manager.selected_upgrades:
+		var available: Array = new_run["unlocked_dishes"].duplicate()
+		available.shuffle()
+		for dish_key in available:
+			if new_run["menu_dishes"].size() >= DishTypes.MAX_MENU_DISHES + 1:
+				break
+			if not new_run["menu_dishes"].has(dish_key):
+				new_run["menu_dishes"].append(dish_key)
 	if not save_manager.save_game(new_run):
 		michelin_upgrades.show_purchase_status(save_manager.last_error)
 		return
@@ -450,6 +473,7 @@ func _process(_delta: float) -> void:
 		hud.set_ready_dish_selection(restaurant.get_selected_ready_dish_ids(), restaurant.player_waiter.get_free_carry_slots())
 
 func _refresh_dish_shop() -> void:
+	hud.menu_editor.menu_capacity = restaurant.menu_capacity
 	hud.menu_editor.set_unlocks(restaurant.unlocked_dishes, economy_manager.money)
 
 func _on_dish_purchase_requested() -> void:

@@ -41,6 +41,12 @@ var waiter_speed_level: int = 0
 var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
 var menu_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
+var menu_capacity: int = DishTypes.MAX_MENU_DISHES
+const BASE_SPAWN_INTERVAL: float = 20.0
+
+func set_menu_capacity_bonus(bonus: int) -> void:
+	menu_capacity = DishTypes.MAX_MENU_DISHES + maxi(0, bonus)
+	customer_spawn_timer.wait_time = BASE_SPAWN_INTERVAL / (1.0 + 0.25 * maxi(0, bonus))
 var unlocked_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
 
 func start_random_menu() -> void:
@@ -55,7 +61,7 @@ func get_locked_dishes() -> Array[DishTypes.Type]:
 	return result
 
 func restore_dish_progress(data: Dictionary) -> void:
-	var saved_menu: Array[DishTypes.Type] = DishTypes.menu_from_keys(data.get("menu_dishes", []))
+	var saved_menu: Array[DishTypes.Type] = DishTypes.menu_from_keys(data.get("menu_dishes", []), menu_capacity)
 	# Old saves retain their selected recipes; new saves restore the full collection.
 	unlocked_dishes = DishTypes.unlocked_from_keys(data.get("unlocked_dishes", DishTypes.menu_keys(saved_menu)))
 	if unlocked_dishes.is_empty():
@@ -69,10 +75,10 @@ func restore_dish_progress(data: Dictionary) -> void:
 	for dish in saved_menu:
 		if unlocked_dishes.has(dish):
 			valid_menu.append(dish)
-	menu_dishes = valid_menu if not valid_menu.is_empty() else unlocked_dishes.slice(0, DishTypes.MAX_MENU_DISHES)
+	menu_dishes = valid_menu if not valid_menu.is_empty() else unlocked_dishes.slice(0, menu_capacity)
 
 func set_menu_dishes(dishes: Array) -> bool:
-	if dishes.is_empty() or dishes.size() > DishTypes.MAX_MENU_DISHES:
+	if dishes.is_empty() or dishes.size() > menu_capacity:
 		return false
 	var validated: Array[DishTypes.Type] = []
 	for dish in dishes:
@@ -88,6 +94,7 @@ var selected_ready_dish_ids: Array[int] = []
 var manual_pickup: bool = false
 
 func _ready() -> void:
+	set_menu_capacity_bonus(0)
 	for table in get_tree().get_nodes_in_group("restaurant_tables"):
 		if table is Area2D:
 			tables.append(table)
@@ -143,7 +150,7 @@ func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int
 		_clear_pickup_selection()
 		selected_table = current_table
 
-		player_waiter.move_to_position(current_table.global_position,player_waiter.TargetType.TABLE)
+		player_waiter.move_to_position(current_table.get_service_position(),player_waiter.TargetType.TABLE)
 		
 #func _input(event: InputEvent) -> void:
 #	if event is InputEventMouseButton:

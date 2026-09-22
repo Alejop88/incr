@@ -15,7 +15,7 @@ script = ExtResource("1_n6na1")
 layout_mode = 0
 offset_left = 3.0
 offset_right = 480.0
-offset_bottom = 550.0
+offset_bottom = 590.0
 
 [node name="TitleLabel" type="Label" parent="." unique_id=1252073161]
 layout_mode = 0
@@ -130,6 +130,14 @@ offset_right = 445.0
 offset_bottom = 250.0
 text = "VIP desde el inicio"
 
+[node name="menu_capacity_1" type="Button" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 259.0
+offset_right = 445.0
+offset_bottom = 290.0
+text = "Carta +1 · Más clientes"
+
 [node name="CloseButton" type="Button" parent="." unique_id=81587447]
 layout_mode = 0
 offset_left = 452.0
@@ -140,9 +148,9 @@ text = "X"
 [node name="PurchasePanel" type="VBoxContainer" parent="." unique_id=555732751]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 262.0
+offset_top = 302.0
 offset_right = 464.0
-offset_bottom = 534.0
+offset_bottom = 574.0
 theme_override_constants/separation = 12
 
 [node name="SummaryLabel" type="Label" parent="PurchasePanel" unique_id=751681570]

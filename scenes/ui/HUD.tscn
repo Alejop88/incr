@@ -22,7 +22,7 @@ offset_right = 540.0
 offset_bottom = -6.0
 grow_vertical = 0
 mouse_filter = 2
-text = "Mover cámara: arrastrar con botón derecho · Espacio: centrar"
+text = "Arrastrar derecho: mover · Rueda: zoom · Espacio: restablecer"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=121375660]
 layout_mode = 1

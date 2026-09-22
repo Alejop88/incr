@@ -7,6 +7,7 @@ const SPEED_PER_LEVEL: float = 15.0
 
 func set_speed_upgrade_level(level: int) -> void:
 	speed = BASE_SPEED + SPEED_PER_LEVEL * level
+var route = preload("res://scripts/RestaurantRoute.gd").new()
 var coordinator: Node
 var state: State = State.IDLE
 var carried_dish: DishTypes.Type = DishTypes.Type.NONE
@@ -40,14 +41,8 @@ func _physics_process(delta: float) -> void:
 	if state == State.IDLE:
 		velocity = Vector2.ZERO
 		return
-	var offset: Vector2 = target_position - global_position
-	if offset.length() <= maxf(3.0, speed * delta):
-		global_position = target_position
-		velocity = Vector2.ZERO
+	if route.advance(self, target_position, speed, delta):
 		_arrive()
-	else:
-		velocity = offset.normalized() * speed
-		move_and_slide()
 
 func _arrive() -> void:
 	match state:

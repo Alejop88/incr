@@ -1,6 +1,7 @@
 extends Control
 
 const VISIBLE_QUEUED_DISHES: int = 5
+var available_money: float = 0.0
 signal menu_requested
 var menu_editor: PanelContainer
 
@@ -68,6 +69,10 @@ func _ready() -> void:
 	eating_speed_button.pressed.connect(_on_eating_speed_button_pressed)
 	patience_button.pressed.connect(_on_patience_button_pressed)
 func set_money(value: float) -> void:
+	available_money = value
+	for button in [waiter_speed_button, plate_price_button, cook_speed_button, eating_speed_button, patience_button]:
+		if button.has_meta("upgrade_cost"):
+			button.disabled = button.get_meta("upgrade_maxed") or available_money < float(button.get_meta("upgrade_cost"))
 	money_label.text = "Dinero: %.1f €" % value
 func set_stars(value: int) -> void:
 	stars_label.text = "⭐ %d" % value
@@ -84,20 +89,24 @@ func _on_waiter_speed_button_pressed() -> void:
 	waiter_speed_upgrade_requested.emit()
 	
 func set_waiter_speed_upgrade(level: int,cost: float,max_level: int) -> void:
+	waiter_speed_button.set_meta("upgrade_cost", cost)
+	waiter_speed_button.set_meta("upgrade_maxed", level >= max_level)
 	if level >= max_level:
 		waiter_speed_button.text = "Velocidad jugador - MÁXIMO"
 		waiter_speed_button.disabled = true
 		return
 
-	waiter_speed_button.disabled = false
+	waiter_speed_button.disabled = available_money < cost
 	waiter_speed_button.text = "Velocidad jugador - Nivel %d - %.1f €" % [level,cost]
 func set_plate_price_upgrade(level: int, cost: float, max_level: int) -> void:
+	plate_price_button.set_meta("upgrade_cost", cost)
+	plate_price_button.set_meta("upgrade_maxed", level >= max_level)
 	if level >= max_level:
 		plate_price_button.text = "Precio del plato - MÁXIMO"
 		plate_price_button.disabled = true
 		return
 
-	plate_price_button.disabled = false
+	plate_price_button.disabled = available_money < cost
 	plate_price_button.text = "Precio del plato - Nivel %d - %.1f €" % [level, cost]
 func _on_plate_price_button_pressed() -> void:
 	plate_price_upgrade_requested.emit()
@@ -138,12 +147,14 @@ func set_cook_speed_upgrade(
 	cost: float,
 	max_level: int
 ) -> void:
+	cook_speed_button.set_meta("upgrade_cost", cost)
+	cook_speed_button.set_meta("upgrade_maxed", level >= max_level)
 	if level >= max_level:
 		cook_speed_button.text = "Velocidad cocina - MÁXIMO"
 		cook_speed_button.disabled = true
 		return
 
-	cook_speed_button.disabled = false
+	cook_speed_button.disabled = available_money < cost
 	cook_speed_button.text = \
 		"Velocidad cocina Nv.%d - %.0f €" % [level, cost]
 func set_eating_speed_upgrade(
@@ -151,12 +162,14 @@ func set_eating_speed_upgrade(
 	cost: float,
 	max_level: int
 ) -> void:
+	eating_speed_button.set_meta("upgrade_cost", cost)
+	eating_speed_button.set_meta("upgrade_maxed", level >= max_level)
 	if level >= max_level:
 		eating_speed_button.text = "Velocidad al comer - MÁXIMO"
 		eating_speed_button.disabled = true
 		return
 
-	eating_speed_button.disabled = false
+	eating_speed_button.disabled = available_money < cost
 	eating_speed_button.text = \
 		"Velocidad al comer Nv.%d - %.0f €" % [level, cost]
 func set_patience_upgrade(
@@ -164,12 +177,14 @@ func set_patience_upgrade(
 	cost: float,
 	max_level: int
 ) -> void:
+	patience_button.set_meta("upgrade_cost", cost)
+	patience_button.set_meta("upgrade_maxed", level >= max_level)
 	if level >= max_level:
 		patience_button.text = "Paciencia clientes - MÁXIMO"
 		patience_button.disabled = true
 		return
 
-	patience_button.disabled = false
+	patience_button.disabled = available_money < cost
 	patience_button.text = \
 		"Paciencia clientes Nv.%d - %.0f €" % [level, cost]
 func open_kitchen_panel() -> void:

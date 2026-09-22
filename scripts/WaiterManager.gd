@@ -87,7 +87,7 @@ func is_payment_valid(waiter: CharacterBody2D) -> bool:
 	return payment_assignments.has(waiter) and _is_payment_target_valid(payment_assignments[waiter])
 
 func get_payment_position(waiter: CharacterBody2D) -> Vector2:
-	return payment_assignments[waiter]["table"].global_position + Vector2(0, 45)
+	return payment_assignments[waiter]["table"].get_service_position()
 
 func collect_payment(waiter: CharacterBody2D) -> bool:
 	if not is_payment_valid(waiter):
@@ -205,7 +205,7 @@ func get_kitchen_position() -> Vector2:
 	return restaurant.kitchen_point.global_position + Vector2(60, 0)
 
 func get_delivery_position(waiter: CharacterBody2D) -> Vector2:
-	return assignments[waiter]["table"].global_position + Vector2(0, 45)
+	return assignments[waiter]["table"].get_service_position()
 
 func get_trash_position() -> Vector2:
 	return restaurant.trash_point.global_position

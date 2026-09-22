@@ -63,11 +63,11 @@ static func menu_keys(dishes: Array) -> Array[String]:
 		keys.append(Type.keys()[dish])
 	return keys
 
-static func menu_from_keys(keys: Array) -> Array[Type]:
+static func menu_from_keys(keys: Array, capacity: int = MAX_MENU_DISHES) -> Array[Type]:
 	var result: Array[Type] = []
 	for key in keys:
 		if Type.has(key):
 			var dish: int = Type[key]
-			if CATALOG.has(dish) and not result.has(dish) and result.size() < MAX_MENU_DISHES:
+			if CATALOG.has(dish) and not result.has(dish) and result.size() < capacity:
 				result.append(dish)
 	return default_menu() if result.is_empty() else result

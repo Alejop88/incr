@@ -1,5 +1,6 @@
 class_name Customer
 extends CharacterBody2D
+var route = preload("res://scripts/RestaurantRoute.gd").new()
 signal destination_reached
 @export var speed: float = 120.0
 @onready var order_label: Label = $OrderLabel
@@ -30,21 +31,12 @@ func move_to_position(
 	has_target = true
 
 
-func _physics_process(_delta: float) -> void:
-	if !has_target:
+func _physics_process(delta: float) -> void:
+	if not has_target:
 		return
-
-	var direction := target_position - global_position
-
-	if direction.length() < 5:
-		global_position = target_position
-		velocity = Vector2.ZERO
+	if route.advance(self, target_position, speed, delta):
 		has_target = false
 		destination_reached.emit()
-		return
-
-	velocity = direction.normalized() * speed
-	move_and_slide()
 func leave_restaurant(new_position: Vector2) -> void:
 	is_seated = false
 	move_to_position(new_position, TargetType.EXIT)

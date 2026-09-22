@@ -7,6 +7,7 @@ var purchase_button: Button
 var purchase_result: Label
 var locked_list: Label
 var selected: Array = []
+var menu_capacity: int = DishTypes.MAX_MENU_DISHES
 var dish_buttons: Dictionary = {}
 var summary: Label
 var apply_button: Button
@@ -82,21 +83,21 @@ func _toggle_dish(dish: int) -> void:
 		return
 	if selected.has(dish):
 		selected.erase(dish)
-	elif selected.size() < DishTypes.MAX_MENU_DISHES:
+	elif selected.size() < menu_capacity:
 		selected.append(dish)
 	_refresh()
 
 func _refresh() -> void:
-	summary.text = "Seleccionados: %d / %d · Elige al menos uno." % [selected.size(), DishTypes.MAX_MENU_DISHES]
+	summary.text = "Seleccionados: %d / %d · Elige al menos uno." % [selected.size(), menu_capacity]
 	apply_button.disabled = selected.is_empty()
 	for dish in dish_buttons:
 		var button: Button = dish_buttons[dish]
 		button.visible = unlocked.has(dish)
 		button.set_pressed_no_signal(selected.has(dish))
-		button.disabled = not selected.has(dish) and selected.size() >= DishTypes.MAX_MENU_DISHES
+		button.disabled = not selected.has(dish) and selected.size() >= menu_capacity
 
 func _apply() -> void:
-	if selected.is_empty() or selected.size() > DishTypes.MAX_MENU_DISHES:
+	if selected.is_empty() or selected.size() > menu_capacity:
 		return
 	menu_applied.emit(selected.duplicate())
 	hide()

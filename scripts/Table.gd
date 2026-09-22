@@ -255,6 +255,9 @@ func clear_seated_customer() -> void:
 	patience_bar.visible = false
 func get_seat_capacity() -> int:
 	return seat_capacity
+
+func get_service_position() -> Vector2:
+	return global_position + Vector2(0, 165)
 func is_available() -> bool:
 	if not unlocked:
 		return false

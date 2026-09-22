@@ -2,9 +2,9 @@ extends "res://tests/test_automatic_waiters.gd"
 
 func run_tests() -> void:
 	var r: Node = world()
-	check(r.tables.size() == 6, "Restaurant must have six tables")
+	check(r.tables.size() == 12, "Restaurant must have twelve tables")
 	check(r.tables[0].unlocked and r.tables[0].seat_capacity == 2, "Initial table seats two")
-	for i in range(1, 6):
+	for i in range(1, r.tables.size()):
 		var table: Node = r.tables[i]
 		check(not table.unlocked and not table.can_seat_group(1), "Locked tables cannot receive customers")
 		check(r.get_next_table_description().contains(str(i + 1).pad_zeros(2)), "Next purchase must follow table order")

@@ -34,6 +34,24 @@ func run_test() -> void:
 	camera._input(motion)
 	assert(camera.position == initial and not camera.dragging, "Pausing cancels movement")
 	paused = false
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	wheel.pressed = true
+	wheel.position = Vector2(250, 180)
+	camera.force_update_scroll()
+	var mouse_world: Vector2 = camera.get_canvas_transform().affine_inverse() * wheel.position
+	camera._unhandled_input(wheel)
+	assert(camera.zoom.x > 0.8, "Wheel up zooms in")
+	assert(mouse_world.distance_to(camera.get_canvas_transform().affine_inverse() * wheel.position) < 0.01, "Zoom must keep the cursor's world point fixed")
+	for i in range(30):
+		camera._unhandled_input(wheel)
+	assert(is_equal_approx(camera.zoom.x, camera.MAX_ZOOM), "Zoom in is bounded")
+	wheel.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	for i in range(30):
+		camera._unhandled_input(wheel)
+	assert(is_equal_approx(camera.zoom.x, camera.MIN_ZOOM), "Zoom out is bounded")
+	camera._unhandled_input(reset)
+	assert(camera.zoom == Vector2(0.8, 0.8) and camera.position == initial, "Space resets position and zoom")
 	var restaurant: Node = load("res://scenes/restaurant/Restaurant.tscn").instantiate()
 	root.add_child(restaurant)
 	camera.force_update_scroll()

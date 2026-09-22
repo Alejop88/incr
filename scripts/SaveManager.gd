@@ -68,6 +68,16 @@ func _is_valid_save(data: Dictionary) -> bool:
 		return false
 	if not _is_nonnegative_number(data.get("money")):
 		return false
+	if data.has("camera_zoom"):
+		if not _is_nonnegative_number(data["camera_zoom"]) or data["camera_zoom"] <= 0:
+			return false
+	if data.has("camera_position"):
+		if not data["camera_position"] is Dictionary:
+			return false
+		for axis in ["x", "y"]:
+			var coordinate: Variant = data["camera_position"].get(axis)
+			if not (coordinate is int or coordinate is float) or not is_finite(float(coordinate)):
+				return false
 	if not data.get("michelin") is Dictionary or not data.get("levels") is Dictionary:
 		return false
 	var michelin: Dictionary = data["michelin"]
