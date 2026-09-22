@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Incr"
-run/main_scene="uid://bbfyksdmcl06n"
+run/main_scene="res://scenes/TitleMenu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

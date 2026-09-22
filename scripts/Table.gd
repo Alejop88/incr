@@ -38,6 +38,7 @@ var food_round: int = 0
 var state: State = State.FREE
 
 func _ready() -> void:
+	patience_bar.hide()
 	var capacity_label := Label.new()
 	capacity_label.text = "%s · %d plazas" % [str(name).trim_prefix("Table").trim_suffix("Point"), seat_capacity]
 	capacity_label.position = Vector2(-48, 44)
