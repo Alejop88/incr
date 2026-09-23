@@ -44,6 +44,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Servir cliente"
 
+[node name="TestStarsButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(180, 45)
+layout_mode = 2
+tooltip_text = "Botón temporal para probar las mejoras permanentes."
+text = "+10 estrellas (pruebas)"
+
 [node name="StarsLabel" type="Label" parent="." unique_id=271534510]
 layout_mode = 0
 offset_left = 776.0

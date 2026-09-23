@@ -10,6 +10,49 @@ var counter_capacity_bonus: int = 0
 var cook_speed_bonus: int = 0
 var vip_spawn_bonus: int = 0
 var max_vip_group_size: int = 1
+const PERMANENT_TABLE_LEVELS: int = 11
+const PERMANENT_WAITER_LEVELS: int = 6
+
+func _init() -> void:
+	for level in range(1, 4):
+		var id := "staff_training_%d" % level
+		upgrade_costs[id] = 4 + (level - 1) * 3
+		upgrade_names[id] = "Camareros ágiles · Nivel %d" % level
+		upgrade_descriptions[id] = "Todos los camareros automáticos se mueven un %d %% más rápido. Permanente y compatible con las mejoras de velocidad compradas con dinero." % (level * 10)
+		upgrade_requirements[id] = ["permanent_waiter" if level == 1 else "staff_training_%d" % (level - 1)]
+	for level in range(1, PERMANENT_TABLE_LEVELS + 1):
+		var id := "permanent_table_%d" % level
+		upgrade_costs[id] = 3 + (level - 1) * 2
+		upgrade_names[id] = "+1 mesa inicial · Nivel %d" % level
+		upgrade_descriptions[id] = "Empiezas cada reinicio con %d mesas desbloqueadas en total. Las mesas adicionales compradas con dinero se reinician." % (level + 1)
+		upgrade_requirements[id] = [] if level == 1 else ["permanent_table_%d" % (level - 1)]
+	for level in range(2, PERMANENT_WAITER_LEVELS + 1):
+		var id := "permanent_waiter_%d" % level
+		upgrade_costs[id] = 5 + (level - 1) * 3
+		upgrade_names[id] = "+1 camarero permanente · Nivel %d" % level
+		upgrade_descriptions[id] = "Empiezas cada reinicio con %d camareros permanentes en total. Conservas el hueco de contratación con dinero." % level
+		upgrade_requirements[id] = ["permanent_waiter" if level == 2 else "permanent_waiter_%d" % (level - 1)]
+
+func get_staff_training_level() -> int:
+	var count := 0
+	for level in range(1, 4):
+		if is_upgrade_bought("staff_training_%d" % level):
+			count += 1
+	return count
+
+func get_permanent_table_bonus() -> int:
+	var count := 0
+	for level in range(1, PERMANENT_TABLE_LEVELS + 1):
+		if is_upgrade_bought("permanent_table_%d" % level):
+			count += 1
+	return count
+
+func get_permanent_waiter_count() -> int:
+	var count := 1 if is_upgrade_bought("permanent_waiter") else 0
+	for level in range(2, PERMANENT_WAITER_LEVELS + 1):
+		if is_upgrade_bought("permanent_waiter_%d" % level):
+			count += 1
+	return count
 var upgrade_costs: Dictionary = {
 	"menu_capacity_1": 5,
 	"permanent_vip": 5,
@@ -128,7 +171,9 @@ func load_save_data(data: Dictionary) -> void:
 		max_vip_group_size = maxi(max_vip_group_size, int(upgrade_vip_group_size.get(upgrade_id, 1)))
 
 func buy_upgrade(upgrade_id: String) -> bool:
-	if upgrade_id in ["player_capacity_2", "permanent_waiter", "waiter_capacity_2", "permanent_vip", "menu_capacity_1"]:
+	if not upgrade_costs.has(upgrade_id):
+		return false
+	if upgrade_id.begins_with("staff_training_") or upgrade_id.begins_with("permanent_table_") or upgrade_id.begins_with("permanent_waiter_") or upgrade_id in ["player_capacity_2", "permanent_waiter", "waiter_capacity_2", "permanent_vip", "menu_capacity_1"]:
 		if not are_upgrade_requirements_met(upgrade_id):
 			return false
 		if is_upgrade_bought(upgrade_id) or not spend_stars(get_upgrade_cost(upgrade_id)):

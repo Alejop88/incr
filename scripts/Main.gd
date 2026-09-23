@@ -32,9 +32,10 @@ func _ready() -> void:
 	restaurant.start_random_menu()
 	initial_run_data = _get_save_data().duplicate(true)
 	_load_saved_progress()
+	restaurant.waiter_manager.set_training_level(michelin_manager.get_staff_training_level())
 	restaurant.set_vip_unlocked(vip_run_unlocked or michelin_manager.is_upgrade_bought("permanent_vip"))
 	restaurant.waiter_manager.apply_permanent_upgrades(
-		michelin_manager.is_upgrade_bought("permanent_waiter"),
+		michelin_manager.get_permanent_waiter_count(),
 		michelin_manager.is_upgrade_bought("waiter_capacity_2")
 	)
 	pause_menu.save_requested.connect(_on_save_requested)
@@ -46,6 +47,9 @@ func _ready() -> void:
 	economy_manager.money_changed.connect(_on_money_changed)
 	michelin_manager.stars_changed.connect(_on_stars_changed)
 	hud.serve_customer_requested.connect(_on_serve_customer_requested)
+	hud.test_stars_requested.connect(func():
+		if not prestige_pending:
+			michelin_manager.add_stars(10))
 	hud.waiter_speed_upgrade_requested.connect(_on_waiter_speed_upgrade_requested)
 	hud.cook_speed_upgrade_requested.connect(_on_cook_speed_upgrade_requested)
 	hud.set_money(economy_manager.money)
@@ -184,7 +188,11 @@ func _load_saved_progress() -> void:
 	eating_speed_upgrade_cost = 20.0 * pow(1.5, eating_speed_level)
 	patience_upgrade_cost = 20.0 * pow(1.5, patience_level)
 	var purchased_table_count: int = 0
-	for table in restaurant.tables:
+	var permanent_tables: int = mini(restaurant.tables.size(), 1 + michelin_manager.get_permanent_table_bonus())
+	for index in range(restaurant.tables.size()):
+		var table: Area2D = restaurant.tables[index]
+		if index < permanent_tables and not table.unlocked:
+			table.unlock()
 		if str(table.name) in data["unlocked_tables"] and not table.unlocked:
 			table.unlock()
 			purchased_table_count += 1

@@ -4,12 +4,17 @@ const MAX_HIRED_WAITERS: int = 1
 const HIRE_COST: float = 100.0
 const MAX_SPEED_LEVEL: int = 10
 var speed_level: int = 0
+var training_level: int = 0
+
+func set_training_level(level: int) -> void:
+	training_level = clampi(level, 0, 3)
+	set_speed_level(speed_level)
 
 func set_speed_level(level: int) -> void:
 	speed_level = clampi(level, 0, MAX_SPEED_LEVEL)
 	for waiter in waiters:
 		if is_instance_valid(waiter):
-			waiter.set_speed_upgrade_level(speed_level)
+			waiter.set_speed_upgrade_level(speed_level, training_level)
 
 func get_speed_upgrade_cost() -> float:
 	return 25.0 * pow(1.5, speed_level)
@@ -24,14 +29,16 @@ var payment_assignments: Dictionary = {}
 var second_assignments: Dictionary = {}
 var carry_capacity: int = 1
 
-func apply_permanent_upgrades(permanent: bool, double_capacity: bool) -> void:
+func apply_permanent_upgrades(permanent: int, double_capacity: bool) -> void:
 	carry_capacity = 2 if double_capacity else 1
-	var has_permanent: bool = false
+	var permanent_count: int = 0
 	for waiter in waiters:
 		waiter.carry_capacity = carry_capacity
-		has_permanent = has_permanent or waiter.is_permanent
-	if permanent and not has_permanent:
+		if waiter.is_permanent:
+			permanent_count += 1
+	while permanent_count < permanent:
 		create_waiter(true)
+		permanent_count += 1
 
 func can_hire() -> bool:
 	return get_hired_count() < MAX_HIRED_WAITERS
@@ -49,11 +56,11 @@ func restore_hired_count(count: int) -> void:
 
 func create_waiter(permanent: bool = false) -> CharacterBody2D:
 	var waiter: CharacterBody2D = WAITER_SCENE.instantiate()
-	waiter.set_speed_upgrade_level(speed_level)
+	waiter.set_speed_upgrade_level(speed_level, training_level)
 	waiter.is_permanent = permanent
 	waiter.carry_capacity = carry_capacity
 	waiter.coordinator = self
-	waiter.waiting_offset = Vector2(90 + waiters.size() * 35, 65)
+	waiter.waiting_offset = Vector2(90 + (waiters.size() % 4) * 35, 65 + (waiters.size() / 4) * 40)
 	waiter.position = restaurant.kitchen_point.position + waiter.waiting_offset
 	restaurant.add_child(waiter)
 	waiters.append(waiter)

@@ -6,6 +6,7 @@ signal menu_requested
 var menu_editor: PanelContainer
 
 signal serve_customer_requested
+signal test_stars_requested
 var last_order_queue= null
 var last_manual_dishes: Variant = null
 var last_ready_dishes: Array = []
@@ -58,6 +59,7 @@ func _ready() -> void:
 	add_child(menu_editor)
 	$KitchenPanel/VBoxContainer/MenuButton.pressed.connect(func(): menu_requested.emit())
 	test_serve_button.pressed.connect(_on_test_serve_button_pressed)
+	$VBoxContainer/TestStarsButton.pressed.connect(func(): test_stars_requested.emit())
 	upgrades_button.pressed.connect(_on_upgrades_button_pressed)
 	close_button.pressed.connect(_on_close_button_pressed)
 	waiter_speed_button.pressed.connect(_on_waiter_speed_button_pressed)
