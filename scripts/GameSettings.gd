@@ -6,6 +6,7 @@ enum DisplayMode { WINDOWED, FULLSCREEN, BORDERLESS }
 var settings_path: String = "user://ajustes.cfg"
 var display_mode: int = DisplayMode.FULLSCREEN
 var resolution: Vector2i = Vector2i(1280, 720)
+var monitor_index: int = -1
 var last_error: String = ""
 const CONTROL_NAMES := {"interact": "Mover e interactuar", "camera": "Mover cámara / abrir cocina", "zoom_in": "Acercar cámara", "zoom_out": "Alejar cámara", "reset_camera": "Restablecer cámara", "pause": "Menú de pausa"}
 const DEFAULT_BINDINGS := {"interact": {"mouse": true, "code": MOUSE_BUTTON_LEFT}, "camera": {"mouse": true, "code": MOUSE_BUTTON_RIGHT}, "zoom_in": {"mouse": true, "code": MOUSE_BUTTON_WHEEL_UP}, "zoom_out": {"mouse": true, "code": MOUSE_BUTTON_WHEEL_DOWN}, "reset_camera": {"mouse": false, "code": KEY_SPACE}, "pause": {"mouse": false, "code": KEY_ESCAPE}}
@@ -49,6 +50,9 @@ func load_settings() -> void:
 		return
 	var mode: Variant = config.get_value("display", "mode", DisplayMode.FULLSCREEN)
 	var size: Variant = config.get_value("display", "resolution", Vector2i(1280, 720))
+	var monitor: Variant = config.get_value("display", "monitor", -1)
+	if monitor is int:
+		monitor_index = resolve_monitor(monitor)
 	if mode is int and mode >= DisplayMode.WINDOWED and mode <= DisplayMode.BORDERLESS:
 		display_mode = mode
 	if size is Vector2i and size.x >= 640 and size.y >= 360 and size.x <= 7680 and size.y <= 4320:
@@ -62,7 +66,7 @@ func load_settings() -> void:
 		if valid:
 			bindings = saved.duplicate(true)
 
-func commit(mode: int, size: Vector2i, controls: Dictionary = {}, locale: String = "es") -> bool:
+func commit(mode: int, size: Vector2i, controls: Dictionary = {}, locale: String = "es", monitor: int = -1) -> bool:
 	last_error = ""
 	if controls.is_empty():
 		controls = bindings
@@ -80,7 +84,9 @@ func commit(mode: int, size: Vector2i, controls: Dictionary = {}, locale: String
 		if not last_error.is_empty():
 			return false
 	var config := ConfigFile.new()
+	var target_monitor: int = resolve_monitor(monitor_index if monitor == -1 else monitor)
 	config.set_value("display", "mode", mode)
+	config.set_value("display", "monitor", target_monitor)
 	config.set_value("display", "resolution", size)
 	config.set_value("general", "language", locale)
 	config.set_value("controls", "bindings", controls)
@@ -89,19 +95,35 @@ func commit(mode: int, size: Vector2i, controls: Dictionary = {}, locale: String
 		return false
 	display_mode = mode
 	resolution = size
+	monitor_index = target_monitor
 	bindings = controls.duplicate(true)
 	language = locale
 	apply_display()
 	settings_changed.emit()
 	return true
 
+func monitor_count() -> int:
+	return maxi(1, DisplayServer.get_screen_count())
+
+func resolve_monitor(index: int) -> int:
+	if index >= 0 and index < monitor_count():
+		return index
+	return clampi(get_tree().root.current_screen, 0, monitor_count() - 1)
+
+func monitor_size(index: int) -> Vector2i:
+	if DisplayServer.get_name() == "headless":
+		return get_tree().root.size
+	return DisplayServer.screen_get_size(resolve_monitor(index))
+
 func apply_display() -> void:
+	monitor_index = resolve_monitor(monitor_index)
 	if DisplayServer.get_name() == "headless":
 		return
 	var window: Window = get_tree().root
-	var screen: int = window.current_screen
+	var screen: int = monitor_index
 	window.mode = Window.MODE_WINDOWED
 	window.borderless = false
+	window.current_screen = screen
 	match display_mode:
 		DisplayMode.WINDOWED:
 			var usable: Rect2i = DisplayServer.screen_get_usable_rect(screen)

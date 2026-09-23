@@ -3,6 +3,7 @@ extends Control
 var settings: Node
 var tabs: TabContainer
 var mode_option: OptionButton
+var monitor_option: OptionButton
 var resolution_option: OptionButton
 var display_hint: Label
 var status: Label
@@ -51,6 +52,10 @@ func _ready() -> void:
 	_note(general, "Se añadirán más idiomas cuando estén disponibles.")
 	_note(general, "Los ajustes se guardan automáticamente al pulsar Aplicar.\nSe conservan aunque empieces una nueva partida.")
 	var display := _tab("Pantalla")
+	_note(display, "Monitor")
+	monitor_option = OptionButton.new()
+	display.add_child(monitor_option)
+	monitor_option.item_selected.connect(func(_index: int): _update_display_hint())
 	_note(display, "Modo de pantalla")
 	mode_option = OptionButton.new()
 	for text in ["Ventana", "Pantalla completa", "Ventana sin bordes"]:
@@ -132,6 +137,7 @@ func open_settings() -> void:
 	window_resolution = settings.resolution
 	resolution_option.disabled = true
 	status.text = ""
+	_refresh_monitors(settings.resolve_monitor(settings.monitor_index))
 	_update_display_hint()
 	show()
 	move_to_front()
@@ -153,9 +159,15 @@ func _update_display_hint() -> void:
 	display_hint.text = "La ventana se ajusta al espacio disponible en tu monitor." if mode_option.selected == 0 else "Este modo utiliza la resolución del monitor."
 
 func monitor_resolution() -> Vector2i:
-	if DisplayServer.get_name() == "headless":
-		return get_tree().root.size
-	return DisplayServer.screen_get_size(get_tree().root.current_screen)
+	return settings.monitor_size(monitor_option.selected)
+
+func _refresh_monitors(selected: int) -> void:
+	monitor_option.clear()
+	for index in range(settings.monitor_count()):
+		var size: Vector2i = settings.monitor_size(index)
+		monitor_option.add_item("Monitor %d — %d × %d" % [index + 1, size.x, size.y])
+	monitor_option.select(settings.resolve_monitor(selected))
+	monitor_option.disabled = monitor_option.item_count == 1
 
 static func resolutions_for_monitor(maximum: Vector2i, preferred: Vector2i) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
@@ -169,7 +181,13 @@ static func resolutions_for_monitor(maximum: Vector2i, preferred: Vector2i) -> A
 	return result
 
 func _process(_delta: float) -> void:
-	if visible and monitor_resolution() != listed_monitor_size:
+	if not visible:
+		return
+	if monitor_option.item_count != settings.monitor_count():
+		_refresh_monitors(monitor_option.selected)
+		_update_display_hint()
+	elif monitor_resolution() != listed_monitor_size:
+		_refresh_monitors(monitor_option.selected)
 		_update_display_hint()
 
 func _show_resolution(value: Vector2i) -> void:
@@ -178,7 +196,7 @@ func _show_resolution(value: Vector2i) -> void:
 func _apply() -> void:
 	if mode_option.selected == 0:
 		window_resolution = resolutions[resolution_option.selected]
-	if settings.commit(mode_option.selected, window_resolution, draft_bindings, "es"):
+	if settings.commit(mode_option.selected, window_resolution, draft_bindings, "es", monitor_option.selected):
 		status.text = "Ajustes guardados."
 	else:
 		status.text = settings.last_error
