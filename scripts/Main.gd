@@ -26,12 +26,15 @@ var patience_level: int = 0
 const MAX_PATIENCE_LEVEL: int = 10
 var initial_run_data: Dictionary = {}
 var prestige_pending: bool = false
+var gachapon = preload("res://scripts/Gachapon.gd").new()
+var gachapon_panel: Control
 const VIP_UNLOCK_COST: float = 100.0
 var vip_run_unlocked: bool = false
 func _ready() -> void:
 	restaurant.start_random_menu()
 	initial_run_data = _get_save_data().duplicate(true)
 	_load_saved_progress()
+	_setup_gachapon()
 	restaurant.waiter_manager.set_training_level(michelin_manager.get_staff_training_level())
 	restaurant.set_vip_unlocked(vip_run_unlocked or michelin_manager.is_upgrade_bought("permanent_vip"))
 	restaurant.waiter_manager.apply_permanent_upgrades(
@@ -100,6 +103,7 @@ func _get_save_data() -> Dictionary:
 		if table.unlocked:
 			unlocked_tables.append(str(table.name))
 	var data: Dictionary = {
+		"gachapon_owned": gachapon.owned.duplicate(),
 		"money": economy_manager.money,
 		"camera_zoom": $RestaurantCamera.zoom.x,
 		"camera_position": {"x": $RestaurantCamera.position.x, "y": $RestaurantCamera.position.y},
@@ -169,7 +173,8 @@ func _load_saved_progress() -> void:
 		$RestaurantCamera.force_update_scroll()
 	vip_run_unlocked = data.get("vip_unlocked", false)
 	michelin_manager.load_save_data(data["michelin"])
-	restaurant.set_menu_capacity_bonus(1 if michelin_manager.is_upgrade_bought("menu_capacity_1") else 0)
+	gachapon.restore(data.get("gachapon_owned", []))
+	restaurant.set_menu_capacity_bonus(michelin_manager.get_menu_capacity_bonus())
 	restaurant.restore_dish_progress(data)
 	var levels: Dictionary = data["levels"]
 	restaurant.waiter_manager.set_speed_level(int(levels.get("staff_speed", 0)))
@@ -441,19 +446,29 @@ func _on_star_purchase_confirmed() -> void:
 	var previous_data: Dictionary = _get_save_data()
 	var new_run: Dictionary = initial_run_data.duplicate(true)
 	new_run["michelin"] = permanent_data
+	new_run["gachapon_owned"] = gachapon.owned.duplicate()
 	new_run["camera_zoom"] = $RestaurantCamera.zoom.x
 	new_run["camera_position"] = {"x": $RestaurantCamera.position.x, "y": $RestaurantCamera.position.y}
 	new_run["menu_dishes"] = DishTypes.menu_keys(restaurant.menu_dishes)
 	new_run["unlocked_dishes"] = DishTypes.menu_keys(restaurant.unlocked_dishes)
-	if "menu_capacity_1" in michelin_manager.selected_upgrades and restaurant.unlocked_dishes.size() == 2:
+	var menu_bonus := 0
+	var menu_expanded := false
+	for level in range(1, 5):
+		var id := "menu_capacity_%d" % level
+		if id in permanent_data["bought_upgrades"]:
+			menu_bonus += 1
+		if id in michelin_manager.selected_upgrades:
+			menu_expanded = true
+	if menu_expanded:
+		var capacity: int = DishTypes.MAX_MENU_DISHES + menu_bonus
 		var locked: Array = restaurant.get_locked_dishes()
-		if not locked.is_empty():
-			new_run["unlocked_dishes"].append(DishTypes.Type.keys()[locked.pick_random()])
-	if "menu_capacity_1" in michelin_manager.selected_upgrades:
+		locked.shuffle()
+		while new_run["unlocked_dishes"].size() < capacity and not locked.is_empty():
+			new_run["unlocked_dishes"].append(DishTypes.Type.keys()[locked.pop_back()])
 		var available: Array = new_run["unlocked_dishes"].duplicate()
 		available.shuffle()
 		for dish_key in available:
-			if new_run["menu_dishes"].size() >= DishTypes.MAX_MENU_DISHES + 1:
+			if new_run["menu_dishes"].size() >= capacity:
 				break
 			if not new_run["menu_dishes"].has(dish_key):
 				new_run["menu_dishes"].append(dish_key)
@@ -506,3 +521,27 @@ func _on_dish_purchase_requested() -> void:
 		restaurant.unlocked_dishes.append(dish)
 		hud.menu_editor.purchase_result.text = "Nuevo plato: " + DishTypes.title(dish)
 		_refresh_dish_shop()
+
+func _setup_gachapon() -> void:
+	gachapon_panel = preload("res://scripts/ui/GachaponPanel.gd").new()
+	$CanvasLayer.add_child(gachapon_panel)
+	gachapon_panel.spin_requested.connect(_on_gachapon_spin)
+	var machine := preload("res://scripts/GachaponMachine.gd").new()
+	machine.name = "GachaponMachine"
+	machine.position = Vector2(-90, 380)
+	restaurant.add_child(machine)
+	machine.opened.connect(func():
+		gachapon_panel.refresh(gachapon, economy_manager.money)
+		gachapon_panel.show())
+	economy_manager.money_changed.connect(func(_money: float):
+		gachapon_panel.refresh(gachapon, economy_manager.money))
+
+func _on_gachapon_spin() -> void:
+	if prestige_pending or gachapon.remaining().is_empty():
+		return
+	if not economy_manager.spend_money(gachapon.PRICE):
+		gachapon_panel.refresh(gachapon, economy_manager.money)
+		return
+	var item: Dictionary = gachapon.draw_item()
+	gachapon_panel.show_result(item)
+	gachapon_panel.refresh(gachapon, economy_manager.money)

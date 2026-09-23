@@ -43,6 +43,26 @@ func run_tests() -> void:
 	await process_frame
 	game = current_scene
 	check(game.restaurant.menu_capacity == 3 and game.restaurant.unlocked_dishes.size() == 3, "Later prestige retains bonus without duplicate gifts")
+	game.michelin_manager.stars = 100
+	for id in ["menu_capacity_2", "menu_capacity_3", "menu_capacity_4"]:
+		game.michelin_manager.toggle_selection(id)
+	check(game.restaurant.menu_capacity == 3, "Selecting levels must not apply them immediately")
+	game._on_star_purchase_confirmed()
+	await process_frame
+	await process_frame
+	game = current_scene
+	check(game.restaurant.menu_capacity == 6 and game.restaurant.menu_dishes.size() == 6, "Batch purchase must fill the six-slot menu")
+	check(game.restaurant.unlocked_dishes.size() == 6, "Missing recipes must be granted without duplicates")
+	check(game.michelin_manager.stars == 55, "New levels cost ten, fifteen and twenty stars")
+	check(game.restaurant.customer_spawn_timer.wait_time == 10.0, "Four levels double the base arrival frequency")
+	game._on_save_requested()
+	reload_current_scene()
+	await process_frame
+	await process_frame
+	game = current_scene
+	check(game.restaurant.menu_capacity == 6 and game.restaurant.menu_dishes.size() == 6, "Six-slot menu must survive save/load")
+	game.restaurant.set_menu_capacity_bonus(99)
+	check(game.restaurant.menu_capacity == 6, "Menu capacity must be capped at six")
 	game._on_new_game_requested()
 	await process_frame
 	await process_frame

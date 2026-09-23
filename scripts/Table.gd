@@ -212,6 +212,30 @@ func _on_eating_timer_timeout() -> void:
 	print("El cliente ha terminado. Esperando pago")
 	eating_finished.emit(self)
 
+func show_money_popup(amount: float) -> void:
+	var popup := Label.new()
+	popup.name = "MoneyPopup"
+	popup.text = "+%s €" % ("%.1f" % amount).trim_suffix(".0")
+	popup.position = Vector2(-90, -95)
+	popup.size = Vector2(180, 44)
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.z_index = 100
+	popup.add_theme_font_size_override("font_size", 30)
+	popup.add_theme_color_override("font_color", Color("6fff91"))
+	popup.add_theme_color_override("font_outline_color", Color("173c25"))
+	popup.add_theme_constant_override("outline_size", 6)
+	popup.pivot_offset = popup.size / 2
+	popup.scale = Vector2.ONE * 0.8
+	popup.modulate.a = 0.0
+	add_child(popup)
+	var animation := popup.create_tween().set_parallel(true)
+	animation.tween_property(popup, "position:y", popup.position.y - 65, 1.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	animation.tween_property(popup, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	animation.tween_property(popup, "modulate:a", 1.0, 0.12)
+	animation.tween_property(popup, "modulate:a", 0.0, 0.65).set_delay(0.55)
+	animation.chain().tween_callback(popup.queue_free)
+
 func collect_payment() -> bool:
 	if state != State.WAITING_PAYMENT:
 		return false

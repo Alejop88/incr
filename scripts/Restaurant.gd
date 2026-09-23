@@ -45,8 +45,8 @@ var menu_capacity: int = DishTypes.MAX_MENU_DISHES
 const BASE_SPAWN_INTERVAL: float = 20.0
 
 func set_menu_capacity_bonus(bonus: int) -> void:
-	menu_capacity = DishTypes.MAX_MENU_DISHES + maxi(0, bonus)
-	customer_spawn_timer.wait_time = BASE_SPAWN_INTERVAL / (1.0 + 0.25 * maxi(0, bonus))
+	menu_capacity = DishTypes.MAX_MENU_DISHES + clampi(bonus, 0, 4)
+	customer_spawn_timer.wait_time = BASE_SPAWN_INTERVAL / (1.0 + 0.25 * clampi(bonus, 0, 4))
 var unlocked_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
 
 func start_random_menu() -> void:
@@ -312,6 +312,7 @@ func _on_table_payment_collected(
 		)
 	else:
 		customer_paid.emit(amount)
+		current_table.show_money_popup(amount)
 
 	if customer_group != null \
 			and customer_group.has_method("leave_restaurant"):

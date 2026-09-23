@@ -87,6 +87,8 @@ func _is_valid_save(data: Dictionary) -> bool:
 		return false
 	if not _is_string_array(data.get("unlocked_tables")):
 		return false
+	if data.has("gachapon_owned") and not _is_string_array(data["gachapon_owned"]):
+		return false
 	var hired_waiters: Variant = data.get("hired_waiters", 0)
 	if data.has("vip_unlocked") and not data["vip_unlocked"] is bool:
 		return false

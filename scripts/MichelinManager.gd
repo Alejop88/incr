@@ -14,6 +14,12 @@ const PERMANENT_TABLE_LEVELS: int = 11
 const PERMANENT_WAITER_LEVELS: int = 6
 
 func _init() -> void:
+	for level in range(1, 5):
+		var id := "menu_capacity_%d" % level
+		upgrade_costs[id] = 5 + (level - 1) * 5
+		upgrade_names[id] = "Carta de %d platos" % (2 + level)
+		upgrade_descriptions[id] = "Permite %d platos en la carta y aumenta un %d %% la frecuencia de llegadas respecto al inicio. Rellena los huecos nuevos y desbloquea recetas aleatorias si faltan." % [2 + level, 25 * level]
+		upgrade_requirements[id] = [] if level == 1 else ["menu_capacity_%d" % (level - 1)]
 	for level in range(1, 4):
 		var id := "staff_training_%d" % level
 		upgrade_costs[id] = 4 + (level - 1) * 3
@@ -32,6 +38,13 @@ func _init() -> void:
 		upgrade_names[id] = "+1 camarero permanente · Nivel %d" % level
 		upgrade_descriptions[id] = "Empiezas cada reinicio con %d camareros permanentes en total. Conservas el hueco de contratación con dinero." % level
 		upgrade_requirements[id] = ["permanent_waiter" if level == 2 else "permanent_waiter_%d" % (level - 1)]
+
+func get_menu_capacity_bonus() -> int:
+	var count := 0
+	for level in range(1, 5):
+		if is_upgrade_bought("menu_capacity_%d" % level):
+			count += 1
+	return count
 
 func get_staff_training_level() -> int:
 	var count := 0
@@ -173,7 +186,7 @@ func load_save_data(data: Dictionary) -> void:
 func buy_upgrade(upgrade_id: String) -> bool:
 	if not upgrade_costs.has(upgrade_id):
 		return false
-	if upgrade_id.begins_with("staff_training_") or upgrade_id.begins_with("permanent_table_") or upgrade_id.begins_with("permanent_waiter_") or upgrade_id in ["player_capacity_2", "permanent_waiter", "waiter_capacity_2", "permanent_vip", "menu_capacity_1"]:
+	if upgrade_id.begins_with("menu_capacity_") or upgrade_id.begins_with("staff_training_") or upgrade_id.begins_with("permanent_table_") or upgrade_id.begins_with("permanent_waiter_") or upgrade_id in ["player_capacity_2", "permanent_waiter", "waiter_capacity_2", "permanent_vip"]:
 		if not are_upgrade_requirements_met(upgrade_id):
 			return false
 		if is_upgrade_bought(upgrade_id) or not spend_stars(get_upgrade_cost(upgrade_id)):
