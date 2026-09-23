@@ -7,6 +7,8 @@ var new_game_button: Button
 var status_label: Label
 var confirmation: ConfirmationDialog
 var starting: bool = false
+var settings_panel: Control
+var settings_button: Button
 
 func _ready() -> void:
 	var background := ColorRect.new()
@@ -42,6 +44,18 @@ func _ready() -> void:
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status_label.custom_minimum_size.x = 336
 	buttons.add_child(status_label)
+	var settings_row := HBoxContainer.new()
+	settings_row.alignment = BoxContainer.ALIGNMENT_END
+	buttons.add_child(settings_row)
+	settings_button = Button.new()
+	settings_button.text = "⚙"
+	settings_button.tooltip_text = "Ajustes"
+	settings_button.custom_minimum_size = Vector2(44, 44)
+	settings_button.add_theme_font_size_override("font_size", 26)
+	settings_row.add_child(settings_button)
+	settings_panel = preload("res://scripts/ui/SettingsPanel.gd").new()
+	add_child(settings_panel)
+	settings_button.pressed.connect(settings_panel.open_settings)
 	confirmation = ConfirmationDialog.new()
 	confirmation.title = "Nueva partida"
 	confirmation.dialog_text = "Se borrará la partida guardada, incluidas las mejoras permanentes. ¿Empezar de nuevo?"
