@@ -124,7 +124,7 @@ func serve_test_customer() -> void:
 	
 func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT:
+		if get_node("/root/GameSettings").matches(event, "interact"):
 			_clear_pickup_selection()
 			if player_waiter.get_free_carry_slots() == 0:
 				return
@@ -133,13 +133,13 @@ func _on_kitchen_point_input_event(_viewport: Viewport,event: InputEvent,_shape_
 				kitchen_point.global_position,
 				player_waiter.TargetType.KITCHEN
 			)
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
+		elif get_node("/root/GameSettings").matches(event, "camera"):
 			kitchen_panel_requested.emit()
 			
 func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int,current_table: Area2D) -> void:
 	if event is InputEventMouseButton \
 			and event.pressed \
-			and event.button_index == MOUSE_BUTTON_LEFT:
+			and get_node("/root/GameSettings").matches(event, "interact"):
 
 		print(
 	"Click en mesa: ",
@@ -638,7 +638,7 @@ func _on_trash_point_input_event(
 	_shape_idx: int
 ) -> void:
 	if event is InputEventMouseButton \
-			and event.button_index == MOUSE_BUTTON_LEFT \
+			and get_node("/root/GameSettings").matches(event, "interact") \
 			and event.pressed:
 
 		if player_waiter.carried_dishes.is_empty():

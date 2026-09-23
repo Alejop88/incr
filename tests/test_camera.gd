@@ -65,6 +65,30 @@ func run_test() -> void:
 	press.position += Vector2(200, 0)
 	camera._unhandled_input(press)
 	assert(camera.dragging, "Right click away from cook must start panning")
+	var settings: Node = root.get_node("GameSettings")
+	var original: Dictionary = settings.bindings.duplicate(true)
+	settings.bindings.camera = {"mouse": true, "code": MOUSE_BUTTON_MIDDLE}
+	settings.bindings.reset_camera = {"mouse": false, "code": KEY_R}
+	settings.bindings.zoom_in = {"mouse": false, "code": KEY_Z}
+	camera.dragging = false
+	camera._unhandled_input(press)
+	assert(not camera.dragging, "Old camera binding must no longer pan")
+	press.button_index = MOUSE_BUTTON_MIDDLE
+	camera._unhandled_input(press)
+	var before_drag: Vector2 = camera.position
+	motion.button_mask = MOUSE_BUTTON_MASK_MIDDLE
+	camera._input(motion)
+	assert(camera.position != before_drag, "Rebound camera button must drag")
+	press.pressed = false
+	camera._input(press)
+	assert(not camera.dragging, "Rebound camera release must stop dragging")
+	reset.keycode = KEY_R
+	camera._unhandled_input(reset)
+	assert(camera.position == initial, "Rebound reset key must restore camera")
+	reset.keycode = KEY_Z
+	camera._unhandled_input(reset)
+	assert(camera.zoom.x > 0.8, "Rebound keyboard zoom must work")
+	settings.bindings = original
 	restaurant.free()
 	camera.free()
 	print("CAMERA TESTS: PASS")

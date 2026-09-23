@@ -96,7 +96,7 @@ func run_tests() -> void:
 	menu.open_menu()
 	menu.save_button.pressed.emit()
 	check(saver.load_game() == expected, "Loading then saving must preserve progression")
-	menu.resume_button.pressed.emit()
+	menu.close_menu()
 	check(not paused, "Continue button must resume")
 
 	var valid_path: String = saver.save_path

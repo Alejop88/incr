@@ -56,43 +56,20 @@ theme_override_font_sizes/font_size = 26
 text = "Pausa"
 horizontal_alignment = 1
 
-[node name="ResumeButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=327515251]
-custom_minimum_size = Vector2(0, 44)
-layout_mode = 2
-text = "Continuar"
-
 [node name="SaveButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=493503125]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Guardar partida"
 
-[node name="NewGameButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1184375355]
+[node name="TitleButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-text = "Nueva partida"
+text = "Pantalla inicial"
 
-[node name="NewGameConfirmation" type="VBoxContainer" parent="Overlay/Center/Panel/Margin/Buttons" unique_id=1150385634]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Warning" type="Label" parent="Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation" unique_id=931222311]
-layout_mode = 2
-text = "¿Empezar una nueva partida?
-Se borrarán el guardado y todo el progreso,
-incluidas las estrellas y las mejoras permanentes."
-horizontal_alignment = 1
-
-[node name="ConfirmButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation" unique_id=1843748543]
+[node name="SettingsButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-text = "Borrar progreso y empezar"
-
-[node name="CancelButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons/NewGameConfirmation" unique_id=1843074600]
-custom_minimum_size = Vector2(0, 44)
-layout_mode = 2
-text = "Cancelar"
-
+text = "⚙ Ajustes"
 [node name="QuitButton" type="Button" parent="Overlay/Center/Panel/Margin/Buttons"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2

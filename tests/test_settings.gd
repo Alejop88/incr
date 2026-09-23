@@ -42,6 +42,35 @@ func run_tests() -> void:
 	restored.settings_path = settings_path
 	root.add_child(restored)
 	check(restored.display_mode == 0 and restored.resolution == Vector2i(1600, 900), "Restart restores display settings")
+	check(panel.language_option.get_item_text(0) == "Español", "General includes the available language")
+	panel._listen("camera")
+	var middle := InputEventMouseButton.new()
+	middle.button_index = MOUSE_BUTTON_MIDDLE
+	middle.pressed = true
+	panel._input(middle)
+	check(panel.draft_bindings.camera.code == MOUSE_BUTTON_MIDDLE and settings.bindings.camera.code == MOUSE_BUTTON_RIGHT, "Rebinding stays pending until Apply")
+	panel._listen("interact")
+	panel._input(middle)
+	check(panel.listening_action == "interact" and panel.draft_bindings.interact.code == MOUSE_BUTTON_LEFT, "Duplicate controls must be rejected")
+	var cancel := InputEventKey.new()
+	cancel.keycode = KEY_ESCAPE
+	cancel.pressed = true
+	panel._input(cancel)
+	check(panel.visible and panel.listening_action.is_empty(), "Escape cancels capture without closing settings")
+	panel._listen("reset_camera")
+	var key := InputEventKey.new()
+	key.keycode = KEY_R
+	key.pressed = true
+	panel._input(key)
+	panel.apply_button.pressed.emit()
+	restored.load_settings()
+	check(restored.matches(middle, "camera") and restored.matches(key, "reset_camera"), "Saved mouse and keyboard bindings must reload and match gameplay events")
+	panel._listen("zoom_in")
+	key.keycode = KEY_Z
+	panel._input(key)
+	panel.hide()
+	panel.open_settings()
+	check(panel.draft_bindings.zoom_in == settings.DEFAULT_BINDINGS.zoom_in, "Closing discards unapplied controls")
 	panel.mode_option.select(1)
 	panel.mode_option.item_selected.emit(1)
 	check(panel.resolutions[panel.resolution_option.selected] == panel.monitor_resolution(), "Changing to fullscreen updates displayed resolution")

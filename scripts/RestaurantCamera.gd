@@ -18,10 +18,11 @@ func _input(event: InputEvent) -> void:
 		dragging = false
 		return
 	# Releases must also be seen over a menu, where GUI consumes input.
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed:
+	if get_node("/root/GameSettings").matches(event, "camera", false):
 		dragging = false
 	if event is InputEventMouseMotion and dragging:
-		if not event.button_mask & MOUSE_BUTTON_MASK_RIGHT:
+		var button: int = get_node("/root/GameSettings").bindings.camera.code
+		if not event.button_mask & (1 << (button - 1)):
 			dragging = false
 			return
 		position -= event.relative / zoom
@@ -30,19 +31,20 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
 		return
-	if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-		var factor: float = ZOOM_STEP if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / ZOOM_STEP
-		_zoom_at(event.position, factor)
+	var settings: Node = get_node("/root/GameSettings")
+	if settings.matches(event, "zoom_in") or settings.matches(event, "zoom_out"):
+		var factor: float = ZOOM_STEP if settings.matches(event, "zoom_in") else 1.0 / ZOOM_STEP
+		_zoom_at(event.position if event is InputEventMouseButton else get_viewport().get_mouse_position(), factor)
 		get_viewport().set_input_as_handled()
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+	if settings.matches(event, "camera"):
 		if _is_over_kitchen(event.position):
 			dragging = false
 			# Leave this click to the kitchen's normal physics picking handler.
 			return
 		dragging = true
 		get_viewport().set_input_as_handled()
-	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_SPACE:
+	elif settings.matches(event, "reset_camera"):
 		position = starting_position
 		zoom = starting_zoom
 		force_update_scroll()

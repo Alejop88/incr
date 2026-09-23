@@ -51,6 +51,9 @@ signal ready_dish_selected(dish_id: int)
 @onready var eating_speed_button: Button = $UpgradesPanel/VBoxContainer/EatingSpeedButton
 @onready var patience_button: Button = $UpgradesPanel/VBoxContainer/PatienceButton
 func _ready() -> void:
+	var settings: Node = get_node("/root/GameSettings")
+	settings.settings_changed.connect(_refresh_camera_hint)
+	_refresh_camera_hint()
 	menu_editor = preload("res://scripts/ui/MenuEditor.gd").new()
 	add_child(menu_editor)
 	$KitchenPanel/VBoxContainer/MenuButton.pressed.connect(func(): menu_requested.emit())
@@ -68,6 +71,10 @@ func _ready() -> void:
 	cook_speed_button.pressed.connect(_on_cook_speed_button_pressed)
 	eating_speed_button.pressed.connect(_on_eating_speed_button_pressed)
 	patience_button.pressed.connect(_on_patience_button_pressed)
+func _refresh_camera_hint() -> void:
+	var settings: Node = get_node("/root/GameSettings")
+	$CameraHint.text = "%s: mover · %s / %s: zoom · %s: restablecer" % [settings.binding_text(settings.bindings.camera), settings.binding_text(settings.bindings.zoom_in), settings.binding_text(settings.bindings.zoom_out), settings.binding_text(settings.bindings.reset_camera)]
+
 func set_money(value: float) -> void:
 	available_money = value
 	for button in [waiter_speed_button, plate_price_button, cook_speed_button, eating_speed_button, patience_button]:

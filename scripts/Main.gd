@@ -38,7 +38,7 @@ func _ready() -> void:
 		michelin_manager.is_upgrade_bought("waiter_capacity_2")
 	)
 	pause_menu.save_requested.connect(_on_save_requested)
-	pause_menu.new_game_requested.connect(_on_new_game_requested)
+	pause_menu.title_requested.connect(_on_title_requested)
 	pause_menu.quit_requested.connect(_on_quit_requested)
 	restaurant.customer_paid.connect(_on_customer_paid)
 	restaurant.vip_completed.connect(_on_vip_completed)
@@ -130,6 +130,16 @@ func _on_quit_requested(save_first: bool) -> void:
 	if save_first and not _on_save_requested():
 		return
 	get_tree().quit()
+
+func _on_title_requested(save_first: bool) -> void:
+	if save_first and not _on_save_requested():
+		return
+	var tree: SceneTree = get_tree()
+	var error: Error = tree.change_scene_to_file("res://scenes/TitleMenu.tscn")
+	if error != OK:
+		pause_menu.show_status("No se pudo abrir la pantalla inicial.")
+		return
+	tree.paused = false
 
 func _on_new_game_requested() -> void:
 	if not save_manager.delete_save():
