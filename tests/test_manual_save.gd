@@ -51,7 +51,7 @@ func run_tests() -> void:
 	game._on_patience_upgrade_requested()
 	game._on_buy_table_requested()
 	game.get_node("MichelinManager").add_stars(100)
-	for upgrade in ["counter_capacity_1", "counter_capacity_2", "cook_speed_1", "vip_spawn_1", "vip_spawn_2", "vip_group_2", "vip_group_3", "vip_group_4"]:
+	for upgrade in ["permanent_vip", "counter_capacity_1", "counter_capacity_2", "cook_speed_1", "vip_spawn_1", "vip_spawn_2", "vip_group_2", "vip_group_3", "vip_group_4"]:
 		game.michelin_manager.buy_upgrade(upgrade)
 	# Seed existing permanent progression; UI purchase/reset has its own test.
 	game.restaurant.set_permanent_cook_speed_bonus(game.michelin_manager.cook_speed_bonus)
@@ -80,7 +80,7 @@ func run_tests() -> void:
 	check(game.get_node("EconomyManager").money == expected.get("money"), "Only manually saved money must load")
 	check(game.get_node("MichelinManager").get_stars() == expected["michelin"]["stars"], "Stars must load without charging upgrades again")
 	check(restaurant.max_vip_group_size == 4, "VIP group upgrade must be restored")
-	check(restaurant.vip_spawn_chance == 0.0, "Restored VIP chance bonuses must respect the unlock gate")
+	check(is_equal_approx(restaurant.vip_spawn_chance, 0.07), "Permanent VIP unlock and frequency bonuses must load together")
 	restaurant.set_vip_unlocked(true)
 	check(is_equal_approx(restaurant.vip_spawn_chance, 0.07), "VIP spawn bonuses must be restored when enabled")
 	check(restaurant.get_counter_capacity() == 7, "Counter bonuses must be restored")
@@ -95,7 +95,10 @@ func run_tests() -> void:
 	check(game.get_node("CanvasLayer/MichelinUpgrades").upgrade_buttons["vip_group_4"].disabled, "Restored purchased upgrade must be disabled")
 	menu.open_menu()
 	menu.save_button.pressed.emit()
-	check(saver.load_game() == expected, "Loading then saving must preserve progression")
+	var reloaded: Dictionary = saver.load_game()
+	check(reloaded.play_time >= expected.play_time, "Loading must preserve accumulated play time")
+	reloaded.play_time = expected.play_time
+	check(reloaded == expected, "Loading then saving must preserve progression apart from elapsed time")
 	menu.close_menu()
 	check(not paused, "Continue button must resume")
 

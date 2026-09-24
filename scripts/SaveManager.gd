@@ -68,6 +68,10 @@ func _is_valid_save(data: Dictionary) -> bool:
 		return false
 	if not _is_nonnegative_number(data.get("money")):
 		return false
+	if data.get("game_mode", "cozy") not in ["cozy", "normal"]:
+		return false
+	if not _is_nonnegative_number(data.get("play_time", 0.0)):
+		return false
 	if data.has("camera_zoom"):
 		if not _is_nonnegative_number(data["camera_zoom"]) or data["camera_zoom"] <= 0:
 			return false

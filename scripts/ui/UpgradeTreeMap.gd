@@ -22,7 +22,7 @@ func _ready() -> void:
 func fit_tree() -> void:
 	if size.x < 1 or nodes.is_empty():
 		return
-	var bounds := Rect2(Vector2(-850, -410), Vector2(1750, 980))
+	var bounds := Rect2(Vector2(-1160, -410), Vector2(2060, 980))
 	view_zoom = clampf(minf(size.x / bounds.size.x, size.y / bounds.size.y) * 0.92, 0.3, 1.3)
 	canvas.scale = Vector2.ONE * view_zoom
 	canvas.position = size / 2 - bounds.get_center() * view_zoom

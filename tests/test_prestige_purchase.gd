@@ -22,7 +22,7 @@ func run_tests() -> void:
 	check(saver.save_game({
 		"money": 500.0, "hired_waiters": 1,
 		"menu_dishes": ["PIZZA"],
-		"michelin": {"stars": 20, "bought_upgrades": ["counter_capacity_1"]},
+		"michelin": {"stars": 20, "bought_upgrades": ["counter_capacity_1", "permanent_vip"]},
 		"levels": {"waiter_speed": 2, "plate_price": 3, "cook_speed": 1, "eating_speed": 2, "patience": 2},
 		"unlocked_tables": ["Table01Point", "Table02Point"]
 	}), "Fixture must save a progressed run")
@@ -87,7 +87,7 @@ func run_tests() -> void:
 	manager = game.michelin_manager
 	check(game.restaurant.menu_dishes == [DishTypes.Type.PIZZA], "Prestige must preserve the chosen menu")
 	check(manager.stars == 5, "Batch must charge exactly once and retain unspent stars")
-	check(manager.bought_upgrades.size() == 6, "Existing permanent upgrade and five new purchases must survive")
+	check(manager.bought_upgrades.size() == 7, "Two existing permanent upgrades and five new purchases must survive")
 	check(manager.selected_upgrades.is_empty(), "Purchased selection must clear after restarting")
 	check(game.economy_manager.money == 0, "Prestige must reset money")
 	check(game.restaurant.waiter_manager.get_hired_count() == 0, "Prestige must remove hired staff")
@@ -97,7 +97,7 @@ func run_tests() -> void:
 	check(game.waiter_speed_upgrade_cost == 10 and game.table_purchase_cost == 50, "Purchase prices must return to their defaults")
 	check(game.restaurant.get_counter_capacity() == 7, "Old and new permanent capacity upgrades must both apply")
 	check(is_equal_approx(game.restaurant.kitchen_point.cook_time, 4.8), "Permanent cook upgrade must apply without the old money bonus")
-	check(game.restaurant.max_vip_group_size == 2 and game.restaurant.vip_spawn_chance == 0.0, "VIP bonuses must not bypass the VIP unlock")
+	check(game.restaurant.max_vip_group_size == 2 and is_equal_approx(game.restaurant.vip_spawn_chance, 0.06), "Permanent VIP unlock enables purchased frequency bonus after prestige")
 	var persisted: Dictionary = game.save_manager.load_game()
 	check(persisted["money"] == 0 and persisted["michelin"]["stars"] == 5 and persisted["hired_waiters"] == 0, "Restarted run must be persisted immediately")
 	check(reload_current_scene() == OK, "Persisted prestige run must reload")

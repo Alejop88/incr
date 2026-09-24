@@ -14,6 +14,13 @@ const PERMANENT_TABLE_LEVELS: int = 11
 const PERMANENT_WAITER_LEVELS: int = 6
 
 func _init() -> void:
+	for level in range(1, 6):
+		var id := "cook_speed_%d" % level
+		upgrade_costs[id] = level * 2
+		upgrade_names[id] = "Cocina rápida · Nivel %d" % level
+		upgrade_descriptions[id] = "Reduce permanentemente el tiempo de cada plato en 0,2 segundos adicionales (%.1f segundos acumulados). Se combina con las mejoras de dinero." % (level * 0.2)
+		upgrade_requirements[id] = [] if level == 1 else ["cook_speed_%d" % (level - 1)]
+		upgrade_cook_speed_bonus[id] = 1
 	for level in range(1, 5):
 		var id := "menu_capacity_%d" % level
 		upgrade_costs[id] = 5 + (level - 1) * 5
@@ -73,7 +80,6 @@ var upgrade_costs: Dictionary = {
 	"player_capacity_2": 5,
 	"counter_capacity_1": 1,
 	"counter_capacity_2": 3,
-	"cook_speed_1": 2,
 	"vip_spawn_1": 2,
 	"vip_spawn_2": 4,
 	"vip_group_2": 3,
@@ -87,7 +93,6 @@ var upgrade_descriptions: Dictionary = {
 	"player_capacity_2": "Tu personaje puede llevar hasta 2 platos a la vez.",
 	"counter_capacity_1": "Añade +1 espacio para platos preparados.",
 	"counter_capacity_2": "Añade +2 espacios para platos preparados.",
-	"cook_speed_1": "Aumenta la velocidad de cocina.",
 	"vip_spawn_1": "Aumenta la probabilidad de aparición de clientes VIP.",
 	"vip_spawn_2": "Aumenta todavía más la probabilidad de aparición de clientes VIP.",
 	"vip_group_2": "Permite que los clientes VIP puedan aparecer en pareja.",
@@ -101,7 +106,6 @@ var upgrade_names: Dictionary = {
 	"player_capacity_2": "Llevar 2 platos",
 	"counter_capacity_1": "Mostrador ampliado",
 	"counter_capacity_2": "Mostrador ampliado II",
-	"cook_speed_1": "Cocinero más rápido",
 	"vip_spawn_1": "Más clientes VIP",
 	"vip_spawn_2": "Más clientes VIP II",
 	"vip_group_2": "VIP en pareja",
@@ -115,8 +119,7 @@ var upgrade_requirements: Dictionary = {
 	"player_capacity_2": [],
 	"counter_capacity_1": [],
 	"counter_capacity_2": ["counter_capacity_1"],
-	"cook_speed_1": [],
-	"vip_spawn_1": [],
+	"vip_spawn_1": ["permanent_vip"],
 	"vip_spawn_2": ["vip_spawn_1"],
 	"vip_group_2": ["vip_spawn_1"],
 	"vip_group_3": ["vip_group_2"],
@@ -126,9 +129,7 @@ var upgrade_counter_capacity_bonus: Dictionary = {
 	"counter_capacity_1": 1,
 	"counter_capacity_2": 2
 }
-var upgrade_cook_speed_bonus: Dictionary = {
-	"cook_speed_1": 1
-}
+var upgrade_cook_speed_bonus: Dictionary = {}
 var upgrade_vip_spawn_bonus: Dictionary = {
 	"vip_spawn_1": 1,
 	"vip_spawn_2": 1

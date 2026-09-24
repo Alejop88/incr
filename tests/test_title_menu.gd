@@ -24,6 +24,8 @@ func run_tests() -> void:
 	check(menu.continue_button.disabled and not menu.status_label.text.is_empty(), "Invalid saves must disable Continue and explain the problem")
 	menu.save_manager.delete_save()
 	menu.new_game_button.pressed.emit()
+	menu.mode_buttons.cozy.pressed.emit()
+	menu.slot_buttons[0].pressed.emit()
 	await process_frame
 	await process_frame
 	var game: Node = current_scene
@@ -36,6 +38,7 @@ func run_tests() -> void:
 	menu = make_title()
 	check(not menu.continue_button.disabled, "Valid save must enable Continue")
 	menu.continue_button.pressed.emit()
+	menu.slot_buttons[0].pressed.emit()
 	await process_frame
 	await process_frame
 	game = current_scene
@@ -50,17 +53,22 @@ func run_tests() -> void:
 	menu = make_title()
 	var original_save: String = FileAccess.get_file_as_string(save_path)
 	menu.new_game_button.pressed.emit()
+	menu.mode_buttons.cozy.pressed.emit()
+	menu.slot_buttons[0].pressed.emit()
 	check(menu.confirmation.visible, "New game must confirm before replacing an existing save")
 	menu.confirmation.hide()
 	menu.confirmation.canceled.emit()
 	check(FileAccess.get_file_as_string(save_path) == original_save, "Cancel preserves the save")
 	menu.new_game_button.pressed.emit()
+	menu.mode_buttons.cozy.pressed.emit()
+	menu.slot_buttons[0].pressed.emit()
 	menu.confirmation.confirmed.emit()
 	await process_frame
 	await process_frame
 	game = current_scene
-	check(game.economy_manager.money == 0 and not FileAccess.file_exists(save_path), "Confirmed new game must reset progression")
+	check(game.economy_manager.money == 0 and FileAccess.file_exists(save_path), "Confirmed new game must reserve its slot with fresh progression")
 	game.free()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(fixture_path))
 	print("TITLE MENU TESTS: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
 	quit(0 if failures == 0 else 1)

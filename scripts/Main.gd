@@ -30,10 +30,21 @@ var gachapon = preload("res://scripts/Gachapon.gd").new()
 var gachapon_panel: Control
 const VIP_UNLOCK_COST: float = 100.0
 var vip_run_unlocked: bool = false
+var game_mode: String = "cozy"
+var play_time: float = 0.0
+
 func _ready() -> void:
+	var slots: Node = get_node("/root/SaveSlots")
+	if save_manager.save_path == "user://partida.json":
+		save_manager.save_path = slots.active_path
+	var creating: bool = slots.new_game_pending and slots.active_path == save_manager.save_path
+	if creating:
+		game_mode = slots.selected_mode
+		slots.new_game_pending = false
 	restaurant.start_random_menu()
 	initial_run_data = _get_save_data().duplicate(true)
-	_load_saved_progress()
+	if not creating:
+		_load_saved_progress()
 	_setup_gachapon()
 	restaurant.waiter_manager.set_training_level(michelin_manager.get_staff_training_level())
 	restaurant.set_vip_unlocked(vip_run_unlocked or michelin_manager.is_upgrade_bought("permanent_vip"))
@@ -96,6 +107,9 @@ func _ready() -> void:
 	hud.eating_speed_upgrade_requested.connect(_on_eating_speed_upgrade_requested)
 	hud.patience_upgrade_requested.connect(_on_patience_upgrade_requested)
 	restaurant.spawn_customer()
+	if creating and not _on_save_requested():
+		pause_menu.open_menu()
+		pause_menu.show_status(save_manager.last_error)
 
 func _get_save_data() -> Dictionary:
 	var unlocked_tables: Array[String] = []
@@ -103,6 +117,8 @@ func _get_save_data() -> Dictionary:
 		if table.unlocked:
 			unlocked_tables.append(str(table.name))
 	var data: Dictionary = {
+		"game_mode": game_mode,
+		"play_time": play_time,
 		"gachapon_owned": gachapon.owned.duplicate(),
 		"money": economy_manager.money,
 		"camera_zoom": $RestaurantCamera.zoom.x,
@@ -167,6 +183,8 @@ func _load_saved_progress() -> void:
 			pause_menu.show_status(save_manager.last_error)
 		return
 	economy_manager.money = float(data["money"])
+	game_mode = data.get("game_mode", "cozy")
+	play_time = float(data.get("play_time", 0.0))
 	$RestaurantCamera.restore_zoom(float(data.get("camera_zoom", 0.8)))
 	if data.has("camera_position"):
 		$RestaurantCamera.position = Vector2(float(data["camera_position"]["x"]), float(data["camera_position"]["y"]))
@@ -446,6 +464,8 @@ func _on_star_purchase_confirmed() -> void:
 	var previous_data: Dictionary = _get_save_data()
 	var new_run: Dictionary = initial_run_data.duplicate(true)
 	new_run["michelin"] = permanent_data
+	new_run["game_mode"] = game_mode
+	new_run["play_time"] = play_time
 	new_run["gachapon_owned"] = gachapon.owned.duplicate()
 	new_run["camera_zoom"] = $RestaurantCamera.zoom.x
 	new_run["camera_position"] = {"x": $RestaurantCamera.position.x, "y": $RestaurantCamera.position.y}
@@ -493,7 +513,9 @@ func _on_kitchen_panel_requested() -> void:
 
 	hud.set_manual_order_dishes(restaurant.get_available_manual_dishes())
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if not prestige_pending:
+		play_time += delta
 	if hud.menu_editor.visible:
 		_refresh_dish_shop()
 	if hud.kitchen_panel.visible:

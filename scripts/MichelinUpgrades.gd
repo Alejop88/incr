@@ -74,6 +74,8 @@ func _build_tree() -> void:
 	for level in range(1, 4):
 		positions["staff_training_%d" % level] = Vector2(340 + (level - 1) * 160, 0)
 	var rules: Node = preload("res://scripts/MichelinManager.gd").new()
+	for level in range(1, 6):
+		positions["cook_speed_%d" % level] = Vector2(-520 - (level - 1) * 140, 130)
 	for level in range(1, 5):
 		positions["menu_capacity_%d" % level] = Vector2(-710 + (level - 1) * 150, 460)
 	for id in positions:
