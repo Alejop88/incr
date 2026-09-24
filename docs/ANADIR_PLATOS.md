@@ -51,3 +51,16 @@ La imagen aparece en la carta, los botones de cocina y el pedido del cliente. Co
 - Para cambiar el máximo, modifica `MAX_MENU_DISHES` en este mismo archivo.
 
 - El precio de un nuevo plato se cambia en "NEW_DISH_COST" de este mismo archivo.
+
+## Etiquetas y ficha del plato
+
+Cada ficha admite `"tags": ["Mediterránea", "Arroz", "Para compartir"]`.
+Puedes añadir o cambiar estas etiquetas en `CATALOG`; por ahora son informativas y no activan combos.
+Al pulsar un plato en Crear la carta aparece su ficha a la derecha, incluso si la carta está llena.
+La ficha muestra el tiempo de cocina y el valor actuales del restaurante, incluidas las mejoras: todavía son iguales para todos los platos.
+
+Las etiquetas con género usan siempre la forma femenina, referida a «comida» (por ejemplo, `Fría`, `Vegetariana` y `Mediterránea`). `DishTypes.tags()` normaliza las variantes previstas y elimina duplicados. El filtro de la carta usa estas mismas etiquetas y no cambia los platos seleccionados.
+
+## Información del modo Normal (sin efectos aún)
+
+Puedes añadir `"complexity": "Por definir"` y `"effect_description": "Descripción de la futura característica"` a la ficha del plato. Estos campos solo se muestran en Normal, encima de las etiquetas. Son informativos: no modifican precios, tiempos ni combos. En Cozy no aparecen.

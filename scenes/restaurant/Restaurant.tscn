@@ -304,7 +304,7 @@ max_value = 20.0
 value = 20.0
 show_percentage = false
 
-[node name="Table07Point" type="Area2D" parent="."]
+[node name="Table07Point" type="Area2D" parent="." unique_id=21064793]
 position = Vector2(440, 1260)
 collision_layer = 2
 collision_mask = 0
@@ -312,28 +312,28 @@ script = ExtResource("5_ycgdg")
 unlocked = false
 seat_capacity = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Table07Point"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table07Point" unique_id=978654512]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_rarhs")
 debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="Table07Point"]
+[node name="Sprite2D" type="Sprite2D" parent="Table07Point" unique_id=1387154868]
 
-[node name="EatingTimer" type="Timer" parent="Table07Point"]
+[node name="EatingTimer" type="Timer" parent="Table07Point" unique_id=1064228230]
 one_shot = true
 
-[node name="SeatPoints" type="Node2D" parent="Table07Point"]
+[node name="SeatPoints" type="Node2D" parent="Table07Point" unique_id=244778567]
 
-[node name="Seat01" type="Marker2D" parent="Table07Point/SeatPoints"]
+[node name="Seat01" type="Marker2D" parent="Table07Point/SeatPoints" unique_id=1076431998]
 position = Vector2(125, 0)
 
-[node name="Seat02" type="Marker2D" parent="Table07Point/SeatPoints"]
+[node name="Seat02" type="Marker2D" parent="Table07Point/SeatPoints" unique_id=127001667]
 position = Vector2(-125, 0)
 
-[node name="FoodWaitTimer" type="Timer" parent="Table07Point"]
+[node name="FoodWaitTimer" type="Timer" parent="Table07Point" unique_id=15908979]
 one_shot = true
 
-[node name="PatienceBar" type="ProgressBar" parent="Table07Point"]
+[node name="PatienceBar" type="ProgressBar" parent="Table07Point" unique_id=1697919253]
 visible = false
 offset_left = -37.0
 offset_top = -74.0
@@ -343,7 +343,7 @@ max_value = 20.0
 value = 20.0
 show_percentage = false
 
-[node name="Table08Point" type="Area2D" parent="."]
+[node name="Table08Point" type="Area2D" parent="." unique_id=129627531]
 position = Vector2(920, 1260)
 collision_layer = 2
 collision_mask = 0
@@ -351,34 +351,34 @@ script = ExtResource("5_ycgdg")
 unlocked = false
 seat_capacity = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Table08Point"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table08Point" unique_id=485678003]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_rarhs")
 debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="Table08Point"]
+[node name="Sprite2D" type="Sprite2D" parent="Table08Point" unique_id=2121212746]
 
-[node name="EatingTimer" type="Timer" parent="Table08Point"]
+[node name="EatingTimer" type="Timer" parent="Table08Point" unique_id=1730757118]
 one_shot = true
 
-[node name="SeatPoints" type="Node2D" parent="Table08Point"]
+[node name="SeatPoints" type="Node2D" parent="Table08Point" unique_id=1047164072]
 
-[node name="Seat01" type="Marker2D" parent="Table08Point/SeatPoints"]
+[node name="Seat01" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=2016380326]
 position = Vector2(125, 60)
 
-[node name="Seat02" type="Marker2D" parent="Table08Point/SeatPoints"]
+[node name="Seat02" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=630096952]
 position = Vector2(-125, 60)
 
-[node name="Seat03" type="Marker2D" parent="Table08Point/SeatPoints"]
+[node name="Seat03" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=1192421233]
 position = Vector2(-125, -60)
 
-[node name="Seat04" type="Marker2D" parent="Table08Point/SeatPoints"]
+[node name="Seat04" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=714187636]
 position = Vector2(125, -60)
 
-[node name="FoodWaitTimer" type="Timer" parent="Table08Point"]
+[node name="FoodWaitTimer" type="Timer" parent="Table08Point" unique_id=1676667823]
 one_shot = true
 
-[node name="PatienceBar" type="ProgressBar" parent="Table08Point"]
+[node name="PatienceBar" type="ProgressBar" parent="Table08Point" unique_id=286306139]
 visible = false
 offset_left = -37.0
 offset_top = -74.0
@@ -388,7 +388,7 @@ max_value = 20.0
 value = 20.0
 show_percentage = false
 
-[node name="Table09Point" type="Area2D" parent="."]
+[node name="Table09Point" type="Area2D" parent="." unique_id=1799267621]
 position = Vector2(440, 1600)
 collision_layer = 2
 collision_mask = 0
@@ -396,28 +396,28 @@ script = ExtResource("5_ycgdg")
 unlocked = false
 seat_capacity = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Table09Point"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table09Point" unique_id=1572090423]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_rarhs")
 debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="Table09Point"]
+[node name="Sprite2D" type="Sprite2D" parent="Table09Point" unique_id=774340079]
 
-[node name="EatingTimer" type="Timer" parent="Table09Point"]
+[node name="EatingTimer" type="Timer" parent="Table09Point" unique_id=679787892]
 one_shot = true
 
-[node name="SeatPoints" type="Node2D" parent="Table09Point"]
+[node name="SeatPoints" type="Node2D" parent="Table09Point" unique_id=923497656]
 
-[node name="Seat01" type="Marker2D" parent="Table09Point/SeatPoints"]
+[node name="Seat01" type="Marker2D" parent="Table09Point/SeatPoints" unique_id=1985958868]
 position = Vector2(125, 0)
 
-[node name="Seat02" type="Marker2D" parent="Table09Point/SeatPoints"]
+[node name="Seat02" type="Marker2D" parent="Table09Point/SeatPoints" unique_id=941952563]
 position = Vector2(-125, 0)
 
-[node name="FoodWaitTimer" type="Timer" parent="Table09Point"]
+[node name="FoodWaitTimer" type="Timer" parent="Table09Point" unique_id=2137835533]
 one_shot = true
 
-[node name="PatienceBar" type="ProgressBar" parent="Table09Point"]
+[node name="PatienceBar" type="ProgressBar" parent="Table09Point" unique_id=2111255284]
 visible = false
 offset_left = -37.0
 offset_top = -74.0
@@ -427,7 +427,7 @@ max_value = 20.0
 value = 20.0
 show_percentage = false
 
-[node name="Table10Point" type="Area2D" parent="."]
+[node name="Table10Point" type="Area2D" parent="." unique_id=1362214143]
 position = Vector2(920, 1600)
 collision_layer = 2
 collision_mask = 0
@@ -435,34 +435,34 @@ script = ExtResource("5_ycgdg")
 unlocked = false
 seat_capacity = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Table10Point"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table10Point" unique_id=1680476109]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_rarhs")
 debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="Table10Point"]
+[node name="Sprite2D" type="Sprite2D" parent="Table10Point" unique_id=1528712554]
 
-[node name="EatingTimer" type="Timer" parent="Table10Point"]
+[node name="EatingTimer" type="Timer" parent="Table10Point" unique_id=1021505390]
 one_shot = true
 
-[node name="SeatPoints" type="Node2D" parent="Table10Point"]
+[node name="SeatPoints" type="Node2D" parent="Table10Point" unique_id=875494248]
 
-[node name="Seat01" type="Marker2D" parent="Table10Point/SeatPoints"]
+[node name="Seat01" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=874046444]
 position = Vector2(125, 60)
 
-[node name="Seat02" type="Marker2D" parent="Table10Point/SeatPoints"]
+[node name="Seat02" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=298842251]
 position = Vector2(-125, 60)
 
-[node name="Seat03" type="Marker2D" parent="Table10Point/SeatPoints"]
+[node name="Seat03" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=1142448891]
 position = Vector2(-125, -60)
 
-[node name="Seat04" type="Marker2D" parent="Table10Point/SeatPoints"]
+[node name="Seat04" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=580993619]
 position = Vector2(125, -60)
 
-[node name="FoodWaitTimer" type="Timer" parent="Table10Point"]
+[node name="FoodWaitTimer" type="Timer" parent="Table10Point" unique_id=2063384763]
 one_shot = true
 
-[node name="PatienceBar" type="ProgressBar" parent="Table10Point"]
+[node name="PatienceBar" type="ProgressBar" parent="Table10Point" unique_id=367041043]
 visible = false
 offset_left = -37.0
 offset_top = -74.0
@@ -472,7 +472,7 @@ max_value = 20.0
 value = 20.0
 show_percentage = false
 
-[node name="Table11Point" type="Area2D" parent="."]
+[node name="Table11Point" type="Area2D" parent="." unique_id=822711694]
 position = Vector2(440, 1940)
 collision_layer = 2
 collision_mask = 0
@@ -480,28 +480,28 @@ script = ExtResource("5_ycgdg")
 unlocked = false
 seat_capacity = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Table11Point"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table11Point" unique_id=1164795709]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_rarhs")
 debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="Table11Point"]
+[node name="Sprite2D" type="Sprite2D" parent="Table11Point" unique_id=1919595582]
 
-[node name="EatingTimer" type="Timer" parent="Table11Point"]
+[node name="EatingTimer" type="Timer" parent="Table11Point" unique_id=1429088170]
 one_shot = true
 
-[node name="SeatPoints" type="Node2D" parent="Table11Point"]
+[node name="SeatPoints" type="Node2D" parent="Table11Point" unique_id=206383714]
 
-[node name="Seat01" type="Marker2D" parent="Table11Point/SeatPoints"]
+[node name="Seat01" type="Marker2D" parent="Table11Point/SeatPoints" unique_id=1038203429]
 position = Vector2(125, 0)
 
-[node name="Seat02" type="Marker2D" parent="Table11Point/SeatPoints"]
+[node name="Seat02" type="Marker2D" parent="Table11Point/SeatPoints" unique_id=170452656]
 position = Vector2(-125, 0)
 
-[node name="FoodWaitTimer" type="Timer" parent="Table11Point"]
+[node name="FoodWaitTimer" type="Timer" parent="Table11Point" unique_id=1033001801]
 one_shot = true
 
-[node name="PatienceBar" type="ProgressBar" parent="Table11Point"]
+[node name="PatienceBar" type="ProgressBar" parent="Table11Point" unique_id=1251627541]
 visible = false
 offset_left = -37.0
 offset_top = -74.0
@@ -511,7 +511,7 @@ max_value = 20.0
 value = 20.0
 show_percentage = false
 
-[node name="Table12Point" type="Area2D" parent="."]
+[node name="Table12Point" type="Area2D" parent="." unique_id=1937892516]
 position = Vector2(920, 1940)
 collision_layer = 2
 collision_mask = 0
@@ -519,34 +519,34 @@ script = ExtResource("5_ycgdg")
 unlocked = false
 seat_capacity = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Table12Point"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Table12Point" unique_id=112500883]
 position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_rarhs")
 debug_color = Color(0.68266076, 0.49184412, 0.2823893, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="Table12Point"]
+[node name="Sprite2D" type="Sprite2D" parent="Table12Point" unique_id=333999517]
 
-[node name="EatingTimer" type="Timer" parent="Table12Point"]
+[node name="EatingTimer" type="Timer" parent="Table12Point" unique_id=1924108119]
 one_shot = true
 
-[node name="SeatPoints" type="Node2D" parent="Table12Point"]
+[node name="SeatPoints" type="Node2D" parent="Table12Point" unique_id=157833273]
 
-[node name="Seat01" type="Marker2D" parent="Table12Point/SeatPoints"]
+[node name="Seat01" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=1671504952]
 position = Vector2(125, 60)
 
-[node name="Seat02" type="Marker2D" parent="Table12Point/SeatPoints"]
+[node name="Seat02" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=150732955]
 position = Vector2(-125, 60)
 
-[node name="Seat03" type="Marker2D" parent="Table12Point/SeatPoints"]
+[node name="Seat03" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=1507626892]
 position = Vector2(-125, -60)
 
-[node name="Seat04" type="Marker2D" parent="Table12Point/SeatPoints"]
+[node name="Seat04" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=1898389521]
 position = Vector2(125, -60)
 
-[node name="FoodWaitTimer" type="Timer" parent="Table12Point"]
+[node name="FoodWaitTimer" type="Timer" parent="Table12Point" unique_id=977356112]
 one_shot = true
 
-[node name="PatienceBar" type="ProgressBar" parent="Table12Point"]
+[node name="PatienceBar" type="ProgressBar" parent="Table12Point" unique_id=1718007955]
 visible = false
 offset_left = -37.0
 offset_top = -74.0
@@ -600,15 +600,9 @@ debug_color = Color(0.94890803, 0.20741636, 0.2489987, 0.41960785)
 [connection signal="timeout" from="Table04Point/FoodWaitTimer" to="Table04Point" method="_on_food_wait_timer_timeout"]
 [connection signal="timeout" from="Table05Point/FoodWaitTimer" to="Table05Point" method="_on_food_wait_timer_timeout"]
 [connection signal="timeout" from="Table06Point/FoodWaitTimer" to="Table06Point" method="_on_food_wait_timer_timeout"]
-
 [connection signal="timeout" from="Table07Point/FoodWaitTimer" to="Table07Point" method="_on_food_wait_timer_timeout"]
-
 [connection signal="timeout" from="Table08Point/FoodWaitTimer" to="Table08Point" method="_on_food_wait_timer_timeout"]
-
 [connection signal="timeout" from="Table09Point/FoodWaitTimer" to="Table09Point" method="_on_food_wait_timer_timeout"]
-
 [connection signal="timeout" from="Table10Point/FoodWaitTimer" to="Table10Point" method="_on_food_wait_timer_timeout"]
-
 [connection signal="timeout" from="Table11Point/FoodWaitTimer" to="Table11Point" method="_on_food_wait_timer_timeout"]
-
 [connection signal="timeout" from="Table12Point/FoodWaitTimer" to="Table12Point" method="_on_food_wait_timer_timeout"]

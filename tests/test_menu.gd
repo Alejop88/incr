@@ -24,6 +24,61 @@ func run_tests() -> void:
 	var editor: Node = load("res://scripts/ui/MenuEditor.gd").new()
 	root.add_child(editor)
 	editor.open_menu([BURGER, PIZZA])
+	check(not editor.normal_details.visible, "Cozy must keep the original dish details")
+	editor.set_game_mode("normal")
+	editor.show_dish_info(DishTypes.Type.SALAD)
+	check(editor.normal_details.visible and editor.detail_complexity.text.contains("Por definir"), "Normal displays the future complexity field")
+	check(editor.detail_effect.text.contains("5 %") and editor.detail_effect.text.contains("todavía no activa"), "Salad describes its future vegetarian bonus as inactive")
+	check(editor.plate_value == 5.0 and editor.cooking_time == 5.0, "Informational features must not change price or cooking")
+	editor.set_game_mode("cozy")
+	check(not editor.normal_details.visible, "Returning to Cozy hides complexity and traits")
+	editor.show_dish_info(BURGER)
+	check(editor.detail_image.visible and not editor.detail_icon.visible, "Burger details use its image")
+	editor.set_unlocks([BURGER, PIZZA, DishTypes.Type.PAELLA], 0)
+	editor.dish_buttons[DishTypes.Type.PAELLA].pressed.emit()
+	check(editor.detail_name.text == "PAELLA" and editor.selected == [BURGER, PIZZA], "Full menu must still allow inspecting another dish without adding it")
+	check(editor.detail_icon.visible and not editor.detail_image.visible, "Dishes without textures use their icon")
+	var displayed_tags: Array[String] = []
+	for chip in editor.detail_tags.get_children():
+		displayed_tags.append(chip.get_child(0).text)
+	check(displayed_tags == ["Mediterránea", "Arroz", "Marisco", "Pescado", "Tradicional", "Sartén", "Para compartir"], "Paella must show the requested tags in order")
+	editor.set_dish_stats(4.6, 6.0)
+	check(editor.detail_time.text.contains("4.6 s") and editor.detail_value.text.contains("6.0 €"), "Details display current cooking time and price")
+	check(DishTypes.tags(DishTypes.Type.SALAD).has("Fría") and DishTypes.tags(DishTypes.Type.NIGIRI).has("Fría"), "Shared tags must use a consistent gender")
+	check(not DishTypes.all_tags().has("Frío"), "Filter must not contain duplicate gender variants")
+	for index in range(editor.tag_checkboxes.size()):
+		if editor.tag_checkboxes[index].text == "Arroz":
+			editor.tag_checkboxes[index].set_pressed_no_signal(false)
+			editor.tag_checkboxes[index].pressed.emit()
+	check(editor.dish_buttons[DishTypes.Type.PAELLA].visible and not editor.dish_buttons[BURGER].visible and not editor.dish_buttons[PIZZA].visible, "Rice filter shows only matching unlocked dishes")
+	check(editor.selected == [BURGER, PIZZA], "Filtering must preserve selected dishes that become hidden")
+	for index in range(editor.tag_checkboxes.size()):
+		if editor.tag_checkboxes[index].text == "Mediterránea":
+			editor.tag_checkboxes[index].pressed.emit()
+	check(editor.active_tags.size() == 2 and editor.dish_buttons[DishTypes.Type.PAELLA].visible and not editor.dish_buttons[PIZZA].visible, "Combined filters require both rice and Mediterranean tags")
+	check(editor.filter_scroll.custom_minimum_size.y == 280, "Filter popup height must remain compact")
+	editor.tag_filter.pressed.emit()
+	await process_frame
+	await process_frame
+	check(editor.filter_scroll.size.y <= 290, "Opening filter must not expand to fit the entire tag list")
+	check(editor.filter_scroll.get_v_scroll_bar().max_value > editor.filter_scroll.size.y, "Remaining tags must be reachable by scrolling")
+	editor.tag_filter.pressed.emit()
+	check(not editor.filter_popup.visible and editor.active_tags.size() == 2, "Second click must close filter without clearing selections")
+	editor.tag_filter.pressed.emit()
+	check(editor.filter_popup.visible and editor.active_tags.size() == 2, "Reopening preserves selected tags")
+	editor.tag_filter.pressed.emit()
+	for index in range(editor.tag_checkboxes.size()):
+		if editor.tag_checkboxes[index].text == "Japonesa":
+			check(not editor.tag_checkboxes[index].visible, "Tags belonging only to locked dishes must be hidden")
+		if editor.tag_checkboxes[index].text == "Americana":
+			editor.tag_checkboxes[index].pressed.emit()
+	check(editor.empty_results.visible, "Tags without unlocked matches show an empty state")
+	editor.clear_filter_button.pressed.emit()
+	check(editor.dish_buttons[BURGER].visible and not editor.empty_results.visible, "All tags restores the dish list")
+	editor.set_unlocks([BURGER, PIZZA, DishTypes.Type.PAELLA, DishTypes.Type.NIGIRI], 0)
+	for checkbox in editor.tag_checkboxes:
+		if checkbox.text == "Japonesa":
+			check(checkbox.visible, "Unlocking a new dish makes its tags available")
 	editor._toggle_dish(NONE)
 	check(editor.selected == [BURGER, PIZZA], "A third selection must not exceed the cap")
 	editor._toggle_dish(BURGER)
