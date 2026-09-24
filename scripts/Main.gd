@@ -163,8 +163,8 @@ func _load_saved_progress() -> void:
 	var data: Dictionary = save_manager.load_game()
 	if data.is_empty():
 		if not save_manager.last_error.is_empty():
-			pause_menu.show_status(save_manager.last_error)
 			pause_menu.open_menu()
+			pause_menu.show_status(save_manager.last_error)
 		return
 	economy_manager.money = float(data["money"])
 	$RestaurantCamera.restore_zoom(float(data.get("camera_zoom", 0.8)))

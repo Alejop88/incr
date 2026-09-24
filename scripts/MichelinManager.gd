@@ -67,7 +67,6 @@ func get_permanent_waiter_count() -> int:
 			count += 1
 	return count
 var upgrade_costs: Dictionary = {
-	"menu_capacity_1": 5,
 	"permanent_vip": 5,
 	"permanent_waiter": 5,
 	"waiter_capacity_2": 8,
@@ -82,7 +81,6 @@ var upgrade_costs: Dictionary = {
 	"vip_group_4": 8
 }
 var upgrade_descriptions: Dictionary = {
-	"menu_capacity_1": "Añade 1 hueco a la carta y aumenta un 25 % la frecuencia de llegadas. Si solo tienes 2 platos desbloqueados, regala otro aleatorio.",
 	"permanent_vip": "Habilita los clientes VIP desde el inicio de cada partida sin pagar su desbloqueo con dinero.",
 	"permanent_waiter": "Empiezas cada partida tras comprar mejoras con un camarero permanente adicional.",
 	"waiter_capacity_2": "Todos los camareros automáticos pueden recoger y repartir hasta 2 platos. Requiere el camarero permanente.",
@@ -97,7 +95,6 @@ var upgrade_descriptions: Dictionary = {
 	"vip_group_4": "Permite que los clientes VIP puedan aparecer en grupos de cuatro."
 }
 var upgrade_names: Dictionary = {
-	"menu_capacity_1": "Carta ampliada",
 	"permanent_vip": "VIP desde el inicio",
 	"permanent_waiter": "Camarero permanente",
 	"waiter_capacity_2": "Camareros: 2 platos",
@@ -112,7 +109,6 @@ var upgrade_names: Dictionary = {
 	"vip_group_4": "VIP en grupo de cuatro"
 }
 var upgrade_requirements: Dictionary = {
-	"menu_capacity_1": [],
 	"permanent_vip": [],
 	"permanent_waiter": [],
 	"waiter_capacity_2": ["permanent_waiter"],

@@ -152,24 +152,6 @@ func _on_table_input_event(_viewport: Viewport,event: InputEvent,_shape_idx: int
 
 		player_waiter.move_to_position(current_table.get_service_position(),player_waiter.TargetType.TABLE)
 		
-#func _input(event: InputEvent) -> void:
-#	if event is InputEventMouseButton:
-#		print(
-#			"GLOBAL -> botón: ",
-#			event.button_index,
-#			" pulsado: ",
-#			event.pressed,
-#			" posición: ",
-#			event.position
-#		)
-
-	if event is InputEventScreenTouch:
-		print(
-			"TOUCH -> pulsado: ",
-			event.pressed,
-			" posición: ",
-			event.position
-		)
 func _on_table_eating_finished(current_table: Area2D) -> void:
 	var customer: CharacterBody2D = \
 		current_table.get_seated_customer()
@@ -516,9 +498,6 @@ func update_plate_price() -> void:
 
 	for current_table in tables:
 		current_table.set_payment_amount(plate_price)
-	
-func get_plate_price() -> float:
-	return plate_price
 	
 # Actualiza todas las estadísticas derivadas de las mejoras actuales.
 func update_stats() -> void:

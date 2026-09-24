@@ -52,8 +52,6 @@ func get_customer(index: int) -> CharacterBody2D:
 		return null
 
 	return customers[index]
-func get_customer_count() -> int:
-	return customers.size()
 func move_customers_to_seats(seat_positions: Array[Vector2]) -> void:
 	for i in range(customers.size()):
 		var customer: CharacterBody2D = customers[i]

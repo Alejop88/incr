@@ -1,7 +1,6 @@
 extends Area2D
 
 signal payment_collected(amount: float)
-signal table_selected(table: Area2D)
 signal customers_left_without_paying(table: Area2D)
 signal eating_finished(table: Area2D)
 enum State {
@@ -48,7 +47,6 @@ func _ready() -> void:
 	for seat in $SeatPoints.get_children():
 		if seat is Marker2D:
 			customer_seat_points.append(seat)
-	input_event.connect(_on_input_event)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
 	update_food_wait_time()
 	update_eating_time()
@@ -251,13 +249,6 @@ func collect_payment() -> bool:
 	return true
 
 
-func _on_input_event(
-	_viewport: Viewport,
-	event: InputEvent,
-	_shape_idx: int
-) -> void:
-	pass
-			
 func set_payment_amount(amount: float) -> void:
 	payment_amount = amount
 	
@@ -278,9 +269,6 @@ func clear_seated_customer() -> void:
 	occupied_seats = 0
 	state = State.FREE
 	patience_bar.visible = false
-func get_seat_capacity() -> int:
-	return seat_capacity
-
 func get_service_position() -> Vector2:
 	return global_position + Vector2(0, 165)
 func is_available() -> bool:
@@ -293,10 +281,6 @@ func can_seat_group(group_size: int) -> bool:
 		return false
 
 	return seat_capacity >= group_size
-func get_required_plates() -> int:
-	return required_plates
-func get_occupied_seats() -> int:
-	return occupied_seats
 func get_group_seat_positions(group_size: int) -> Array[Vector2]:
 	var positions: Array[Vector2] = []
 
@@ -319,9 +303,6 @@ func unlock() -> void:
 	print(name, " desbloqueada")
 
 
-func lock() -> void:
-	unlocked = false
-	visible = false
 func find_customer_waiting_for_dish(
 	dish: DishTypes.Type
 ) -> CharacterBody2D:
