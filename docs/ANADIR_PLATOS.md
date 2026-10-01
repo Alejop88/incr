@@ -55,7 +55,7 @@ La imagen aparece en la carta, los botones de cocina y el pedido del cliente. Co
 ## Etiquetas y ficha del plato
 
 Cada ficha admite `"tags": ["Mediterránea", "Arroz", "Para compartir"]`.
-Puedes añadir o cambiar estas etiquetas en `CATALOG`; por ahora son informativas y no activan combos.
+Puedes añadir o cambiar estas etiquetas en `CATALOG`; en Normal, las características implementadas se activan cuando la carta cumple sus condiciones.
 Al pulsar un plato en Crear la carta aparece su ficha a la derecha, incluso si la carta está llena.
 La ficha muestra el tiempo de cocina y el valor actuales del restaurante, incluidas las mejoras: todavía son iguales para todos los platos.
 
@@ -64,3 +64,13 @@ Las etiquetas con género usan siempre la forma femenina, referida a «comida» 
 ## Información del modo Normal (sin efectos aún)
 
 Puedes añadir `"complexity": "Por definir"` y `"effect_description": "Descripción de la futura característica"` a la ficha del plato. Estos campos solo se muestran en Normal, encima de las etiquetas. Son informativos: no modifican precios, tiempos ni combos. En Cozy no aparecen.
+
+Las descripciones de las etiquetas están en `TAG_EFFECTS`, dentro de `scripts/DishTypes.gd`, y se muestran al pasar el ratón en la ficha o el filtro **solo en Normal**. `IMPLEMENTED_TAG_EFFECTS` distingue las características implementadas de las futuras. Para añadir una descripción, usa como clave el nombre unificado de la etiqueta y como valor su texto. Las etiquetas sin característica definida no muestran explicación. Las variantes se unifican mediante `TAG_ALIASES`; para sopas y platos caldosos usamos `Caldo`, y para frituras, `Frita`.
+
+## Primeras características activas (solo Normal)
+
+`scripts/MenuTraits.gd` calcula los efectos a partir de los platos distintos de la carta aplicada. Picante aumenta un 2 % la velocidad de los camareros automáticos por plato; una carta completamente Fría aumenta un 30 % la velocidad de cocina; con al menos cuatro platos Sushi aumenta un 25 % la velocidad de comer y un 20 % la frecuencia de llegadas. Las velocidades se multiplican sobre las mejoras existentes: cocinar un 30 % más rápido significa dividir el tiempo entre 1,3.
+
+También funcionan Japonesa (+2 % de velocidad de cocina por plato), Arroz (2–4 platos: +10 %; 5 o más: +30 % de velocidad de cocina), Pescado (3–5 platos: +15 %; 6 o más: +30 % de velocidad al comer) y Marisco (6 o más: +25 % de valor del marisco y +5 % relativo de aparición VIP). Con al menos 3 platos Pescado y 3 Marisco, ambos tipos ganan además un 10 % de valor, una sola vez por plato aunque tenga las dos etiquetas. Los tramos se sustituyen; características distintas multiplican sus bonificaciones. Marisco no desbloquea los VIP por sí solo.
+
+Se recalculan al aplicar la carta, restaurar recetas o iniciar la partida según su modo. Los tiempos nuevos se utilizan en las próximas preparaciones, comidas y siguientes intervalos de aparición; no reinician actividades en curso. Las mesas conservan la bonificación de cada plato entregado hasta cobrar y la limpian al cambiar de grupo o ronda. No se guardan como mejoras permanentes. En Cozy los multiplicadores siempre son 1. Nigiri, Maki, Temaki y Sashimi permiten alcanzar los cuatro Sushi; para Picante y los umbrales de Marisco aún faltan recetas. Las demás características y el ejemplo propio de la ensalada siguen sin efectos.

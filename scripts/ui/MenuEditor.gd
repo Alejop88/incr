@@ -30,8 +30,26 @@ var detail_tags: HFlowContainer
 var inspected_dish: int = DishTypes.Type.NONE
 var cooking_time: float = 5.0
 var plate_value: float = 5.0
+var active_traits_panel: PanelContainer
+var active_traits_list: VBoxContainer
+var active_traits_empty: Label
+var active_trait_labels: Dictionary = {}
 
 func _ready() -> void:
+	# Tooltip popups inherit this local theme, including tags in the filter.
+	theme = Theme.new()
+	var tooltip_style := StyleBoxFlat.new()
+	tooltip_style.bg_color = Color("17231f")
+	tooltip_style.border_color = Color("759c87")
+	tooltip_style.set_border_width_all(1)
+	tooltip_style.set_corner_radius_all(6)
+	tooltip_style.content_margin_left = 14
+	tooltip_style.content_margin_right = 14
+	tooltip_style.content_margin_top = 10
+	tooltip_style.content_margin_bottom = 10
+	theme.set_stylebox("panel", "TooltipPanel", tooltip_style)
+	theme.set_color("font_color", "TooltipLabel", Color.WHITE)
+	theme.set_font_size("font_size", "TooltipLabel", 16)
 	position = Vector2(100, 24)
 	size = Vector2(940, 580)
 	var margin := MarginContainer.new()
@@ -100,6 +118,46 @@ func _ready() -> void:
 	column.add_child(title)
 	summary = Label.new()
 	column.add_child(summary)
+	active_traits_panel = PanelContainer.new()
+	var traits_style := StyleBoxFlat.new()
+	traits_style.bg_color = Color("20382d")
+	traits_style.set_corner_radius_all(8)
+	traits_style.content_margin_left = 12
+	traits_style.content_margin_right = 12
+	traits_style.content_margin_top = 10
+	traits_style.content_margin_bottom = 10
+	active_traits_panel.add_theme_stylebox_override("panel", traits_style)
+	column.add_child(active_traits_panel)
+	active_traits_list = VBoxContainer.new()
+	active_traits_list.add_theme_constant_override("separation", 6)
+	active_traits_panel.add_child(active_traits_list)
+	var traits_title := Label.new()
+	traits_title.text = "ETIQUETAS ACTIVAS"
+	traits_title.add_theme_color_override("font_color", Color("a8edbd"))
+	active_traits_list.add_child(traits_title)
+	var traits_hint := Label.new()
+	traits_hint.text = "Vista previa · Se activan al aplicar la carta"
+	traits_hint.add_theme_font_size_override("font_size", 13)
+	active_traits_list.add_child(traits_hint)
+	active_traits_empty = Label.new()
+	active_traits_empty.text = "Ninguna característica cumplida."
+	active_traits_list.add_child(active_traits_empty)
+	var trait_scroll := ScrollContainer.new()
+	trait_scroll.custom_minimum_size.y = 90
+	trait_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	active_traits_list.add_child(trait_scroll)
+	var trait_rows := VBoxContainer.new()
+	trait_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	trait_scroll.add_child(trait_rows)
+	for tag in DishTypes.IMPLEMENTED_TAG_EFFECTS:
+		var effect_label := Label.new()
+		effect_label.mouse_filter = Control.MOUSE_FILTER_PASS
+		effect_label.tooltip_text = DishTypes.tag_tooltip(tag)
+		effect_label.add_theme_font_size_override("font_size", 15)
+		effect_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		trait_rows.add_child(effect_label)
+		active_trait_labels[tag] = effect_label
+	_update_active_traits()
 	purchase_button = Button.new()
 	purchase_button.pressed.connect(func(): purchase_requested.emit())
 	column.add_child(purchase_button)
@@ -124,6 +182,7 @@ func _ready() -> void:
 	for tag in DishTypes.all_tags():
 		var checkbox := CheckBox.new()
 		checkbox.text = tag
+		checkbox.tooltip_text = DishTypes.tag_tooltip(tag) if game_mode == "normal" else ""
 		checkbox.custom_minimum_size.y = 28
 		checkbox.add_theme_font_size_override("font_size", 16)
 		for state in ["normal", "hover", "pressed", "hover_pressed"]:
@@ -212,6 +271,7 @@ func _toggle_dish(dish: int) -> void:
 	_refresh()
 
 func _refresh() -> void:
+	_update_active_traits()
 	summary.text = "Seleccionados: %d / %d · Elige al menos uno." % [selected.size(), menu_capacity]
 	apply_button.disabled = selected.is_empty()
 	var visible_count := 0
@@ -303,8 +363,27 @@ func set_dish_stats(time: float, value: float) -> void:
 	_update_detail_stats()
 
 func set_game_mode(mode: String) -> void:
+	if game_mode == mode:
+		return
 	game_mode = mode
 	_update_normal_details()
+	_update_active_traits()
+	for checkbox in tag_checkboxes:
+		checkbox.tooltip_text = DishTypes.tag_tooltip(checkbox.text) if game_mode == "normal" else ""
+	if detail_tags != null:
+		for chip in detail_tags.get_children():
+			chip.tooltip_text = DishTypes.tag_tooltip(str(chip.get_meta("tag", ""))) if game_mode == "normal" else ""
+
+func _update_active_traits() -> void:
+	if active_traits_panel == null:
+		return
+	active_traits_panel.visible = game_mode == "normal"
+	var effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate(game_mode, selected)
+	active_traits_empty.visible = effects.active_tags.is_empty()
+	for tag in active_trait_labels:
+		active_trait_labels[tag].visible = effects.active_tags.has(tag)
+		active_trait_labels[tag].text = tag + " · " + str(effects.descriptions.get(tag, ""))
+	_update_detail_stats()
 
 func _update_normal_details() -> void:
 	if normal_details == null:
@@ -318,7 +397,10 @@ func _update_detail_stats() -> void:
 	if detail_time != null:
 		detail_time.text = "TIEMPO: %.1f s" % cooking_time
 		detail_time.tooltip_text = "Tiempo de cocinado"
-		detail_value.text = "VALOR: %.1f €" % plate_value
+		var effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate(game_mode, selected)
+		var multiplier: float = preload("res://scripts/MenuTraits.gd").dish_value_multiplier(inspected_dish, effects)
+		detail_value.text = ("VALOR: %.2f €" if game_mode == "normal" else "VALOR: %.1f €") % (plate_value * multiplier)
+		detail_value.tooltip_text = "Valor con la carta seleccionada; se activa al aplicar." if game_mode == "normal" else "Valor del plato"
 
 func show_dish_info(dish: int) -> void:
 	inspected_dish = dish
@@ -340,7 +422,9 @@ func show_dish_info(dish: int) -> void:
 		tags.append("Sin etiquetas todavía")
 	for tag in tags:
 		var chip := PanelContainer.new()
-		chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		chip.mouse_filter = Control.MOUSE_FILTER_PASS
+		chip.set_meta("tag", tag)
+		chip.tooltip_text = DishTypes.tag_tooltip(tag) if game_mode == "normal" else ""
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color("304840")
 		style.set_corner_radius_all(8)

@@ -16,8 +16,11 @@ const EATING_TIME_REDUCTION_PER_LEVEL: float = 0.2
 const MIN_EATING_TIME: float = 1.0
 
 var eating_speed_level: int = 0
+var menu_speed_multiplier: float = 1.0
 var eating_time: float = BASE_EATING_TIME
 @export var payment_amount: float = 5.0
+var dish_value_multipliers: Dictionary = {}
+var served_value_bonus: float = 0.0
 @export var seat_capacity: int = 1
 const BASE_FOOD_WAIT_TIME: float = 20.0
 const FOOD_WAIT_TIME_INCREASE_PER_LEVEL: float = 2.0
@@ -108,6 +111,7 @@ func reserve(customer_group: Node2D) -> bool:
 		return false
 
 	seated_customer = leader
+	served_value_bonus = 0.0
 
 	required_plates = customer_group.get_group_size()
 	occupied_seats = required_plates
@@ -144,6 +148,8 @@ func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null)
 	customer.has_received_food = true
 	customer.hide_order()
 	delivered_plates += 1
+	# Keep each delivered dish's bonus even if the menu changes before payment.
+	served_value_bonus += float(dish_value_multipliers.get(dish, 1.0)) - 1.0
 	print(
 	"Cliente servido con ",
 	DishTypes.Type.keys()[dish],
@@ -170,7 +176,7 @@ func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null)
 		var current_eating_time: float = eating_time
 
 		if seated_customer is VIPCustomer:
-			current_eating_time = seated_customer.EATING_TIME
+			current_eating_time = seated_customer.EATING_TIME / menu_speed_multiplier
 
 		eating_timer.start(current_eating_time)
 
@@ -181,6 +187,7 @@ func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null)
 	return true
 
 func start_next_food_round(customer: CharacterBody2D,plates_needed: int) -> void:
+	served_value_bonus = 0.0
 	food_round += 1
 	delivered_plates = 0
 	required_plates = plates_needed
@@ -238,7 +245,7 @@ func collect_payment() -> bool:
 	if state != State.WAITING_PAYMENT:
 		return false
 
-	var total_payment: float = payment_amount * required_plates
+	var total_payment: float = payment_amount * (required_plates + served_value_bonus)
 	payment_collected.emit(total_payment)
 	clear_seated_customer()
 
@@ -263,6 +270,7 @@ func get_seated_customer() -> CharacterBody2D:
 	return seated_customer
 	
 func clear_seated_customer() -> void:
+	served_value_bonus = 0.0
 	seated_customer = null
 	required_plates = 1
 	delivered_plates = 0
@@ -325,7 +333,7 @@ func update_eating_time() -> void:
 	eating_time = max(
 		MIN_EATING_TIME,
 		BASE_EATING_TIME - EATING_TIME_REDUCTION_PER_LEVEL * eating_speed_level
-	)
+	) / menu_speed_multiplier
 
 func set_eating_speed_level(level: int) -> void:
 	eating_speed_level = max(level, 0)

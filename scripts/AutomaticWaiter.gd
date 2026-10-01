@@ -5,8 +5,8 @@ const BASE_SPEED: float = 90.0
 const SPEED_PER_LEVEL: float = 15.0
 @export var speed: float = BASE_SPEED
 
-func set_speed_upgrade_level(level: int, training: int = 0) -> void:
-	speed = (BASE_SPEED + SPEED_PER_LEVEL * level) * (1.0 + 0.1 * training)
+func set_speed_upgrade_level(level: int, training: int = 0, menu_multiplier: float = 1.0) -> void:
+	speed = (BASE_SPEED + SPEED_PER_LEVEL * level) * (1.0 + 0.1 * training) * menu_multiplier
 var route = preload("res://scripts/RestaurantRoute.gd").new()
 var coordinator: Node
 var state: State = State.IDLE

@@ -30,9 +30,33 @@ func run_tests() -> void:
 	check(editor.normal_details.visible and editor.detail_complexity.text.contains("Por definir"), "Normal displays the future complexity field")
 	check(editor.detail_effect.text.contains("5 %") and editor.detail_effect.text.contains("todavía no activa"), "Salad describes its future vegetarian bonus as inactive")
 	check(editor.plate_value == 5.0 and editor.cooking_time == 5.0, "Informational features must not change price or cooking")
+	check(DishTypes.TAG_EFFECTS.size() == 20, "All twenty planned tag effects are defined")
+	for tag in DishTypes.TAG_EFFECTS:
+		var tooltip := DishTypes.tag_tooltip(tag)
+		check(tooltip.contains("todavía no activo") != DishTypes.IMPLEMENTED_TAG_EFFECTS.has(tag), "Tooltip distinguishes implemented and future effects: " + tag)
+		for line in tooltip.split("\n"):
+			check(line.length() <= 58, "Long descriptions must wrap to a readable width")
+	check(DishTypes.tag_tooltip("Frito") == DishTypes.tag_tooltip("Fritura"), "Fried tag variants share the same effect")
+	check(DishTypes.tag_tooltip("Peru") == DishTypes.tag_tooltip("Peruana"), "Peruvian tag variants share the same effect")
+	check(DishTypes.tag_tooltip("Tradicional").is_empty(), "Undefined effects must not be invented")
+	for chip in editor.detail_tags.get_children():
+		check(chip.tooltip_text == DishTypes.tag_tooltip(chip.get_child(0).text), "Normal detail tags display their effect")
+		check(chip.mouse_filter == Control.MOUSE_FILTER_PASS, "Detail tags accept hover while preserving scrolling")
+	for checkbox in editor.tag_checkboxes:
+		check(checkbox.tooltip_text == DishTypes.tag_tooltip(checkbox.text), "Normal filter tags display their effect")
+	editor.set_game_mode("cozy")
+	for chip in editor.detail_tags.get_children():
+		check(chip.tooltip_text.is_empty(), "Switching to Cozy clears existing detail tooltips")
+	for checkbox in editor.tag_checkboxes:
+		check(checkbox.tooltip_text.is_empty(), "Switching to Cozy clears filter tooltips")
+	editor.set_game_mode("normal")
+	for chip in editor.detail_tags.get_children():
+		check(chip.tooltip_text == DishTypes.tag_tooltip(chip.get_child(0).text), "Switching back restores tooltips without rebuilding tags")
 	editor.set_game_mode("cozy")
 	check(not editor.normal_details.visible, "Returning to Cozy hides complexity and traits")
 	editor.show_dish_info(BURGER)
+	for chip in editor.detail_tags.get_children():
+		check(chip.tooltip_text.is_empty(), "Newly inspected Cozy dishes have no effect tooltips")
 	check(editor.detail_image.visible and not editor.detail_icon.visible, "Burger details use its image")
 	editor.set_unlocks([BURGER, PIZZA, DishTypes.Type.PAELLA], 0)
 	editor.dish_buttons[DishTypes.Type.PAELLA].pressed.emit()

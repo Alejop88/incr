@@ -6,6 +6,7 @@ const COOK_TIME_REDUCTION_PER_LEVEL: float = 0.2
 const MIN_COOK_TIME: float = 0.5
 
 var cook_speed_level: int = 0
+var menu_speed_multiplier: float = 1.0
 var cook_time: float = BASE_COOK_TIME
 
 var current_dish: DishTypes.Type = DishTypes.Type.NONE
@@ -189,7 +190,7 @@ func update_cook_time() -> void:
 	cook_time = max(
 		MIN_COOK_TIME,
 		BASE_COOK_TIME - COOK_TIME_REDUCTION_PER_LEVEL * cook_speed_level
-	)
+	) / menu_speed_multiplier
 func set_cook_speed_level(level: int) -> void:
 	cook_speed_level = level
 	update_cook_time()

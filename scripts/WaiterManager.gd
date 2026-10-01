@@ -5,6 +5,11 @@ const HIRE_COST: float = 100.0
 const MAX_SPEED_LEVEL: int = 10
 var speed_level: int = 0
 var training_level: int = 0
+var menu_speed_multiplier: float = 1.0
+
+func set_menu_speed_multiplier(multiplier: float) -> void:
+	menu_speed_multiplier = multiplier
+	set_speed_level(speed_level)
 
 func set_training_level(level: int) -> void:
 	training_level = clampi(level, 0, 3)
@@ -14,7 +19,7 @@ func set_speed_level(level: int) -> void:
 	speed_level = clampi(level, 0, MAX_SPEED_LEVEL)
 	for waiter in waiters:
 		if is_instance_valid(waiter):
-			waiter.set_speed_upgrade_level(speed_level, training_level)
+			waiter.set_speed_upgrade_level(speed_level, training_level, menu_speed_multiplier)
 
 func get_speed_upgrade_cost() -> float:
 	return 25.0 * pow(1.5, speed_level)
@@ -56,7 +61,7 @@ func restore_hired_count(count: int) -> void:
 
 func create_waiter(permanent: bool = false) -> CharacterBody2D:
 	var waiter: CharacterBody2D = WAITER_SCENE.instantiate()
-	waiter.set_speed_upgrade_level(speed_level, training_level)
+	waiter.set_speed_upgrade_level(speed_level, training_level, menu_speed_multiplier)
 	waiter.is_permanent = permanent
 	waiter.carry_capacity = carry_capacity
 	waiter.coordinator = self

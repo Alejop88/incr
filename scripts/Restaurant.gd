@@ -42,16 +42,42 @@ var active_customers: Array[CharacterBody2D] = []
 var selected_table: Area2D = null
 var menu_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
 var menu_capacity: int = DishTypes.MAX_MENU_DISHES
+var game_mode: String = "cozy"
+var menu_effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate("cozy", [])
 const BASE_SPAWN_INTERVAL: float = 20.0
+
+func set_game_mode(mode: String) -> void:
+	game_mode = mode
+	refresh_menu_traits()
+
+func refresh_menu_traits() -> void:
+	menu_effects = preload("res://scripts/MenuTraits.gd").calculate(game_mode, menu_dishes)
+	_apply_menu_traits()
+
+func _apply_menu_traits() -> void:
+	waiter_manager.set_menu_speed_multiplier(menu_effects.waiter_speed)
+	kitchen_point.menu_speed_multiplier = menu_effects.cooking_speed
+	update_cook_speed()
+	for table in tables:
+		table.menu_speed_multiplier = menu_effects.eating_speed
+		for dish in DishTypes.CATALOG:
+			table.dish_value_multipliers[dish] = preload("res://scripts/MenuTraits.gd").dish_value_multiplier(dish, menu_effects)
+	update_eating_speed()
+	update_vip_spawn_chance()
+	_update_spawn_interval()
+
+func _update_spawn_interval() -> void:
+	customer_spawn_timer.wait_time = BASE_SPAWN_INTERVAL / (1.0 + 0.25 * (menu_capacity - DishTypes.MAX_MENU_DISHES)) / float(menu_effects.customer_rate)
 
 func set_menu_capacity_bonus(bonus: int) -> void:
 	menu_capacity = DishTypes.MAX_MENU_DISHES + clampi(bonus, 0, 4)
-	customer_spawn_timer.wait_time = BASE_SPAWN_INTERVAL / (1.0 + 0.25 * clampi(bonus, 0, 4))
+	_update_spawn_interval()
 var unlocked_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
 
 func start_random_menu() -> void:
 	unlocked_dishes = DishTypes.random_starting_dishes()
 	menu_dishes = unlocked_dishes.duplicate()
+	refresh_menu_traits()
 
 func get_locked_dishes() -> Array[DishTypes.Type]:
 	var result: Array[DishTypes.Type] = []
@@ -76,6 +102,7 @@ func restore_dish_progress(data: Dictionary) -> void:
 		if unlocked_dishes.has(dish):
 			valid_menu.append(dish)
 	menu_dishes = valid_menu if not valid_menu.is_empty() else unlocked_dishes.slice(0, menu_capacity)
+	refresh_menu_traits()
 
 func set_menu_dishes(dishes: Array) -> bool:
 	if dishes.is_empty() or dishes.size() > menu_capacity:
@@ -86,6 +113,7 @@ func set_menu_dishes(dishes: Array) -> bool:
 			return false
 		validated.append(dish)
 	menu_dishes = validated
+	refresh_menu_traits()
 	return true
 var waiting_queue: Array[Node2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
@@ -479,6 +507,7 @@ func update_vip_spawn_chance() -> void:
 			+ VIP_SPAWN_CHANCE_PER_BONUS_LEVEL
 			* vip_spawn_bonus_level
 	)
+	vip_spawn_chance = minf(1.0, vip_spawn_chance * float(menu_effects.vip_rate))
 func set_vip_spawn_bonus_level(level: int) -> void:
 	vip_spawn_bonus_level = max(level, 0)
 	update_vip_spawn_chance()

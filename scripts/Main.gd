@@ -45,6 +45,7 @@ func _ready() -> void:
 	initial_run_data = _get_save_data().duplicate(true)
 	if not creating:
 		_load_saved_progress()
+	restaurant.set_game_mode(game_mode)
 	_setup_gachapon()
 	restaurant.waiter_manager.set_training_level(michelin_manager.get_staff_training_level())
 	restaurant.set_vip_unlocked(vip_run_unlocked or michelin_manager.is_upgrade_bought("permanent_vip"))

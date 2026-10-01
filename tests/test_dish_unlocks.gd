@@ -48,7 +48,8 @@ func run_tests() -> void:
 	editor._toggle_dish(new_dish)
 	editor.apply_button.pressed.emit()
 	check(r.menu_dishes.has(new_dish) and r.menu_dishes.size() == 2, "Purchased dish can replace a selected recipe")
-	while not r.get_locked_dishes().is_empty():
+	game.economy_manager.money = r.get_locked_dishes().size() * DishTypes.NEW_DISH_COST
+	for i in range(r.get_locked_dishes().size()):
 		game._on_dish_purchase_requested()
 	var balance: float = game.economy_manager.money
 	game._on_dish_purchase_requested()
