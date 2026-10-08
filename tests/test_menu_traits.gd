@@ -70,7 +70,7 @@ func run_tests() -> void:
 	check(not editor.active_traits_empty.visible and not editor.active_trait_labels["Sushi"].visible, "Only fulfilled traits are displayed")
 	editor._toggle_dish(DishTypes.Type.SANDWICH)
 	editor._toggle_dish(BURGER)
-	check(editor.active_traits_empty.visible and not editor.active_trait_labels["Fría"].visible, "Adding a hot dish immediately removes cold preview")
+	check(not editor.active_trait_labels["Fría"].visible, "Adding a hot dish immediately removes cold preview")
 	editor.open_menu([DishTypes.Type.SALAD])
 	check(editor.active_trait_labels["Fría"].visible, "Reopening restores the applied menu preview")
 	editor.set_game_mode("cozy")

@@ -6,6 +6,7 @@ var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var vip_customer_scene := preload("res://scenes/customer/VIPCustomer.tscn")
 var is_vip_group: bool = false
 var available_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
+var menu_effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate("cozy", [])
 signal queue_patience_expired(customer_group)
 
 @export var queue_patience_time: float = 60.0
@@ -21,6 +22,7 @@ func setup(new_group_size: int) -> void:
 	create_customers()
 	
 func create_customers() -> void:
+	var previous_orders: Array = []
 	for i in range(group_size):
 		var scene_to_use: PackedScene = customer_scene
 		if is_vip_group:
@@ -29,7 +31,8 @@ func create_customers() -> void:
 		
 		customer.group_size = group_size
 		add_child(customer)
-		customer.set_requested_dish(available_dishes.pick_random())
+		customer.set_requested_dish(preload("res://scripts/MenuTraits.gd").choose_order(available_dishes, previous_orders, group_size, menu_effects))
+		previous_orders.append(customer.requested_dish)
 		customer.visible = false
 		customers.append(customer)
 		print(
@@ -119,7 +122,7 @@ func start_queue_patience() -> void:
 	if is_vip_group:
 		current_queue_patience_time = VIPCustomer.QUEUE_WAIT_TIME
 
-	queue_patience_timer.start(current_queue_patience_time)
+	queue_patience_timer.start(current_queue_patience_time * float(menu_effects.queue_patience))
 
 
 func stop_queue_patience() -> void:

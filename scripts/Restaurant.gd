@@ -57,12 +57,17 @@ func refresh_menu_traits() -> void:
 func _apply_menu_traits() -> void:
 	waiter_manager.set_menu_speed_multiplier(menu_effects.waiter_speed)
 	kitchen_point.menu_speed_multiplier = menu_effects.cooking_speed
+	kitchen_point.menu_effects = menu_effects
 	update_cook_speed()
 	for table in tables:
 		table.menu_speed_multiplier = menu_effects.eating_speed
+		table.menu_patience_multiplier = menu_effects.table_patience
 		for dish in DishTypes.CATALOG:
 			table.dish_value_multipliers[dish] = preload("res://scripts/MenuTraits.gd").dish_value_multiplier(dish, menu_effects)
 	update_eating_speed()
+	for group in waiting_queue:
+		if is_instance_valid(group):
+			group.menu_effects = menu_effects
 	update_vip_spawn_chance()
 	_update_spawn_interval()
 
@@ -251,12 +256,12 @@ func _on_table_eating_finished(current_table: Area2D) -> void:
 		print("Todos los VIP han terminado su visita")
 		return
 
-	# Cada VIP que continúa elige su siguiente plato.
+	# All orders in this round are chosen before cooking so repetitions are known.
+	var round_orders: Array = []
 	for vip in vip_still_eating:
-		var next_dish: DishTypes.Type = \
-			vip.prepare_next_dish(menu_dishes)
-
-		kitchen_point.add_order(next_dish)
+		var next_dish: DishTypes.Type = preload("res://scripts/MenuTraits.gd").choose_order(menu_dishes, round_orders, vip_still_eating.size(), menu_effects)
+		vip.prepare_next_dish(menu_dishes, next_dish)
+		round_orders.append(next_dish)
 
 		print(
 			"VIP pide su siguiente plato: ",
@@ -268,6 +273,7 @@ func _on_table_eating_finished(current_table: Area2D) -> void:
 		customer,
 		vip_still_eating.size()
 	)
+	kitchen_point.add_orders(vip_still_eating, current_table)
 func _on_player_waiter_destination_reached() -> void:
 	match player_waiter.target_type:
 		player_waiter.TargetType.KITCHEN:
@@ -368,7 +374,7 @@ func _on_customer_destination_reached(customer: CharacterBody2D,customer_table: 
 			if customer_group != null \
 					and customer_group.has_method("get_customers"):
 
-				kitchen_point.add_orders(customer_group.get_customers())
+				kitchen_point.add_orders(customer_group.get_customers(), customer_table)
 				
 		customer.TargetType.QUEUE:
 			print("El grupo ha llegado a la cola")
@@ -395,6 +401,7 @@ func spawn_customer() -> void:
 	add_child(customer_group)
 	customer_group.is_vip_group = is_vip
 	customer_group.available_dishes = menu_dishes.duplicate()
+	customer_group.menu_effects = menu_effects
 	customer_group.setup(group_size)
 
 	var available_table: Area2D = get_available_table(group_size)

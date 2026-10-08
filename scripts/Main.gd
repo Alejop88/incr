@@ -530,7 +530,7 @@ func _process(delta: float) -> void:
 
 func _refresh_dish_shop() -> void:
 	hud.menu_editor.set_game_mode(game_mode)
-	hud.menu_editor.set_dish_stats(restaurant.kitchen_point.cook_time, restaurant.plate_price)
+	hud.menu_editor.set_dish_stats(restaurant.kitchen_point.get_base_cook_time(), restaurant.plate_price)
 	hud.menu_editor.menu_capacity = restaurant.menu_capacity
 	hud.menu_editor.set_unlocks(restaurant.unlocked_dishes, economy_manager.money)
 

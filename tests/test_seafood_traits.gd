@@ -8,16 +8,16 @@ func run_tests() -> void:
 		catalog[id] = {"tags": ["Japonesa", "Arroz", "Pescado", "Marisco"]}
 	catalog[7] = {"tags": ["Carne"]}
 	var one: Dictionary = TRAITS.calculate("normal", [1], catalog)
-	check(is_equal_approx(one.cooking_speed, 1.02), "One Japanese dish grants two percent cooking speed")
-	check(one.eating_speed == 1.0 and one.seafood_value == 1.0, "Threshold bonuses are absent below their requirements")
+	check(is_equal_approx(one.cooking_speed, 1.0), "Japanese dishes no longer grant cooking speed")
+	check(one.eating_speed == 1.0 and TRAITS.dish_value_multiplier(1, one, catalog) == 1.0, "Threshold bonuses are absent below their requirements")
 	var two: Dictionary = TRAITS.calculate("normal", [1, 2], catalog)
-	check(is_equal_approx(two.cooking_speed, 1.04 * 1.1), "Two rice dishes activate the ten percent tier")
+	check(is_equal_approx(two.cooking_speed, 1.1), "Two rice dishes activate the ten percent tier")
 	var three: Dictionary = TRAITS.calculate("normal", [1, 2, 3], catalog)
-	check(is_equal_approx(three.eating_speed, 1.15) and three.fish_seafood_value == 1.1, "Three fish and three seafood activate eating and shared value bonuses")
+	check(is_equal_approx(three.eating_speed, 1.15) and is_equal_approx(TRAITS.dish_value_multiplier(1, three, catalog), 1.1), "Three fish and three seafood activate eating and shared value bonuses")
 	check(is_equal_approx(TRAITS.dish_value_multiplier(1, three, catalog), 1.1), "A dual-tag dish receives shared value bonus only once")
 	check(TRAITS.dish_value_multiplier(7, three, catalog) == 1.0, "Unrelated dishes receive no value bonus")
 	var five: Dictionary = TRAITS.calculate("normal", [1, 2, 3, 4, 5], catalog)
-	check(is_equal_approx(five.cooking_speed, 1.1 * 1.3), "Five rice dishes use the thirty percent tier without stacking the ten percent tier")
+	check(is_equal_approx(five.cooking_speed, 1.3), "Five rice dishes use the thirty percent tier without stacking the ten percent tier")
 	check(is_equal_approx(five.eating_speed, 1.15) and five.vip_rate == 1.0, "Five fish and seafood do not reach six-dish tiers")
 	var six: Dictionary = TRAITS.calculate("normal", [1, 2, 3, 4, 5, 6], catalog)
 	check(is_equal_approx(six.eating_speed, 1.3) and six.vip_rate == 1.05, "Six dishes activate higher fish tier and VIP multiplier")
@@ -25,14 +25,14 @@ func run_tests() -> void:
 	var cozy: Dictionary = TRAITS.calculate("cozy", [1, 2, 3, 4, 5, 6], catalog)
 	check(cozy == TRAITS.calculate("cozy", []), "Cozy remains unaffected by all new traits")
 	var fish_only := {1: {"tags": ["Pescado"]}, 2: {"tags": ["Pescado"]}, 3: {"tags": ["Pescado"]}}
-	check(TRAITS.calculate("normal", [1, 2, 3], fish_only).fish_seafood_value == 1.0, "Fish alone cannot activate seafood synergy")
+	check(TRAITS.dish_value_multiplier(1, TRAITS.calculate("normal", [1, 2, 3], fish_only), fish_only) == 1.0, "Fish alone cannot activate seafood synergy")
 
 	var r: Node = world()
 	r.set_game_mode("normal")
 	r.set_menu_capacity_bonus(2)
 	r.unlocked_dishes.assign([DishTypes.Type.NIGIRI, DishTypes.Type.MAKI, DishTypes.Type.TEMAKI, DishTypes.Type.SASHIMI])
 	r.set_menu_dishes(r.unlocked_dishes)
-	check(is_equal_approx(r.kitchen_point.cook_time, 5.0 / (1.3 * 1.08 * 1.1)), "Real sushi menu combines cold, Japanese and rice cooking bonuses")
+	check(is_equal_approx(r.kitchen_point.cook_time, 5.0 / (1.3 * 1.1)), "Real sushi menu combines cold and rice cooking bonuses")
 	check(is_equal_approx(r.tables[0].eating_time, 5.0 / (1.25 * 1.15)), "Real sushi menu combines sushi and fish eating bonuses")
 	r.menu_effects = six
 	r._apply_menu_traits()

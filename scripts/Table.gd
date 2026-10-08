@@ -17,6 +17,7 @@ const MIN_EATING_TIME: float = 1.0
 
 var eating_speed_level: int = 0
 var menu_speed_multiplier: float = 1.0
+var menu_patience_multiplier: float = 1.0
 var eating_time: float = BASE_EATING_TIME
 @export var payment_amount: float = 5.0
 var dish_value_multipliers: Dictionary = {}
@@ -85,6 +86,7 @@ func seat_customer(customer: CharacterBody2D) -> bool:
 	if customer is VIPCustomer:
 		current_food_wait_time = customer.FOOD_WAIT_TIME
 
+	current_food_wait_time *= menu_patience_multiplier
 	food_wait_timer.start(current_food_wait_time)
 
 	patience_bar.max_value = current_food_wait_time
@@ -199,6 +201,7 @@ func start_next_food_round(customer: CharacterBody2D,plates_needed: int) -> void
 	if customer is VIPCustomer:
 		current_food_wait_time = customer.FOOD_WAIT_TIME
 
+	current_food_wait_time *= menu_patience_multiplier
 	food_wait_timer.start(current_food_wait_time)
 
 	patience_bar.max_value = current_food_wait_time

@@ -7,6 +7,7 @@ const MIN_COOK_TIME: float = 0.5
 
 var cook_speed_level: int = 0
 var menu_speed_multiplier: float = 1.0
+var menu_effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate("cozy", [])
 var cook_time: float = BASE_COOK_TIME
 
 var current_dish: DishTypes.Type = DishTypes.Type.NONE
@@ -15,6 +16,7 @@ var is_cooking: bool = false
 @onready var cook_timer: Timer = $CookTimer
 
 var order_queue: Array[DishTypes.Type] = []
+var order_contexts: Array[Dictionary] = []
 const BASE_COUNTER_CAPACITY: int = 4
 @export var counter_capacity: int = BASE_COUNTER_CAPACITY
 var counter_capacity_bonus: int = 0
@@ -45,11 +47,12 @@ func _on_cook_timer_timeout() -> void:
 	current_dish = DishTypes.Type.NONE
 
 	try_start_cooking()
-func add_order(dish: DishTypes.Type) -> void:
+func add_order(dish: DishTypes.Type, context: Dictionary = {}) -> void:
 	if dish == DishTypes.Type.NONE:
 		return
 
 	order_queue.append(dish)
+	order_contexts.append(context)
 
 	print(
 		"Pedido añadido a cocina: ",
@@ -60,9 +63,15 @@ func add_order(dish: DishTypes.Type) -> void:
 
 	try_start_cooking()
 
-func add_orders(customers: Array) -> void:
+func add_orders(customers: Array, table: Node = null) -> void:
+	var counts := {}
 	for customer in customers:
-		add_order(customer.requested_dish)
+		counts[customer.requested_dish] = int(counts.get(customer.requested_dish, 0)) + 1
+	for customer in customers:
+		var context := {}
+		if table != null:
+			context = {"table": weakref(table), "round": table.food_round, "repeated": counts[customer.requested_dish]}
+		add_order(customer.requested_dish, context)
 func try_start_cooking() -> void:
 	if is_cooking:
 		return
@@ -75,6 +84,7 @@ func try_start_cooking() -> void:
 		return
 
 	current_dish = order_queue.pop_front()
+	var context: Dictionary = order_contexts.pop_front() if not order_contexts.is_empty() else {}
 	is_cooking = true
 
 	print(
@@ -82,7 +92,19 @@ func try_start_cooking() -> void:
 		DishTypes.Type.keys()[current_dish]
 	)
 
-	cook_timer.start(cook_time)
+	cook_timer.start(get_dish_cook_time(current_dish, context))
+
+func get_base_cook_time() -> float:
+	return maxf(MIN_COOK_TIME, BASE_COOK_TIME - COOK_TIME_REDUCTION_PER_LEVEL * cook_speed_level)
+
+func get_dish_cook_time(dish: int, context: Dictionary = {}) -> float:
+	var traits = preload("res://scripts/MenuTraits.gd")
+	var repeated := 1
+	if context.has("table"):
+		var table: Node = context.table.get_ref()
+		if is_instance_valid(table) and table.food_round == context.round and table.state == table.State.WAITING_FOOD:
+			repeated = context.repeated
+	return cook_time / traits.dish_multiplier(dish, menu_effects, "cooking_speed", DishTypes.CATALOG) / traits.sharing_speed(dish, repeated, menu_effects)
 func take_ready_dish() -> DishTypes.Type:
 	if ready_dishes.is_empty():
 		return DishTypes.Type.NONE
@@ -132,8 +154,24 @@ func get_order_queue() -> Array:
 func get_available_manual_dishes() -> Array:
 	return DishTypes.CATALOG.keys()
 func add_manual_order(dish: DishTypes.Type) -> void:
-	order_queue.append(dish)
-	try_start_cooking()
+	var context := {}
+	# Manual copies can fulfil an outstanding repeated order from one actual table.
+	var most_repeated := 1
+	for table in get_tree().get_nodes_in_group("restaurant_tables"):
+		if table.state != table.State.WAITING_FOOD or not is_instance_valid(table.seated_customer):
+			continue
+		var count := 0
+		var pending := false
+		for customer in table.seated_customer.get_parent().get_customers():
+			if customer is VIPCustomer and customer.dishes_eaten >= customer.total_dishes_to_eat:
+				continue
+			if customer.requested_dish == dish:
+				count += 1
+				pending = pending or not customer.has_received_food
+		if pending and count > most_repeated:
+			most_repeated = count
+			context = {"table": weakref(table), "round": table.food_round, "repeated": count}
+	add_order(dish, context)
 func move_order_up(index: int) -> void:
 	if index <= 0:
 		return
@@ -144,6 +182,9 @@ func move_order_up(index: int) -> void:
 	var previous_dish = order_queue[index - 1]
 	order_queue[index - 1] = order_queue[index]
 	order_queue[index] = previous_dish
+	var previous_context: Dictionary = order_contexts[index - 1]
+	order_contexts[index - 1] = order_contexts[index]
+	order_contexts[index] = previous_context
 func move_order_down(index: int) -> void:
 	if index < 0:
 		return
@@ -154,6 +195,9 @@ func move_order_down(index: int) -> void:
 	var next_dish = order_queue[index + 1]
 	order_queue[index + 1] = order_queue[index]
 	order_queue[index] = next_dish
+	var next_context: Dictionary = order_contexts[index + 1]
+	order_contexts[index + 1] = order_contexts[index]
+	order_contexts[index] = next_context
 func cancel_order(index: int) -> void:
 	if index < 0:
 		return
@@ -162,6 +206,7 @@ func cancel_order(index: int) -> void:
 		return
 
 	order_queue.remove_at(index)
+	order_contexts.remove_at(index)
 
 func get_ready_dish_ids() -> Array[int]:
 	return ready_dish_ids.duplicate()
@@ -187,10 +232,7 @@ func take_ready_dish_by_id(dish_id: int) -> DishTypes.Type:
 
 	return dish
 func update_cook_time() -> void:
-	cook_time = max(
-		MIN_COOK_TIME,
-		BASE_COOK_TIME - COOK_TIME_REDUCTION_PER_LEVEL * cook_speed_level
-	) / menu_speed_multiplier
+	cook_time = get_base_cook_time() * float(menu_effects.cooking_time) / menu_speed_multiplier
 func set_cook_speed_level(level: int) -> void:
 	cook_speed_level = level
 	update_cook_time()

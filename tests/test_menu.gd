@@ -30,10 +30,10 @@ func run_tests() -> void:
 	check(editor.normal_details.visible and editor.detail_complexity.text.contains("Por definir"), "Normal displays the future complexity field")
 	check(editor.detail_effect.text.contains("5 %") and editor.detail_effect.text.contains("todavía no activa"), "Salad describes its future vegetarian bonus as inactive")
 	check(editor.plate_value == 5.0 and editor.cooking_time == 5.0, "Informational features must not change price or cooking")
-	check(DishTypes.TAG_EFFECTS.size() == 20, "All twenty planned tag effects are defined")
-	for tag in DishTypes.TAG_EFFECTS:
+	check(DishTypes.implemented_tags().size() == 28, "All twenty-eight tag effects are defined")
+	for tag in DishTypes.implemented_tags():
 		var tooltip := DishTypes.tag_tooltip(tag)
-		check(tooltip.contains("todavía no activo") != DishTypes.IMPLEMENTED_TAG_EFFECTS.has(tag), "Tooltip distinguishes implemented and future effects: " + tag)
+		check(tooltip.contains("modo Normal"), "Tooltip describes implemented effects: " + tag)
 		for line in tooltip.split("\n"):
 			check(line.length() <= 58, "Long descriptions must wrap to a readable width")
 	check(DishTypes.tag_tooltip("Frito") == DishTypes.tag_tooltip("Fritura"), "Fried tag variants share the same effect")
@@ -94,7 +94,7 @@ func run_tests() -> void:
 	for index in range(editor.tag_checkboxes.size()):
 		if editor.tag_checkboxes[index].text == "Japonesa":
 			check(not editor.tag_checkboxes[index].visible, "Tags belonging only to locked dishes must be hidden")
-		if editor.tag_checkboxes[index].text == "Americana":
+		if editor.tag_checkboxes[index].text == "Estadounidense":
 			editor.tag_checkboxes[index].pressed.emit()
 	check(editor.empty_results.visible, "Tags without unlocked matches show an empty state")
 	editor.clear_filter_button.pressed.emit()

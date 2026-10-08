@@ -149,7 +149,7 @@ func _ready() -> void:
 	var trait_rows := VBoxContainer.new()
 	trait_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	trait_scroll.add_child(trait_rows)
-	for tag in DishTypes.IMPLEMENTED_TAG_EFFECTS:
+	for tag in DishTypes.implemented_tags():
 		var effect_label := Label.new()
 		effect_label.mouse_filter = Control.MOUSE_FILTER_PASS
 		effect_label.tooltip_text = DishTypes.tag_tooltip(tag)
@@ -395,9 +395,10 @@ func _update_normal_details() -> void:
 
 func _update_detail_stats() -> void:
 	if detail_time != null:
-		detail_time.text = "TIEMPO: %.1f s" % cooking_time
-		detail_time.tooltip_text = "Tiempo de cocinado"
 		var effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate(game_mode, selected)
+		var speed: float = preload("res://scripts/MenuTraits.gd").dish_cooking_speed(inspected_dish, effects)
+		detail_time.text = "TIEMPO: %.1f s" % (cooking_time / speed)
+		detail_time.tooltip_text = "Tiempo con la carta seleccionada; no incluye repeticiones de una mesa." if game_mode == "normal" else "Tiempo de cocinado"
 		var multiplier: float = preload("res://scripts/MenuTraits.gd").dish_value_multiplier(inspected_dish, effects)
 		detail_value.text = ("VALOR: %.2f €" if game_mode == "normal" else "VALOR: %.1f €") % (plate_value * multiplier)
 		detail_value.tooltip_text = "Valor con la carta seleccionada; se activa al aplicar." if game_mode == "normal" else "Valor del plato"
