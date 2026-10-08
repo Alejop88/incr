@@ -2,9 +2,11 @@
 
 Solo necesitas editar `scripts/DishTypes.gd`. Los platos aparecen automáticamente en «Cocina → Crear la carta». No hace falta modificar clientes, cocina ni camareros.
 
-## Ejemplo: añadir sopa
+El catálogo actual contiene los 139 platos de la lista importada. Ensalada, Sopa y Sandwich genéricos se han retirado; sus identificadores `SALAD`, `SOUP` y `SANDWICH` están reservados para no cambiar la numeración histórica y no deben reutilizarse. Los guardados conservan las recetas vigentes y descartan las retiradas; si no queda ninguna, se recupera una carta válida. Todos los platos tienen icono y campo `image`; solo la hamburguesa conserva su imagen de prueba. Las características individuales se definirán más adelante.
 
-1. Añade `SOUP` **al final** del enum, después del último plato existente (sin borrar los anteriores):
+## Ejemplo: añadir sopa de pollo
+
+1. Añade `CHICKEN_SOUP` **al final** del enum, después del último plato existente (sin borrar los anteriores):
 
 ```gdscript
 enum Type {
@@ -14,17 +16,17 @@ enum Type {
     SALAD,
     TACO,
     PAELLA,
-    SOUP
+    CHICKEN_SOUP
 }
 ```
 
 2. Añade su ficha dentro de `CATALOG`:
 
 ```gdscript
-Type.SOUP: {"name": "Sopa", "icon": "🍲", "image": ""},
+Type.CHICKEN_SOUP: {"name": "Sopa de pollo", "icon": "🍲", "image": ""},
 ```
 
-3. Ejecuta el juego y abre **Cocina → Crear la carta**. El nuevo plato entra automáticamente en el sorteo inicial y en la compra aleatoria. Cuando lo desbloquees, desmarca un plato, selecciona Sopa y pulsa **Aplicar carta**. Se permite seleccionar entre uno y dos platos.
+3. Ejecuta el juego y abre **Cocina → Crear la carta**. El nuevo plato entra automáticamente en el sorteo inicial y en la compra aleatoria. Cuando lo desbloquees, desmarca un plato, selecciona Sopa de pollo y pulsa **Aplicar carta**. Se permite seleccionar entre uno y dos platos.
 
 Los clientes nuevos y las nuevas rondas VIP pedirán platos de la carta. Los pedidos anteriores siguen siendo válidos; la cocina permite prepararlos aunque hayas quitado su plato de la carta.
 
@@ -33,8 +35,8 @@ Los clientes nuevos y las nuevas rondas VIP pedirán platos de la carta. Los ped
 Copia tu PNG o WebP, por ejemplo a `assets/art/dishes/sopa.png`, y cambia la ficha:
 
 ```gdscript
-Type.SOUP: {
-    "name": "Sopa",
+Type.CHICKEN_SOUP: {
+    "name": "Sopa de pollo",
     "icon": "🍲",
     "image": "res://assets/art/dishes/sopa.png"
 },

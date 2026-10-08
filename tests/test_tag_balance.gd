@@ -111,7 +111,7 @@ func run_tests() -> void:
 func integration_tests() -> void:
 	var r: Node = world()
 	r.set_game_mode("normal")
-	r.unlocked_dishes.assign([PIZZA, DishTypes.Type.SOUP])
+	r.unlocked_dishes.assign([PIZZA, DishTypes.Type.SOPA_DE_MISO])
 	r.set_menu_dishes([PIZZA])
 	var effects: Dictionary = r.menu_effects
 	for n in [2, 3, 4]:

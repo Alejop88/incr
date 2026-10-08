@@ -45,4 +45,4 @@ Los nombres unificados incluyen **Cruda, Fría, Frita, Vegetariana, Vegana, Japo
 
 Para asignar etiquetas a un plato, edita su lista `tags` en `scripts/DishTypes.gd`, como explica [Añadir platos](ANADIR_PLATOS.md). No se han inventado etiquetas nuevas para los platos existentes: si una receta no tiene Cruda, no recibe el bonus japonés dirigido a Cruda.
 
-Los 28 tipos de características están implementados. Los tramos de 7, 9 y 10 platos están preparados para futuras ampliaciones; con el máximo actual de seis espacios todavía no pueden alcanzarse. La complejidad y la característica individual de ejemplo de la ensalada siguen siendo informativas.
+Los 28 tipos de características de etiquetas están implementados. Los tramos de 7, 9 y 10 platos están preparados para futuras ampliaciones; con el máximo actual de seis espacios todavía no pueden alcanzarse. El catálogo contiene 139 platos; sus características individuales y complejidad se definirán más adelante. La antigua ensalada genérica y su descripción de ejemplo se han retirado.

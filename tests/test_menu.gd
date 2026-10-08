@@ -26,9 +26,9 @@ func run_tests() -> void:
 	editor.open_menu([BURGER, PIZZA])
 	check(not editor.normal_details.visible, "Cozy must keep the original dish details")
 	editor.set_game_mode("normal")
-	editor.show_dish_info(DishTypes.Type.SALAD)
+	editor.show_dish_info(DishTypes.Type.GAZPACHO)
 	check(editor.normal_details.visible and editor.detail_complexity.text.contains("Por definir"), "Normal displays the future complexity field")
-	check(editor.detail_effect.text.contains("5 %") and editor.detail_effect.text.contains("todavía no activa"), "Salad describes its future vegetarian bonus as inactive")
+	check(editor.detail_effect.text.contains("todavía no tiene una característica definida"), "New recipes have no invented individual characteristic")
 	check(editor.plate_value == 5.0 and editor.cooking_time == 5.0, "Informational features must not change price or cooking")
 	check(DishTypes.implemented_tags().size() == 28, "All twenty-eight tag effects are defined")
 	for tag in DishTypes.implemented_tags():
@@ -65,10 +65,10 @@ func run_tests() -> void:
 	var displayed_tags: Array[String] = []
 	for chip in editor.detail_tags.get_children():
 		displayed_tags.append(chip.get_child(0).text)
-	check(displayed_tags == ["Mediterránea", "Arroz", "Marisco", "Pescado", "Tradicional", "Sartén", "Para compartir"], "Paella must show the requested tags in order")
+	check(displayed_tags == ["Arroz", "Marisco", "Pescado", "Española", "Para compartir"], "Paella must show the requested tags in order")
 	editor.set_dish_stats(4.6, 6.0)
 	check(editor.detail_time.text.contains("4.6 s") and editor.detail_value.text.contains("6.0 €"), "Details display current cooking time and price")
-	check(DishTypes.tags(DishTypes.Type.SALAD).has("Fría") and DishTypes.tags(DishTypes.Type.NIGIRI).has("Fría"), "Shared tags must use a consistent gender")
+	check(DishTypes.tags(DishTypes.Type.GAZPACHO).has("Fría") and DishTypes.tags(DishTypes.Type.NIGIRI).has("Fría"), "Shared tags must use a consistent gender")
 	check(not DishTypes.all_tags().has("Frío"), "Filter must not contain duplicate gender variants")
 	for index in range(editor.tag_checkboxes.size()):
 		if editor.tag_checkboxes[index].text == "Arroz":
@@ -77,9 +77,9 @@ func run_tests() -> void:
 	check(editor.dish_buttons[DishTypes.Type.PAELLA].visible and not editor.dish_buttons[BURGER].visible and not editor.dish_buttons[PIZZA].visible, "Rice filter shows only matching unlocked dishes")
 	check(editor.selected == [BURGER, PIZZA], "Filtering must preserve selected dishes that become hidden")
 	for index in range(editor.tag_checkboxes.size()):
-		if editor.tag_checkboxes[index].text == "Mediterránea":
+		if editor.tag_checkboxes[index].text == "Pescado":
 			editor.tag_checkboxes[index].pressed.emit()
-	check(editor.active_tags.size() == 2 and editor.dish_buttons[DishTypes.Type.PAELLA].visible and not editor.dish_buttons[PIZZA].visible, "Combined filters require both rice and Mediterranean tags")
+	check(editor.active_tags.size() == 2 and editor.dish_buttons[DishTypes.Type.PAELLA].visible and not editor.dish_buttons[PIZZA].visible, "Combined filters require both rice and fish tags")
 	check(editor.filter_scroll.custom_minimum_size.y == 280, "Filter popup height must remain compact")
 	editor.tag_filter.pressed.emit()
 	await process_frame

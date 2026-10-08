@@ -30,9 +30,9 @@ func run_tests() -> void:
 	var r: Node = world()
 	r.set_game_mode("normal")
 	r.set_menu_capacity_bonus(2)
-	r.unlocked_dishes.assign([DishTypes.Type.NIGIRI, DishTypes.Type.MAKI, DishTypes.Type.TEMAKI, DishTypes.Type.SASHIMI])
+	r.unlocked_dishes.assign([DishTypes.Type.NIGIRI, DishTypes.Type.MAKI, DishTypes.Type.TEMAKI, DishTypes.Type.URAMAKI])
 	r.set_menu_dishes(r.unlocked_dishes)
-	check(is_equal_approx(r.kitchen_point.cook_time, 5.0 / (1.3 * 1.1)), "Real sushi menu combines cold and rice cooking bonuses")
+	check(is_equal_approx(r.kitchen_point.cook_time, 5.0 / (1.3 * 1.1 * 1.05)), "Real sushi menu combines cold, rice and raw cooking bonuses")
 	check(is_equal_approx(r.tables[0].eating_time, 5.0 / (1.25 * 1.15)), "Real sushi menu combines sushi and fish eating bonuses")
 	r.menu_effects = six
 	r._apply_menu_traits()
@@ -64,7 +64,7 @@ func run_tests() -> void:
 	var editor: Node = load("res://scripts/ui/MenuEditor.gd").new()
 	root.add_child(editor)
 	editor.set_game_mode("normal")
-	editor.open_menu([DishTypes.Type.NIGIRI, DishTypes.Type.MAKI, DishTypes.Type.TEMAKI, DishTypes.Type.SASHIMI])
+	editor.open_menu([DishTypes.Type.NIGIRI, DishTypes.Type.MAKI, DishTypes.Type.TEMAKI, DishTypes.Type.URAMAKI])
 	for tag in ["Japonesa", "Arroz", "Pescado"]:
 		check(editor.active_trait_labels[tag].visible, "Active preview includes " + tag)
 	check(not editor.active_trait_labels["Marisco"].visible, "Preview hides unmet seafood trait")

@@ -14,7 +14,7 @@ func check(condition: bool, message: String) -> void:
 
 func run_tests() -> void:
 	var seen: Dictionary = {}
-	for i in range(100):
+	for i in range(DishTypes.CATALOG.size() * 20):
 		var initial: Array = DishTypes.random_starting_dishes()
 		check(initial.size() == mini(2, DishTypes.CATALOG.size()) and initial[0] != initial[1], "Starting dishes must be distinct")
 		for dish in initial:
@@ -76,8 +76,8 @@ func run_tests() -> void:
 	game = current_scene
 	check(game.restaurant.unlocked_dishes.size() == 2 and game.restaurant.menu_dishes == game.restaurant.unlocked_dishes, "Explicit new game resets to two drawn recipes")
 	game.restaurant.restore_dish_progress({"menu_dishes": ["SALAD", "TACO"]})
-	check(game.restaurant.menu_dishes == [DishTypes.Type.SALAD, DishTypes.Type.TACO], "Legacy save must preserve its selected recipes")
-	check(game.restaurant.unlocked_dishes == game.restaurant.menu_dishes, "Legacy selected recipes become unlocked")
+	check(game.restaurant.menu_dishes == [DishTypes.Type.TACO], "Legacy save keeps surviving recipes and removes retired ones")
+	check(game.restaurant.unlocked_dishes.has(DishTypes.Type.TACO) and game.restaurant.unlocked_dishes.size() == 2 and not game.restaurant.unlocked_dishes.has(DishTypes.Type.SALAD), "Legacy migration keeps surviving recipe and supplies a second valid unlock")
 	game.free()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(fixture_path))
 	print("DISH UNLOCK TESTS: ", "PASS" if failures == 0 else "FAIL", " (", failures, " failures)")
