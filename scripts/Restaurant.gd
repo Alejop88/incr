@@ -72,10 +72,10 @@ func _apply_menu_traits() -> void:
 	_update_spawn_interval()
 
 func _update_spawn_interval() -> void:
-	customer_spawn_timer.wait_time = BASE_SPAWN_INTERVAL / (1.0 + 0.25 * (menu_capacity - DishTypes.MAX_MENU_DISHES)) / float(menu_effects.customer_rate)
+	customer_spawn_timer.wait_time = BASE_SPAWN_INTERVAL / (1.0 + 0.5 * maxi(0, menu_dishes.size() - DishTypes.MAX_MENU_DISHES)) / float(menu_effects.customer_rate)
 
 func set_menu_capacity_bonus(bonus: int) -> void:
-	menu_capacity = DishTypes.MAX_MENU_DISHES + clampi(bonus, 0, 4)
+	menu_capacity = DishTypes.MAX_MENU_DISHES + clampi(bonus, 0, DishTypes.MAX_UPGRADED_MENU_DISHES - DishTypes.MAX_MENU_DISHES)
 	_update_spawn_interval()
 var unlocked_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
 

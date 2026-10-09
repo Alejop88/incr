@@ -10,7 +10,8 @@ var counter_capacity_bonus: int = 0
 var cook_speed_bonus: int = 0
 var vip_spawn_bonus: int = 0
 var max_vip_group_size: int = 1
-const PERMANENT_TABLE_LEVELS: int = 11
+const SINGLE_TABLE_LEVELS: int = 11
+const PERMANENT_TABLE_LEVELS: int = 15
 const PERMANENT_WAITER_LEVELS: int = 6
 
 func _init() -> void:
@@ -21,11 +22,11 @@ func _init() -> void:
 		upgrade_descriptions[id] = "Reduce permanentemente el tiempo de cada plato en 0,2 segundos adicionales (%.1f segundos acumulados). Se combina con las mejoras de dinero." % (level * 0.2)
 		upgrade_requirements[id] = [] if level == 1 else ["cook_speed_%d" % (level - 1)]
 		upgrade_cook_speed_bonus[id] = 1
-	for level in range(1, 5):
+	for level in range(1, DishTypes.MAX_UPGRADED_MENU_DISHES - DishTypes.MAX_MENU_DISHES + 1):
 		var id := "menu_capacity_%d" % level
 		upgrade_costs[id] = 5 + (level - 1) * 5
 		upgrade_names[id] = "Carta de %d platos" % (2 + level)
-		upgrade_descriptions[id] = "Permite %d platos en la carta y aumenta un %d %% la frecuencia de llegadas respecto al inicio. Rellena los huecos nuevos y desbloquea recetas aleatorias si faltan." % [2 + level, 25 * level]
+		upgrade_descriptions[id] = "Permite %d platos en la carta. Con la carta llena, las llegadas aumentan un %d %% respecto al inicio (+50 %% por plato activo adicional). Rellena los huecos nuevos y desbloquea recetas aleatorias si faltan." % [2 + level, 50 * level]
 		upgrade_requirements[id] = [] if level == 1 else ["menu_capacity_%d" % (level - 1)]
 	for level in range(1, 4):
 		var id := "staff_training_%d" % level
@@ -36,8 +37,10 @@ func _init() -> void:
 	for level in range(1, PERMANENT_TABLE_LEVELS + 1):
 		var id := "permanent_table_%d" % level
 		upgrade_costs[id] = 3 + (level - 1) * 2
-		upgrade_names[id] = "+1 mesa inicial · Nivel %d" % level
-		upgrade_descriptions[id] = "Empiezas cada reinicio con %d mesas desbloqueadas en total. Las mesas adicionales compradas con dinero se reinician." % (level + 1)
+		var bonus := 1 if level <= SINGLE_TABLE_LEVELS else 2
+		upgrade_names[id] = ("+1 mesa inicial · Nivel %d" if bonus == 1 else "+2 mesas iniciales · Nivel %d") % level
+		var total := 1 + mini(level, SINGLE_TABLE_LEVELS) + maxi(0, level - SINGLE_TABLE_LEVELS) * 2
+		upgrade_descriptions[id] = "Añade %d %s. Empiezas cada reinicio con %d mesas desbloqueadas en total. Las mesas adicionales compradas con dinero se reinician." % [bonus, "mesa permanente" if bonus == 1 else "mesas permanentes", total]
 		upgrade_requirements[id] = [] if level == 1 else ["permanent_table_%d" % (level - 1)]
 	for level in range(2, PERMANENT_WAITER_LEVELS + 1):
 		var id := "permanent_waiter_%d" % level
@@ -48,7 +51,7 @@ func _init() -> void:
 
 func get_menu_capacity_bonus() -> int:
 	var count := 0
-	for level in range(1, 5):
+	for level in range(1, DishTypes.MAX_UPGRADED_MENU_DISHES - DishTypes.MAX_MENU_DISHES + 1):
 		if is_upgrade_bought("menu_capacity_%d" % level):
 			count += 1
 	return count
@@ -64,7 +67,7 @@ func get_permanent_table_bonus() -> int:
 	var count := 0
 	for level in range(1, PERMANENT_TABLE_LEVELS + 1):
 		if is_upgrade_bought("permanent_table_%d" % level):
-			count += 1
+			count += 1 if level <= SINGLE_TABLE_LEVELS else 2
 	return count
 
 func get_permanent_waiter_count() -> int:

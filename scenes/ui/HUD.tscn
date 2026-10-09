@@ -159,8 +159,15 @@ follow_focus = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ManualOrderButtons" type="HBoxContainer" parent="KitchenPanel/VBoxContainer" unique_id=1676992908]
+[node name="ManualOrderScroll" type="ScrollContainer" parent="KitchenPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="ManualOrderButtons" type="HFlowContainer" parent="KitchenPanel/VBoxContainer/ManualOrderScroll" unique_id=1676992908]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="CloseButton" type="Button" parent="KitchenPanel/VBoxContainer" unique_id=934119032]
 layout_mode = 2

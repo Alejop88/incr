@@ -64,10 +64,11 @@ func _build_tree() -> void:
 	layout.add_child(tree_map)
 	center.pressed.connect(tree_map.fit_tree)
 	var positions: Dictionary = {}
-	for level in range(1, 12):
+	for level in range(1, preload("res://scripts/MichelinManager.gd").PERMANENT_TABLE_LEVELS + 1):
 		var index := level - 1
-		var x := -180 - (index % 6) * 120 if index < 6 else -780 + (index % 6) * 120
-		positions["permanent_table_%d" % level] = Vector2(x, -130 if index < 6 else -330)
+		var row := int(index / 6)
+		var x := -180 - (index % 6) * 120 if row % 2 == 0 else -780 + (index % 6) * 120
+		positions["permanent_table_%d" % level] = Vector2(x, -130 - row * 200)
 	for level in range(1, 7):
 		positions["permanent_waiter" if level == 1 else "permanent_waiter_%d" % level] = Vector2(180 + (level - 1) * 120, -130 - (level - 1) * 25)
 	positions.merge({"waiter_capacity_2": Vector2(180, -330), "player_capacity_2": Vector2(20, -330), "counter_capacity_1": Vector2(-180, 160), "counter_capacity_2": Vector2(-350, 270), "cook_speed_1": Vector2(-520, 160), "menu_capacity_1": Vector2(-690, 270), "permanent_vip": Vector2(180, 160), "vip_spawn_1": Vector2(370, 160), "vip_spawn_2": Vector2(560, 110), "vip_group_2": Vector2(500, 300), "vip_group_3": Vector2(660, 300), "vip_group_4": Vector2(820, 300)})
@@ -76,7 +77,7 @@ func _build_tree() -> void:
 	var rules: Node = preload("res://scripts/MichelinManager.gd").new()
 	for level in range(1, 6):
 		positions["cook_speed_%d" % level] = Vector2(-520 - (level - 1) * 140, 130)
-	for level in range(1, 5):
+	for level in range(1, DishTypes.MAX_UPGRADED_MENU_DISHES - DishTypes.MAX_MENU_DISHES + 1):
 		positions["menu_capacity_%d" % level] = Vector2(-710 + (level - 1) * 150, 460)
 	for id in positions:
 		var button: Button = preload("res://scripts/ui/UpgradeTreeNode.gd").new()

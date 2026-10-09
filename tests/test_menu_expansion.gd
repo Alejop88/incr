@@ -18,7 +18,7 @@ func run_tests() -> void:
 	await process_frame
 	game = current_scene
 	check(game.michelin_manager.stars == 0 and game.restaurant.menu_capacity == 3, "Purchase must charge five stars and add one menu slot")
-	check(game.restaurant.customer_spawn_timer.wait_time == 16.0, "Upgrade must increase arrival frequency by twenty-five percent")
+	check(is_equal_approx(game.restaurant.customer_spawn_timer.wait_time, 20.0 / 1.5), "Upgrade must increase arrival frequency by fifty percent")
 	check(game.restaurant.unlocked_dishes.size() == 3, "Two-recipe player must receive one free random unlock")
 	check(game.restaurant.menu_dishes.size() == 3, "Purchase must automatically fill all three menu slots")
 	for dish in original:
@@ -35,7 +35,7 @@ func run_tests() -> void:
 	await process_frame
 	game = current_scene
 	check(game.restaurant.menu_dishes.size() == 3 and game.restaurant.unlocked_dishes.size() == 3, "Reload must retain three selected recipes without another gift")
-	check(game.restaurant.customer_spawn_timer.wait_time == 16.0, "Reload must retain arrival bonus")
+	check(is_equal_approx(game.restaurant.customer_spawn_timer.wait_time, 20.0 / 1.5), "Reload must retain arrival bonus")
 	game.michelin_manager.stars = 5
 	game.michelin_manager.toggle_selection("player_capacity_2")
 	game._on_star_purchase_confirmed()
@@ -54,15 +54,34 @@ func run_tests() -> void:
 	check(game.restaurant.menu_capacity == 6 and game.restaurant.menu_dishes.size() == 6, "Batch purchase must fill the six-slot menu")
 	check(game.restaurant.unlocked_dishes.size() == 6, "Missing recipes must be granted without duplicates")
 	check(game.michelin_manager.stars == 55, "New levels cost ten, fifteen and twenty stars")
-	check(game.restaurant.customer_spawn_timer.wait_time == 10.0, "Four levels double the base arrival frequency")
+	check(is_equal_approx(game.restaurant.customer_spawn_timer.wait_time, 20.0 / 3.0), "Six active dishes triple the base arrival frequency")
 	game._on_save_requested()
 	reload_current_scene()
 	await process_frame
 	await process_frame
 	game = current_scene
 	check(game.restaurant.menu_capacity == 6 and game.restaurant.menu_dishes.size() == 6, "Six-slot menu must survive save/load")
+	game.michelin_manager.stars = 200
+	for level in range(5, 9):
+		check(game.michelin_upgrades.upgrade_buttons.has("menu_capacity_%d" % level), "New menu levels appear in the tree")
+		game.michelin_manager.toggle_selection("menu_capacity_%d" % level)
+	game._on_star_purchase_confirmed()
+	await process_frame
+	await process_frame
+	game = current_scene
+	check(game.restaurant.menu_capacity == 10 and game.restaurant.menu_dishes.size() == 10, "New upgrades fill ten menu slots")
+	check(game.michelin_manager.stars == 70, "Four new levels cost 25, 30, 35 and 40 stars")
+	check(is_equal_approx(game.restaurant.customer_spawn_timer.wait_time, 4.0), "Ten active dishes produce five times the base arrival rate")
+	game._on_save_requested()
+	reload_current_scene()
+	await process_frame
+	await process_frame
+	game = current_scene
+	check(game.restaurant.menu_capacity == 10 and game.restaurant.menu_dishes.size() == 10, "Ten dishes survive save/load")
+	game.restaurant.set_menu_dishes(game.restaurant.menu_dishes.slice(0, 2))
+	check(is_equal_approx(game.restaurant.customer_spawn_timer.wait_time, 20.0), "Empty unlocked slots do not increase arrivals")
 	game.restaurant.set_menu_capacity_bonus(99)
-	check(game.restaurant.menu_capacity == 6, "Menu capacity must be capped at six")
+	check(game.restaurant.menu_capacity == 10, "Menu capacity must be capped at ten")
 	game._on_new_game_requested()
 	await process_frame
 	await process_frame

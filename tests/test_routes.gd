@@ -40,7 +40,9 @@ func run_tests() -> void:
 		check(navigator.segment_clear(chair_previous, point, blocks), "Through traffic cannot cross chair footprints")
 		chair_previous = point
 	for i in range(1, r.tables.size()):
-		check(r.tables[i].position.y >= r.tables[i - 1].position.y, "Table numbering must progress from top to bottom")
+		if i == 12:
+			continue # The new wing starts below the kitchen, alongside the original tables.
+		check(r.tables[i].position.y >= r.tables[i - 1].position.y, "Table numbering progresses downward within each wing")
 	var customer: Node = load("res://scenes/customer/Customer.tscn").instantiate()
 	r.add_child(customer)
 	var automatic: Node = waiter(r)

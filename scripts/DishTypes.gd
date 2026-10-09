@@ -291,6 +291,7 @@ const CATALOG: Dictionary = {
 	Type.JAMBALAYA: {"name": "Jambalaya", "icon": "🍚", "image": "", "tags": ["Estadounidense", "Arroz", "Marisco", "Carne", "Picante"]}
 }
 const MAX_MENU_DISHES: int = 2
+const MAX_UPGRADED_MENU_DISHES: int = 10
 const NEW_DISH_COST: float = 50.0
 const TAG_ALIASES := {"Frío": "Fría", "Fresco": "Fresca", "Vegetariano": "Vegetariana", "Ligero": "Ligera", "Especiado": "Especiada", "Mediterráneo": "Mediterránea", "Americano": "Americana", "Italiano": "Italiana", "Mexicano": "Mexicana", "Japonés": "Japonesa", "Chino": "China", "Español": "Española", "Peru": "Peruana", "Perú": "Peruana", "Peruano": "Peruana", "Frito": "Frita", "Fritura": "Frita", "Sopa": "Caldo", "Sopas": "Caldo", "Caldoso": "Caldo", "Caldosos": "Caldo", "Comida Rapida": "Comida rápida"}
 

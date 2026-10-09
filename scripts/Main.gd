@@ -474,7 +474,7 @@ func _on_star_purchase_confirmed() -> void:
 	new_run["unlocked_dishes"] = DishTypes.menu_keys(restaurant.unlocked_dishes)
 	var menu_bonus := 0
 	var menu_expanded := false
-	for level in range(1, 5):
+	for level in range(1, DishTypes.MAX_UPGRADED_MENU_DISHES - DishTypes.MAX_MENU_DISHES + 1):
 		var id := "menu_capacity_%d" % level
 		if id in permanent_data["bought_upgrades"]:
 			menu_bonus += 1

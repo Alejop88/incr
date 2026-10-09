@@ -40,6 +40,7 @@ func run_tests() -> void:
 
 	# Apply calculated fixture effects without modifying the real recipe catalog.
 	r.set_menu_capacity_bonus(2)
+	r.menu_dishes.assign([BURGER, PIZZA, DishTypes.Type.MAKI, DishTypes.Type.NIGIRI])
 	r.menu_effects = effects
 	r._apply_menu_traits()
 	var actor: Node = waiter(r)
@@ -47,7 +48,7 @@ func run_tests() -> void:
 	r.waiter_manager.set_speed_level(2)
 	r.waiter_manager.set_training_level(1)
 	check(is_equal_approx(actor.speed, 120.0 * 1.1 * 1.04), "Spicy survives cash and permanent staff upgrades")
-	check(is_equal_approx(r.customer_spawn_timer.wait_time, 20.0 / 1.5 / 1.2), "Sushi arrivals combine with menu capacity")
+	check(is_equal_approx(r.customer_spawn_timer.wait_time, 20.0 / 2.0 / 1.2), "Sushi arrivals combine with four active dishes")
 	var table: Node = r.get_node("Table01Point")
 	seat(r, "Table01Point", [BURGER])
 	table.receive_food(BURGER)
@@ -58,7 +59,7 @@ func run_tests() -> void:
 	check(is_equal_approx(vip_table.eating_timer.wait_time, vip_group.get_leader().EATING_TIME / 1.25), "Sushi also speeds up VIP eating")
 	r.set_game_mode("cozy")
 	check(is_equal_approx(actor.speed, 120.0 * 1.1), "Cozy removes spicy without losing upgrades")
-	check(is_equal_approx(r.customer_spawn_timer.wait_time, 20.0 / 1.5), "Cozy removes sushi arrival bonus")
+	check(is_equal_approx(r.customer_spawn_timer.wait_time, 20.0 / 2.0), "Cozy removes sushi arrival bonus")
 	check(is_equal_approx(table.eating_time, table.BASE_EATING_TIME), "Cozy removes sushi eating bonus")
 	r.free()
 	var editor: Node = load("res://scripts/ui/MenuEditor.gd").new()

@@ -45,7 +45,7 @@ signal ready_dish_selected(dish_id: int)
 @onready var ready_dishes_label: Label = $KitchenPanel/VBoxContainer/ReadyDishesLabel
 @onready var cooking_progress_bar: ProgressBar = $KitchenPanel/VBoxContainer/CookingProgressBar
 @onready var current_dish_label: Label = $KitchenPanel/VBoxContainer/CurrentDishLabel
-@onready var manual_order_buttons: HBoxContainer = $KitchenPanel/VBoxContainer/ManualOrderButtons
+@onready var manual_order_buttons: HFlowContainer = $KitchenPanel/VBoxContainer/ManualOrderScroll/ManualOrderButtons
 @onready var order_queue_container: VBoxContainer = $KitchenPanel/VBoxContainer/OrderQueueScroll/OrderQueueContainer
 @onready var order_queue_scroll: ScrollContainer = $KitchenPanel/VBoxContainer/OrderQueueScroll
 @onready var ready_dishes_container: VBoxContainer = $KitchenPanel/VBoxContainer/ReadyDishesContainer
@@ -219,12 +219,16 @@ func set_manual_order_dishes(dishes: Array) -> void:
 		return
 	last_manual_dishes = dishes.duplicate()
 	for child in manual_order_buttons.get_children():
+		manual_order_buttons.remove_child(child)
 		child.queue_free()
 
 	for dish in dishes:
 		var button := Button.new()
 
 		button.text = DishTypes.title(dish)
+		button.custom_minimum_size = Vector2(180, 32)
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.tooltip_text = DishTypes.title(dish)
 		button.icon = DishTypes.texture(dish)
 		button.expand_icon = true
 		button.add_theme_constant_override("icon_max_width", 28)

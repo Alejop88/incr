@@ -87,6 +87,26 @@ func run_tests() -> void:
 	await process_frame
 	game = current_scene
 	check(count_tables(game) == 12 and game.restaurant.waiter_manager.waiters.size() == 6, "Final levels must unlock all twelve tables and six permanent waiters")
+	game.michelin_manager.stars = 5000
+	for level in range(12, 16):
+		var id := "permanent_table_%d" % level
+		check(game.michelin_upgrades.upgrade_buttons.has(id), "New paired upgrade appears in tree")
+		check(game.michelin_manager.upgrade_names[id].contains("+2"), "New level clearly grants two tables")
+		check(game.michelin_manager.upgrade_requirements[id] == ["permanent_table_%d" % (level - 1)], "Paired levels extend existing chain")
+		game.michelin_manager.toggle_selection(id)
+		check(count_tables(game) == 12 + (level - 12) * 2, "Draft selection grants no tables")
+		game._on_star_purchase_confirmed()
+		await process_frame
+		await process_frame
+		game = current_scene
+		check(count_tables(game) == 12 + (level - 11) * 2, "Each new purchase and restart grants exactly two tables")
+		check(game.table_purchase_cost == 50, "Permanent pairs do not raise paid table costs")
+	game._on_save_requested()
+	reload_current_scene()
+	await process_frame
+	await process_frame
+	game = current_scene
+	check(count_tables(game) == 20, "Save reload retains all twenty permanent tables")
 	game._on_new_game_requested()
 	await process_frame
 	await process_frame

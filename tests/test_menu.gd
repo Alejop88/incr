@@ -24,8 +24,22 @@ func run_tests() -> void:
 	var editor: Node = load("res://scripts/ui/MenuEditor.gd").new()
 	root.add_child(editor)
 	editor.open_menu([BURGER, PIZZA])
+	await process_frame
+	await process_frame
+	check(editor.get_theme_stylebox("panel").bg_color.a == 1.0, "Menu window background is fully opaque")
+	var pending_apply := {"count": 0}
+	editor.menu_applied.connect(func(_dishes): pending_apply.count += 1)
+	editor._toggle_dish(BURGER)
+	editor.close_button.pressed.emit()
+	check(not editor.visible and pending_apply.count == 0, "Close X hides without applying draft")
+	editor.open_menu([BURGER, PIZZA])
 	check(not editor.normal_details.visible, "Cozy must keep the original dish details")
 	editor.set_game_mode("normal")
+	await process_frame
+	await process_frame
+	check(editor.active_traits_panel.get_global_rect().end.x <= editor.selected_cards[BURGER].card.get_global_rect().position.x, "Benefits have their own column to the left of dishes")
+	check(editor.close_button.get_global_rect().end.x > editor.selected_cards[BURGER].card.get_global_rect().end.x, "Close X is at the upper right")
+	check(editor.get_global_rect().position.x >= 0 and editor.get_global_rect().end.x <= editor.get_viewport_rect().size.x + 1, "Three columns fit the viewport")
 	editor.show_dish_info(DishTypes.Type.GAZPACHO)
 	check(editor.normal_details.visible and editor.detail_complexity.text.contains("Por definir"), "Normal displays the future complexity field")
 	check(editor.detail_effect.text.contains("todavía no tiene una característica definida"), "New recipes have no invented individual characteristic")
@@ -98,7 +112,7 @@ func run_tests() -> void:
 			editor.tag_checkboxes[index].pressed.emit()
 	check(editor.empty_results.visible, "Tags without unlocked matches show an empty state")
 	editor.clear_filter_button.pressed.emit()
-	check(editor.dish_buttons[BURGER].visible and not editor.empty_results.visible, "All tags restores the dish list")
+	check(editor.selected_cards.has(BURGER) and editor.dish_buttons[DishTypes.Type.PAELLA].visible and not editor.empty_results.visible, "Clearing filters restores available dishes while keeping the menu separate")
 	editor.set_unlocks([BURGER, PIZZA, DishTypes.Type.PAELLA, DishTypes.Type.NIGIRI], 0)
 	for checkbox in editor.tag_checkboxes:
 		if checkbox.text == "Japonesa":
@@ -113,6 +127,28 @@ func run_tests() -> void:
 	check(not editor.apply_button.disabled, "One selected dish can be applied")
 	editor.open_menu([PIZZA])
 	check(editor.selected == [PIZZA], "Reopening discards unapplied changes")
+	check(editor.selected_grid.get_child_count() == 2 and editor.selected_cards.size() == 1, "Menu shows selected dishes and empty slots")
+	editor.selected_cards[PIZZA].inspect.pressed.emit()
+	editor.dish_buttons[BURGER].pressed.emit()
+	check(editor.selected == [PIZZA], "Inspecting either section never changes the menu")
+	editor.search_field.text = "  PÁELLA  "
+	editor.search_field.text_changed.emit(editor.search_field.text)
+	check(editor.dish_rows[DishTypes.Type.PAELLA].visible and not editor.dish_rows[BURGER].visible, "Name search ignores case, accents and outer spaces")
+	check(editor.selected_cards[PIZZA].card.visible, "Selected dishes remain visible during searches")
+	editor.add_buttons[DishTypes.Type.PAELLA].pressed.emit()
+	check(editor.selected == [PIZZA, DishTypes.Type.PAELLA] and not editor.dish_rows[DishTypes.Type.PAELLA].visible, "Adding moves a dish into the menu section")
+	check(editor.add_buttons[BURGER].disabled, "Full menus disable adding but allow inspection")
+	editor._add_dish(BURGER)
+	check(editor.selected.size() == 2, "Add action enforces capacity")
+	editor.selected_cards[PIZZA].remove.pressed.emit()
+	check(editor.selected == [DishTypes.Type.PAELLA] and not editor.add_buttons[BURGER].disabled, "Explicit remove frees a slot")
+	editor.menu_capacity = 6
+	editor.search_field.text = ""
+	editor._refresh()
+	await process_frame
+	await process_frame
+	check(editor.selected_grid.get_child_count() == 6, "Expanded menus show all six slots")
+	check(editor.get_global_rect().end.y <= editor.get_viewport_rect().size.y + 1, "Six-slot editor fits vertically")
 	editor.free()
 	var game: Node = load("res://scenes/Main.tscn").instantiate()
 	game.get_node("SaveManager").save_path = "res://tests/menu-unused-%s.json" % Time.get_ticks_usec()

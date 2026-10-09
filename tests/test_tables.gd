@@ -2,7 +2,11 @@ extends "res://tests/test_automatic_waiters.gd"
 
 func run_tests() -> void:
 	var r: Node = world()
-	check(r.tables.size() == 12, "Restaurant must have twelve tables")
+	check(r.tables.size() == 20, "Restaurant must have twenty tables")
+	for index in range(12, 20):
+		check(r.tables[index].position.y > r.kitchen_point.position.y + 250, "New tables lie below kitchen")
+		check(r.tables[index].position.x < r.tables[0].position.x, "New tables widen restaurant toward kitchen side")
+		check(r.tables[index].seat_capacity == (2 if index % 2 == 0 else 4), "Each new pair offers both group capacities")
 	check(r.tables[0].unlocked and r.tables[0].seat_capacity == 2, "Initial table seats two")
 	check(not r.tables[0].patience_bar.visible, "Empty starting table must hide its patience bar")
 	for i in range(1, r.tables.size()):
