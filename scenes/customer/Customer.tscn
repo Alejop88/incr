@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dq0vm1qcvf202" path="res://scripts/Customer.gd" id="1_2hfkh"]
 [ext_resource type="Texture2D" uid="uid://lnou05ilrpdf" path="res://assets/art/SpriteCustomer.png" id="2_xvxe4"]
+[ext_resource type="Script" path="res://scripts/CustomerAppearance.gd" id="3_body"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_b6rs3"]
 size = Vector2(70, 130.75)
@@ -13,6 +14,7 @@ script = ExtResource("1_2hfkh")
 position = Vector2(1, 0.99999905)
 scale = Vector2(0.37550607, 0.3401099)
 texture = ExtResource("2_xvxe4")
+script = ExtResource("3_body")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1020025879]
 position = Vector2(-2, 16.375)

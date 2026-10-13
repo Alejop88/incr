@@ -32,11 +32,43 @@ func move_to_position(
 
 
 func _physics_process(delta: float) -> void:
+	var previous_position := global_position
 	if not has_target:
+		_update_appearance(Vector2.ZERO, delta)
+		return
+	if _wait_for_group_member():
+		_update_appearance(Vector2.ZERO, delta)
 		return
 	if route.advance(self, target_position, speed, delta):
 		has_target = false
 		destination_reached.emit()
+	_update_appearance(global_position - previous_position, delta)
+
+func _wait_for_group_member() -> bool:
+	var group := get_parent()
+	if group == null or not group.has_method("get_customers"):
+		return false
+	# Allow the final approach to individual seats and the shared exit.
+	if global_position.distance_to(target_position) < 100.0:
+		return false
+	var heading := global_position.direction_to(target_position)
+	for other in group.get_customers():
+		if other == self or not is_instance_valid(other) or not other.has_target:
+			continue
+		var separation: Vector2 = other.global_position - global_position
+		if separation.length() >= 80.0 or separation.dot(heading) <= 0:
+			continue
+		# Yield only to the person ahead travelling the same way, avoiding
+		# mutual waiting when paths cross on their way to different seats.
+		var other_heading: Vector2 = other.global_position.direction_to(other.target_position)
+		if heading.dot(other_heading) > 0.7 and other.global_position.distance_to(other.target_position) < global_position.distance_to(target_position):
+			return true
+	return false
+
+func _update_appearance(displacement: Vector2, delta: float) -> void:
+	var visual := get_node_or_null("Sprite2D")
+	if visual != null and visual.has_method("update_movement"):
+		visual.update_movement(displacement, delta)
 func leave_restaurant(new_position: Vector2) -> void:
 	is_seated = false
 	move_to_position(new_position, TargetType.EXIT)

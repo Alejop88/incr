@@ -909,16 +909,16 @@ position = Vector2(-1, 0)
 position = Vector2(240, 168)
 
 [node name="Queue02" type="Marker2D" parent="QueuePoints" unique_id=1787639074]
-position = Vector2(242, 136)
+position = Vector2(240, -112)
 
 [node name="Queue03" type="Marker2D" parent="QueuePoints" unique_id=1946153440]
-position = Vector2(242, 101)
+position = Vector2(240, -392)
 
 [node name="Queue04" type="Marker2D" parent="QueuePoints" unique_id=1604495369]
-position = Vector2(242, 67)
+position = Vector2(240, -672)
 
 [node name="Queue05" type="Marker2D" parent="QueuePoints" unique_id=480175768]
-position = Vector2(242, 25)
+position = Vector2(240, -952)
 
 [node name="TrashPoint" type="Area2D" parent="." unique_id=56642591]
 position = Vector2(116, 328)

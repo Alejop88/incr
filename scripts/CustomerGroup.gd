@@ -1,6 +1,8 @@
 extends Node2D
 
 var group_size: int = 1
+const HORIZONTAL_SPACING: float = 96.0
+const VERTICAL_SPACING: float = 140.0
 var customers: Array[CharacterBody2D] = []
 var customer_scene := preload("res://scenes/customer/Customer.tscn")
 var vip_customer_scene := preload("res://scenes/customer/VIPCustomer.tscn")
@@ -31,6 +33,8 @@ func create_customers() -> void:
 		
 		customer.group_size = group_size
 		add_child(customer)
+		# Spread the group at entry as well as at its queue destination.
+		customer.position = Vector2((i % 2 - 0.5) * HORIZONTAL_SPACING if group_size > 1 else 0.0, -int(i / 2) * VERTICAL_SPACING)
 		customer.set_requested_dish(preload("res://scripts/MenuTraits.gd").choose_order(available_dishes, previous_orders, group_size, menu_effects))
 		previous_orders.append(customer.requested_dish)
 		customer.visible = false
@@ -76,8 +80,8 @@ func _on_customer_exit_reached(customer: CharacterBody2D) -> void:
 	if customers.is_empty():
 		queue_free()
 func move_to_queue_position(queue_position: Vector2) -> void:
-	var horizontal_spacing: float = 18.0
-	var vertical_spacing: float = 18.0
+	var horizontal_spacing: float = HORIZONTAL_SPACING
+	var vertical_spacing: float = VERTICAL_SPACING
 
 	var positions: Array[Vector2] = []
 
