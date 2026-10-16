@@ -23,6 +23,11 @@ var direction: int = 0 # front, right, left, back
 var step: int = 0
 var distance_walked: float = 0.0
 var skin_index: int = 0
+var seated := false
+var eating := false
+var sitting_progress := 0.0
+var eating_clock := 0.0
+var seated_rig: Node2D
 
 func _ready() -> void:
 	_build_frames()
@@ -33,6 +38,9 @@ func _ready() -> void:
 	var skin_material := ShaderMaterial.new()
 	skin_material.shader = SKIN_SHADER
 	material = skin_material
+	seated_rig = preload("res://scripts/CustomerSeatedRig.gd").new()
+	add_child(seated_rig)
+	seated_rig.hide()
 	set_skin(randi_range(0, SKINS.size() - 1))
 	_build_hair_frames()
 	hair = Sprite2D.new()
@@ -164,10 +172,10 @@ func _update_hair() -> void:
 		height = 65.0
 		top_offset = 20.0
 		if direction in [1, 2]:
-			width = 60.0
+			width = 72.0
 			height = 72.0
 			top_offset = 12.0
-			side_offset = -55.0 if direction == 1 else 55.0
+			side_offset = -49.0 if direction == 1 else 49.0
 	elif hair_style == 8: # Narrow ridge head-on, full crest in profile.
 		width = 35.0 if direction in [0, 3] else 145.0
 		height = 75.0 if direction in [0, 3] else 70.0
@@ -192,6 +200,8 @@ func _update_hair() -> void:
 		var amount := 2.0 if hair_style in [3, 4, 6] else 1.0
 		sway = Vector2(roundf(sin(phase) * amount), -roundf(absf(sin(phase)) * amount))
 	hair.position = anchor + Vector2(side_offset, height / 2.0 + top_offset) + sway
+	if seated:
+		hair.position.y += seated_rig.drop + seated_rig.position.y
 
 static func _build_frames() -> void:
 	if not frames.is_empty():
@@ -231,6 +241,13 @@ func set_skin(index: int) -> void:
 	(material as ShaderMaterial).set_shader_parameter("skin_color", SKINS[skin_index])
 
 func update_movement(displacement: Vector2, _delta: float) -> void:
+	if seated:
+		sitting_progress = minf(1.0, sitting_progress + _delta / 0.36)
+		if eating and sitting_progress >= 1.0:
+			eating_clock += _delta
+		seated_rig.pose(sitting_progress, eating_clock if eating and sitting_progress >= 1.0 else -1.0)
+		_update_hair()
+		return
 	if displacement.length_squared() < 0.0001:
 		walking = false
 		distance_walked = 0.0
@@ -249,3 +266,36 @@ func update_movement(displacement: Vector2, _delta: float) -> void:
 func _show_frame(column: int) -> void:
 	texture = frames[direction * 4 + column]
 	_update_hair()
+
+func sit_down(toward_table: Vector2) -> void:
+	if seated:
+		return
+	walking = false
+	distance_walked = 0.0
+	step = 0
+	if absf(toward_table.x) > absf(toward_table.y):
+		direction = 1 if toward_table.x > 0 else 2
+	else:
+		direction = 0 if toward_table.y > 0 else 3
+	_show_frame(0)
+	seated_rig.configure(texture, material, direction)
+	seated = true
+	sitting_progress = 0.0
+	seated_rig.pose(0.0, -1.0)
+	seated_rig.show()
+	(material as ShaderMaterial).set_shader_parameter("hide_body", true)
+	_update_hair()
+
+func set_eating(value: bool) -> void:
+	eating = value
+	eating_clock = 0.0
+	if seated:
+		seated_rig.pose(sitting_progress, 0.0 if value else -1.0)
+
+func stand_up() -> void:
+	seated = false
+	eating = false
+	sitting_progress = 0.0
+	seated_rig.hide()
+	(material as ShaderMaterial).set_shader_parameter("hide_body", false)
+	_show_frame(0)

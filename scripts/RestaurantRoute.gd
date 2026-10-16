@@ -15,9 +15,10 @@ func table_obstacles(actor: Node) -> Array[Rect2]:
 		return result
 	for table in restaurant.tables:
 		if table.unlocked:
-			var footprint := Rect2(table.global_position - Vector2(40, 40), Vector2(80, 80))
+			var footprint: Rect2 = table.get_furniture_bounds()
+			footprint.position += table.global_position
 			for seat in table.customer_seat_points:
-				footprint = footprint.merge(Rect2(seat.global_position - Vector2(16, 16), Vector2(32, 32)))
+				footprint = footprint.merge(Rect2(seat.global_position - Vector2(28, 32), Vector2(56, 64)))
 			result.append(footprint.grow(CLEARANCE))
 	return result
 

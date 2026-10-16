@@ -15,6 +15,9 @@ signal queue_patience_expired(customer_group)
 
 @onready var queue_patience_timer: Timer = $QueuePatienceTimer
 func _ready() -> void:
+	# Draw each whole customer (body, hair and order) by their seat/walking Y,
+	# rather than by spawn order; lower customers must cover those behind them.
+	y_sort_enabled = true
 	queue_patience_timer.timeout.connect(_on_queue_patience_timer_timeout)
 func get_group_size() -> int:
 	return group_size
@@ -59,10 +62,12 @@ func get_customer(index: int) -> CharacterBody2D:
 		return null
 
 	return customers[index]
-func move_customers_to_seats(seat_positions: Array[Vector2]) -> void:
+func move_customers_to_seats(seat_positions: Array[Vector2], table_center: Vector2 = Vector2.INF) -> void:
 	for i in range(customers.size()):
 		var customer: CharacterBody2D = customers[i]
 		customer.visible = true
+		if table_center != Vector2.INF:
+			customer.seat_facing = table_center - seat_positions[i]
 		customer.move_to_position(seat_positions[i],customer.TargetType.TABLE)
 func leave_restaurant(exit_position: Vector2) -> void:
 	for customer in customers:

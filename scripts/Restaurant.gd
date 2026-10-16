@@ -444,7 +444,7 @@ func spawn_customer() -> void:
 
 	var seat_positions: Array[Vector2] = available_table.get_group_seat_positions(group_size)
 
-	customer_group.move_customers_to_seats(seat_positions)
+	customer_group.move_customers_to_seats(seat_positions, available_table.global_position)
 
 	print("Nuevo cliente creado para: ", available_table.name)
 	customer_spawn_timer.start()
@@ -596,7 +596,7 @@ func try_seat_waiting_group() -> void:
 		var seat_positions: Array[Vector2] = \
 			available_table.get_group_seat_positions(group_size)
 
-		customer_group.move_customers_to_seats(seat_positions)
+		customer_group.move_customers_to_seats(seat_positions, available_table.global_position)
 
 		print(
 			"Un grupo compatible de la cola entra en: ",

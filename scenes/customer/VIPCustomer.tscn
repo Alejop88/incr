@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://tj37ds7fy5ud" path="res://scripts/VIPCustomer.gd" id="1_ak4qf"]
 [ext_resource type="Texture2D" uid="uid://bwryej85suftt" path="res://assets/art/SpriteVIPCustomer.png" id="2_ak4qf"]
+[ext_resource type="Script" path="res://scripts/LegacyCustomerSeated.gd" id="3_seated"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_b6rs3"]
 size = Vector2(70, 130.75)
@@ -13,6 +14,7 @@ script = ExtResource("1_ak4qf")
 position = Vector2(1, 0.99999905)
 scale = Vector2(0.37550607, 0.3401099)
 texture = ExtResource("2_ak4qf")
+script = ExtResource("3_seated")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1020025879]
 position = Vector2(-2, 16.375)

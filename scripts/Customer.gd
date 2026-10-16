@@ -19,6 +19,8 @@ var has_received_food: bool = false
 var requested_dish: DishTypes.Type = DishTypes.Type.NONE
 var target_type: TargetType = TargetType.NONE
 var is_seated: bool = false
+var seat_facing := Vector2.DOWN
+var is_eating := false
 func _ready() -> void:
 	update_order_label()
 	hide_order()
@@ -29,6 +31,12 @@ func move_to_position(
 	target_position = new_position
 	target_type = new_target_type
 	has_target = true
+	if new_target_type != TargetType.TABLE:
+		is_seated = false
+		set_eating(false)
+		var visual := get_node_or_null("Sprite2D")
+		if visual != null and visual.has_method("stand_up"):
+			visual.stand_up()
 
 
 func _physics_process(delta: float) -> void:
@@ -41,6 +49,8 @@ func _physics_process(delta: float) -> void:
 		return
 	if route.advance(self, target_position, speed, delta):
 		has_target = false
+		if target_type == TargetType.TABLE:
+			sit_down()
 		destination_reached.emit()
 	_update_appearance(global_position - previous_position, delta)
 
@@ -69,6 +79,19 @@ func _update_appearance(displacement: Vector2, delta: float) -> void:
 	var visual := get_node_or_null("Sprite2D")
 	if visual != null and visual.has_method("update_movement"):
 		visual.update_movement(displacement, delta)
+
+func sit_down() -> void:
+	is_seated = true
+	var visual := get_node_or_null("Sprite2D")
+	if visual != null and visual.has_method("sit_down"):
+		visual.sit_down(seat_facing)
+		visual.set_eating(is_eating)
+
+func set_eating(value: bool) -> void:
+	is_eating = value
+	var visual := get_node_or_null("Sprite2D")
+	if visual != null and visual.has_method("set_eating"):
+		visual.set_eating(value)
 func leave_restaurant(new_position: Vector2) -> void:
 	is_seated = false
 	move_to_position(new_position, TargetType.EXIT)

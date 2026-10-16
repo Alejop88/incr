@@ -23,6 +23,8 @@ var eating_time: float = BASE_EATING_TIME
 var dish_value_multipliers: Dictionary = {}
 var served_value_bonus: float = 0.0
 @export var seat_capacity: int = 1
+@export var table_skin: Resource = preload("res://assets/art/table_classic.tres")
+var appearance: Node2D
 const BASE_FOOD_WAIT_TIME: float = 20.0
 const FOOD_WAIT_TIME_INCREASE_PER_LEVEL: float = 2.0
 const MAX_FOOD_WAIT_TIME: float = 40.0
@@ -44,13 +46,25 @@ func _ready() -> void:
 	patience_bar.hide()
 	var capacity_label := Label.new()
 	capacity_label.text = "%s · %d plazas" % [str(name).trim_prefix("Table").trim_suffix("Point"), seat_capacity]
-	capacity_label.position = Vector2(-48, 44)
+	var furniture_size := preload("res://scripts/TableAppearance.gd").surface_size(seat_capacity)
+	capacity_label.position = Vector2(-64, furniture_size.y / 2.0 + 32)
 	capacity_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(capacity_label)
 	add_to_group("restaurant_tables")
 	for seat in $SeatPoints.get_children():
 		if seat is Marker2D:
 			customer_seat_points.append(seat)
+	appearance = preload("res://scripts/TableAppearance.gd").new()
+	appearance.name = "TableAppearance"
+	add_child(appearance)
+	set_table_skin(table_skin)
+	# Every table gets its own hit shape, matching its actual top.
+	var hit_shape := RectangleShape2D.new()
+	hit_shape.size = furniture_size
+	$CollisionShape2D.shape = hit_shape
+	$CollisionShape2D.position = Vector2.ZERO
+	patience_bar.position = Vector2(-40, -furniture_size.y / 2.0 - 24)
+	patience_bar.size = Vector2(80, 14)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)
 	update_food_wait_time()
 	update_eating_time()
@@ -60,19 +74,17 @@ func _process(_delta: float) -> void:
 	if state == State.WAITING_FOOD:
 		patience_bar.value = food_wait_timer.time_left
 
-func _draw() -> void:
-	draw_style_box(_table_style(), Rect2(-40, -40, 80, 80))
+func set_table_skin(new_skin: Resource) -> void:
+	table_skin = new_skin if new_skin != null else preload("res://assets/art/table_classic.tres")
+	if appearance == null:
+		return
+	var seat_positions: Array[Vector2] = []
 	for seat in customer_seat_points:
-		draw_circle(seat.position, 16, Color("a57849"))
-		draw_arc(seat.position, 16, 0, TAU, 24, Color("503726"), 2)
+		seat_positions.append(seat.position)
+	appearance.configure(seat_capacity, seat_positions, table_skin)
 
-func _table_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("b78350")
-	style.border_color = Color("503726")
-	style.set_border_width_all(3)
-	style.set_corner_radius_all(12)
-	return style
+func get_furniture_bounds() -> Rect2:
+	return preload("res://scripts/TableAppearance.gd").furniture_bounds(seat_capacity)
 
 func seat_customer(customer: CharacterBody2D) -> bool:
 	if state != State.RESERVED:
@@ -174,6 +186,7 @@ func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null)
 		food_wait_timer.stop()
 		patience_bar.visible = false
 		state = State.EATING
+		_set_group_eating(true)
 
 		var current_eating_time: float = eating_time
 
@@ -189,6 +202,7 @@ func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null)
 	return true
 
 func start_next_food_round(customer: CharacterBody2D,plates_needed: int) -> void:
+	_set_group_eating(false)
 	served_value_bonus = 0.0
 	food_round += 1
 	delivered_plates = 0
@@ -217,8 +231,22 @@ func _on_eating_timer_timeout() -> void:
 		return
 
 	state = State.WAITING_PAYMENT
+	_set_group_eating(false)
 	print("El cliente ha terminado. Esperando pago")
 	eating_finished.emit(self)
+
+func _set_group_eating(value: bool) -> void:
+	if not is_instance_valid(seated_customer):
+		return
+	var group := seated_customer.get_parent()
+	if group.has_method("get_customers"):
+		for customer in group.get_customers():
+			var participating: bool = customer.has_received_food
+			if customer is VIPCustomer:
+				participating = participating and customer.dishes_eaten < customer.total_dishes_to_eat
+			customer.set_eating(value and participating)
+	else:
+		seated_customer.set_eating(value)
 
 func show_money_popup(amount: float) -> void:
 	var popup := Label.new()
@@ -268,11 +296,18 @@ func get_customer_seat_position(seat_index: int = 0) -> Vector2:
 		return global_position
 
 	return customer_seat_points[seat_index].global_position
+
+func get_dish_position(seat_index: int) -> Vector2:
+	# Stable target for future dish sprites and hand-to-plate eating animation.
+	if seat_index < 0 or seat_index >= customer_seat_points.size():
+		return global_position
+	return to_global(preload("res://scripts/TableAppearance.gd").dish_position(seat_capacity, customer_seat_points[seat_index].position))
 	
 func get_seated_customer() -> CharacterBody2D:
 	return seated_customer
 	
 func clear_seated_customer() -> void:
+	_set_group_eating(false)
 	served_value_bonus = 0.0
 	seated_customer = null
 	required_plates = 1
@@ -281,7 +316,8 @@ func clear_seated_customer() -> void:
 	state = State.FREE
 	patience_bar.visible = false
 func get_service_position() -> Vector2:
-	return global_position + Vector2(0, 165)
+	var clearance: float = preload("res://scripts/RestaurantRoute.gd").CLEARANCE
+	return global_position + Vector2(0, maxf(165, get_furniture_bounds().end.y + clearance + 12))
 func is_available() -> bool:
 	if not unlocked:
 		return false

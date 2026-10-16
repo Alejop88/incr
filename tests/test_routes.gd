@@ -27,8 +27,8 @@ func run_tests() -> void:
 				check(seat_access or navigator.segment_clear(previous, point, blocks), "Only lateral seat entry and exit may cross chair clearance")
 				previous = point
 	var table: Node = r.tables[0]
-	var start: Vector2 = table.global_position - Vector2(200, 0)
-	var target: Vector2 = table.global_position + Vector2(200, 0)
+	var start: Vector2 = Vector2(blocks[0].position.x - 12, table.global_position.y)
+	var target: Vector2 = Vector2(blocks[0].end.x + 12, table.global_position.y)
 	var detour: PackedVector2Array = navigator.build_path(start, target, blocks)
 	check(detour.size() > 1, "Cross-table route must bend around the table")
 	var chair_start: Vector2 = table.global_position + Vector2(125, -220)

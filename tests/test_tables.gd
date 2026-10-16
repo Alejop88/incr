@@ -2,6 +2,20 @@ extends "res://tests/test_automatic_waiters.gd"
 
 func run_tests() -> void:
 	var r: Node = world()
+	var original_bounds: Rect2 = r.tables[0].get_furniture_bounds()
+	var original_seat: Vector2 = r.tables[0].get_customer_seat_position()
+	var alternate: Resource = r.tables[0].table_skin.duplicate()
+	alternate.wood = Color("667788")
+	r.tables[0].set_table_skin(alternate)
+	check(r.tables[0].appearance.skin == alternate, "Skin can change without recreating the table")
+	check(r.tables[0].get_furniture_bounds() == original_bounds and r.tables[0].get_customer_seat_position() == original_seat, "Changing skin preserves navigation and seat positions")
+	check(r.tables[0].get_node("CollisionShape2D").shape != r.tables[1].get_node("CollisionShape2D").shape, "Different sized tables own independent hit shapes")
+	check(r.tables[1].get_furniture_bounds().size.y > original_bounds.size.y, "Four-seat furniture is longer than two-seat furniture")
+	for furnishing in r.tables:
+		var top_size: Vector2 = furnishing.get_node("CollisionShape2D").shape.size
+		var top_bounds := Rect2(furnishing.global_position - top_size / 2, top_size)
+		for seat_index in range(furnishing.seat_capacity):
+			check(top_bounds.has_point(furnishing.get_dish_position(seat_index)), "Every seat has a dish position on its own tabletop")
 	check(r.tables.size() == 20, "Restaurant must have twenty tables")
 	for index in range(12, 20):
 		check(r.tables[index].position.y > r.kitchen_point.position.y + 250, "New tables lie below kitchen")

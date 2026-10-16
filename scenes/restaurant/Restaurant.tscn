@@ -112,16 +112,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table02Point" unique_id=691477431]
 
 [node name="Seat01" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=378942625]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=1095771052]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=475131559]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table02Point/SeatPoints" unique_id=716704038]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table02Point" unique_id=794417113]
 one_shot = true
@@ -196,16 +196,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table04Point" unique_id=2001773979]
 
 [node name="Seat01" type="Marker2D" parent="Table04Point/SeatPoints" unique_id=269331431]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table04Point/SeatPoints" unique_id=1524450760]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table04Point/SeatPoints" unique_id=661419080]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table04Point/SeatPoints" unique_id=955147452]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table04Point" unique_id=891744976]
 one_shot = true
@@ -280,16 +280,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table06Point" unique_id=659373628]
 
 [node name="Seat01" type="Marker2D" parent="Table06Point/SeatPoints" unique_id=1971531676]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table06Point/SeatPoints" unique_id=1012158378]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table06Point/SeatPoints" unique_id=1605350208]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table06Point/SeatPoints" unique_id=617697894]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table06Point" unique_id=1885160612]
 one_shot = true
@@ -364,16 +364,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table08Point" unique_id=1047164072]
 
 [node name="Seat01" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=2016380326]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=630096952]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=1192421233]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table08Point/SeatPoints" unique_id=714187636]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table08Point" unique_id=1676667823]
 one_shot = true
@@ -448,16 +448,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table10Point" unique_id=875494248]
 
 [node name="Seat01" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=874046444]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=298842251]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=1142448891]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table10Point/SeatPoints" unique_id=580993619]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table10Point" unique_id=2063384763]
 one_shot = true
@@ -532,16 +532,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table12Point" unique_id=157833273]
 
 [node name="Seat01" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=1671504952]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=150732955]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=1507626892]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table12Point/SeatPoints" unique_id=1898389521]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table12Point" unique_id=977356112]
 one_shot = true
@@ -616,16 +616,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table14Point" unique_id=253332931]
 
 [node name="Seat01" type="Marker2D" parent="Table14Point/SeatPoints" unique_id=2055058370]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table14Point/SeatPoints" unique_id=1805089026]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table14Point/SeatPoints" unique_id=201320638]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table14Point/SeatPoints" unique_id=1438100510]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table14Point" unique_id=769162457]
 one_shot = true
@@ -700,16 +700,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table16Point" unique_id=1246837596]
 
 [node name="Seat01" type="Marker2D" parent="Table16Point/SeatPoints" unique_id=2120309165]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table16Point/SeatPoints" unique_id=306611356]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table16Point/SeatPoints" unique_id=2066522954]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table16Point/SeatPoints" unique_id=2072852743]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table16Point" unique_id=1321050132]
 one_shot = true
@@ -784,16 +784,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table18Point" unique_id=861070445]
 
 [node name="Seat01" type="Marker2D" parent="Table18Point/SeatPoints" unique_id=1746229178]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table18Point/SeatPoints" unique_id=1217685898]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table18Point/SeatPoints" unique_id=809149300]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table18Point/SeatPoints" unique_id=1838773198]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table18Point" unique_id=380843645]
 one_shot = true
@@ -868,16 +868,16 @@ one_shot = true
 [node name="SeatPoints" type="Node2D" parent="Table20Point" unique_id=708115818]
 
 [node name="Seat01" type="Marker2D" parent="Table20Point/SeatPoints" unique_id=217153703]
-position = Vector2(125, 60)
+position = Vector2(115, 40)
 
 [node name="Seat02" type="Marker2D" parent="Table20Point/SeatPoints" unique_id=1871217701]
-position = Vector2(-125, 60)
+position = Vector2(-115, 40)
 
 [node name="Seat03" type="Marker2D" parent="Table20Point/SeatPoints" unique_id=12326011]
-position = Vector2(-125, -60)
+position = Vector2(-115, -40)
 
 [node name="Seat04" type="Marker2D" parent="Table20Point/SeatPoints" unique_id=1617834969]
-position = Vector2(125, -60)
+position = Vector2(115, -40)
 
 [node name="FoodWaitTimer" type="Timer" parent="Table20Point" unique_id=1576385648]
 one_shot = true
