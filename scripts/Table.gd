@@ -62,7 +62,7 @@ func _ready() -> void:
 	var hit_shape := RectangleShape2D.new()
 	hit_shape.size = furniture_size
 	$CollisionShape2D.shape = hit_shape
-	$CollisionShape2D.position = Vector2.ZERO
+	$CollisionShape2D.position = Vector2(0, preload("res://scripts/SeatingLayout.gd").TABLETOP_Y)
 	patience_bar.position = Vector2(-40, -furniture_size.y / 2.0 - 24)
 	patience_bar.size = Vector2(80, 14)
 	eating_timer.timeout.connect(_on_eating_timer_timeout)

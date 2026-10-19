@@ -66,10 +66,19 @@ func move_to_position(new_position: Vector2, type: TargetType) -> void:
 	has_target = true
 
 func _physics_process(delta: float) -> void:
+	var previous_position := global_position
 	if not has_target:
+		$Sprite2D.update_movement(Vector2.ZERO, delta)
 		return
 	if route.advance(self, target_position, speed, delta):
 		has_target = false
 		destination_reached.emit()
+	$Sprite2D.update_movement(global_position - previous_position, delta)
+
+func set_appearance(look: Variant) -> void:
+	$Sprite2D.apply_look(look)
+
+func get_appearance() -> Dictionary:
+	return $Sprite2D.get_look()
 func set_speed_upgrade_level(level: int) -> void:
 	speed = BASE_SPEED + SPEED_PER_LEVEL * level

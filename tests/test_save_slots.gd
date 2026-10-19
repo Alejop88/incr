@@ -33,11 +33,25 @@ func run_tests() -> void:
 		menu.new_game_button.pressed.emit()
 		menu.mode_buttons["normal" if index == 1 else "cozy"].pressed.emit()
 		menu.slot_buttons[index].pressed.emit()
+		check(menu.character_creator.visible and not FileAccess.file_exists(slots.slot_path(base_path, index)), "Creator opens before a new save exists")
+		menu.character_creator.cycle("hair", -1)
+		check(menu.character_creator.look.hair == -1, "Hair arrows include bald")
+		menu.character_creator.cycle("hair", -1)
+		check(menu.character_creator.look.hair == 8, "Hair choices wrap at either end")
+		menu.character_creator.random_button.pressed.emit()
+		check(menu.character_creator.preview.get_look() == menu.character_creator.look, "Random choices update the same preview used in game")
+		menu.character_creator.look = {"hair": index - 1, "hair_color": index + 2, "skin": index + 2}
+		menu.character_creator.refresh()
+		menu.character_creator.accept_button.pressed.emit()
 		await process_frame
 		await process_frame
 		var game: Node = current_scene
 		check(game.save_manager.save_path == slots.slot_path(base_path, index), "Save path must stay bound to chosen slot")
 		check(game.game_mode == ("normal" if index == 1 else "cozy"), "Chosen mode must reach game")
+		check(game.restaurant.player_waiter.get_appearance() == {"hair": index - 1, "hair_color": index + 2, "skin": index + 2}, "Chosen appearance reaches its slot")
+		var visual: Node = game.restaurant.player_waiter.get_node("Sprite2D")
+		visual.update_movement(Vector2(15, 0), 0.1)
+		check(visual.direction == 1 and visual.material.get_shader_parameter("facing") == 1, "Uniform follows walking direction")
 		game.economy_manager.money = 100 + index
 		game.play_time = 3661 + index
 		game._on_save_requested()
@@ -50,6 +64,7 @@ func run_tests() -> void:
 	await process_frame
 	var game: Node = current_scene
 	check(game.game_mode == "normal" and game.economy_manager.money == 101 and game.play_time >= 3662, "Loading must restore chosen slot metadata")
+	check(game.restaurant.player_waiter.get_appearance() == {"hair": 0, "hair_color": 3, "skin": 3}, "Loading restores the player's appearance")
 	game.pause_menu.open_menu()
 	var paused_time: float = game.play_time
 	await process_frame
@@ -62,6 +77,7 @@ func run_tests() -> void:
 	await process_frame
 	game = current_scene
 	check(game.game_mode == "normal" and game.play_time >= paused_time and game.save_manager.save_path == slots.slot_path(base_path, 1), "Prestige must retain slot mode and played time")
+	check(game.restaurant.player_waiter.get_appearance() == {"hair": 0, "hair_color": 3, "skin": 3}, "Prestige preserves player customization")
 	game.free()
 	menu = title()
 	menu.new_game_button.pressed.emit()
@@ -73,6 +89,11 @@ func run_tests() -> void:
 	check(menu._slot_data(1).game_mode == "normal", "Cancel must preserve the occupied slot")
 	menu.slot_buttons[1].pressed.emit()
 	menu.confirmation.confirmed.emit()
+	menu.character_creator.cancelled.emit()
+	check(menu._slot_data(1).game_mode == "normal", "Backing out of the creator preserves the existing save")
+	menu.slot_buttons[1].pressed.emit()
+	menu.confirmation.confirmed.emit()
+	menu.character_creator.accept_button.pressed.emit()
 	await process_frame
 	await process_frame
 	game = current_scene

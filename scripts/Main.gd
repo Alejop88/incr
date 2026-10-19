@@ -40,6 +40,7 @@ func _ready() -> void:
 	var creating: bool = slots.new_game_pending and slots.active_path == save_manager.save_path
 	if creating:
 		game_mode = slots.selected_mode
+		restaurant.player_waiter.set_appearance(slots.selected_appearance)
 		slots.new_game_pending = false
 	restaurant.start_random_menu()
 	initial_run_data = _get_save_data().duplicate(true)
@@ -47,6 +48,7 @@ func _ready() -> void:
 		_load_saved_progress()
 	restaurant.set_game_mode(game_mode)
 	_setup_gachapon()
+	_setup_bar()
 	restaurant.waiter_manager.set_training_level(michelin_manager.get_staff_training_level())
 	restaurant.set_vip_unlocked(vip_run_unlocked or michelin_manager.is_upgrade_bought("permanent_vip"))
 	restaurant.waiter_manager.apply_permanent_upgrades(
@@ -118,9 +120,11 @@ func _get_save_data() -> Dictionary:
 		if table.unlocked:
 			unlocked_tables.append(str(table.name))
 	var data: Dictionary = {
+		"player_appearance": restaurant.player_waiter.get_appearance(),
 		"game_mode": game_mode,
 		"play_time": play_time,
 		"gachapon_owned": gachapon.owned.duplicate(),
+		"selected_drink": restaurant.selected_drink,
 		"money": economy_manager.money,
 		"camera_zoom": $RestaurantCamera.zoom.x,
 		"camera_position": {"x": $RestaurantCamera.position.x, "y": $RestaurantCamera.position.y},
@@ -185,6 +189,7 @@ func _load_saved_progress() -> void:
 		return
 	economy_manager.money = float(data["money"])
 	game_mode = data.get("game_mode", "cozy")
+	restaurant.player_waiter.set_appearance(data.get("player_appearance", {}))
 	play_time = float(data.get("play_time", 0.0))
 	$RestaurantCamera.restore_zoom(float(data.get("camera_zoom", 0.8)))
 	if data.has("camera_position"):
@@ -193,6 +198,8 @@ func _load_saved_progress() -> void:
 	vip_run_unlocked = data.get("vip_unlocked", false)
 	michelin_manager.load_save_data(data["michelin"])
 	gachapon.restore(data.get("gachapon_owned", []))
+	var drink_id := str(data.get("selected_drink", ""))
+	restaurant.selected_drink = drink_id if preload("res://scripts/DrinkTypes.gd").index_of(drink_id) >= 0 else ""
 	restaurant.set_menu_capacity_bonus(michelin_manager.get_menu_capacity_bonus())
 	restaurant.restore_dish_progress(data)
 	var levels: Dictionary = data["levels"]
@@ -466,8 +473,10 @@ func _on_star_purchase_confirmed() -> void:
 	var new_run: Dictionary = initial_run_data.duplicate(true)
 	new_run["michelin"] = permanent_data
 	new_run["game_mode"] = game_mode
+	new_run["player_appearance"] = restaurant.player_waiter.get_appearance()
 	new_run["play_time"] = play_time
 	new_run["gachapon_owned"] = gachapon.owned.duplicate()
+	new_run["selected_drink"] = restaurant.selected_drink
 	new_run["camera_zoom"] = $RestaurantCamera.zoom.x
 	new_run["camera_position"] = {"x": $RestaurantCamera.position.x, "y": $RestaurantCamera.position.y}
 	new_run["menu_dishes"] = DishTypes.menu_keys(restaurant.menu_dishes)
@@ -546,6 +555,24 @@ func _on_dish_purchase_requested() -> void:
 		restaurant.unlocked_dishes.append(dish)
 		hud.menu_editor.purchase_result.text = "Nuevo plato: " + DishTypes.title(dish)
 		_refresh_dish_shop()
+
+func _setup_bar() -> void:
+	restaurant.bar_unlocked = michelin_manager.is_upgrade_bought("permanent_bar")
+	restaurant.refresh_menu_traits()
+	if not restaurant.bar_unlocked:
+		return
+	var bar := preload("res://scripts/Bar.gd").new()
+	bar.name = "Bar"
+	bar.position = Vector2(110, 30)
+	restaurant.add_child(bar)
+	var panel := preload("res://scripts/ui/BarPanel.gd").new()
+	panel.name = "BarPanel"
+	$CanvasLayer.add_child(panel)
+	bar.opened.connect(func(): panel.open(restaurant.selected_drink, game_mode))
+	panel.selected.connect(func(id: String):
+		restaurant.selected_drink = id
+		restaurant.refresh_menu_traits()
+		_on_save_requested())
 
 func _setup_gachapon() -> void:
 	gachapon_panel = preload("res://scripts/ui/GachaponPanel.gd").new()

@@ -79,6 +79,7 @@ func _build_tree() -> void:
 		positions["cook_speed_%d" % level] = Vector2(-520 - (level - 1) * 140, 130)
 	for level in range(1, DishTypes.MAX_UPGRADED_MENU_DISHES - DishTypes.MAX_MENU_DISHES + 1):
 		positions["menu_capacity_%d" % level] = Vector2(-710 + (level - 1) * 150, 460)
+	positions["permanent_bar"] = Vector2(40, 650)
 	for id in positions:
 		var button: Button = preload("res://scripts/ui/UpgradeTreeNode.gd").new()
 		button.position = positions[id] - Vector2(48, 46)

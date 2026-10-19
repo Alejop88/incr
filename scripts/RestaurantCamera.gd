@@ -38,7 +38,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if settings.matches(event, "camera"):
-		if _is_over_kitchen(event.position):
+		if _is_over_kitchen(event.position) or _is_over_bar(event.position):
 			dragging = false
 			# Leave this click to the kitchen's normal physics picking handler.
 			return
@@ -78,3 +78,10 @@ func _is_over_kitchen(viewport_position: Vector2) -> bool:
 	var world_position: Vector2 = get_canvas_transform().affine_inverse() * viewport_position
 	var local_position: Vector2 = collider.to_local(world_position)
 	return Rect2(-collider.shape.size / 2.0, collider.shape.size).has_point(local_position)
+
+func _is_over_bar(viewport_position: Vector2) -> bool:
+	var bar := get_node_or_null("../Restaurant/Bar")
+	if bar == null or not bar.is_visible_in_tree():
+		return false
+	var world_position := get_canvas_transform().affine_inverse() * viewport_position
+	return Rect2(-105, -40, 210, 80).has_point(bar.to_local(world_position))

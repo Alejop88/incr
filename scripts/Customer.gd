@@ -20,6 +20,8 @@ var requested_dish: DishTypes.Type = DishTypes.Type.NONE
 var target_type: TargetType = TargetType.NONE
 var is_seated: bool = false
 var seat_facing := Vector2.DOWN
+var plate_position := Vector2.INF
+var table_cover := Rect2()
 var is_eating := false
 func _ready() -> void:
 	update_order_label()
@@ -84,6 +86,9 @@ func sit_down() -> void:
 	is_seated = true
 	var visual := get_node_or_null("Sprite2D")
 	if visual != null and visual.has_method("sit_down"):
+		if plate_position != Vector2.INF and visual.has_method("set_plate_position"):
+			visual.set_plate_position(plate_position)
+			visual.set_table_cover(table_cover)
 		visual.sit_down(seat_facing)
 		visual.set_eating(is_eating)
 

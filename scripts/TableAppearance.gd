@@ -15,11 +15,15 @@ static func furniture_bounds(places: int) -> Rect2:
 	# Keep the established clearance envelope while changing visual projection.
 	return Rect2(-76, -52, 152, 128) if places <= 2 else Rect2(-84, -88, 168, 200)
 
+static func tabletop_cover(places: int) -> Rect2:
+	var size := surface_size(places)
+	return Rect2(-size / 2.0 + Vector2(0, SEATING.TABLETOP_Y), size + Vector2(0, 12))
+
 static func dish_position(places: int, seat: Vector2) -> Vector2:
 	if places > 2:
-		return Vector2(-40 if seat.x < 0 else 40, -40 if seat.y < 0 else 40)
+		return Vector2(-40 if seat.x < 0 else 40, (-40 if seat.y < 0 else 40) + SEATING.TABLETOP_Y)
 	var x := surface_size(places).x / 2.0 - 32
-	return Vector2(-x if seat.x < 0 else x, seat.y)
+	return Vector2(-x if seat.x < 0 else x, seat.y + SEATING.TABLETOP_Y)
 
 func configure(places: int, seat_positions: Array[Vector2], new_skin: Resource) -> void:
 	capacity = places
@@ -68,8 +72,9 @@ func _build() -> void:
 	# Two visible feet sit beneath the front edge; tabletop has a bevel and apron.
 	rect(Vector2(-half.x + 4, half.y + 30), Vector2(size.x, 10), Color(0.08, 0.06, 0.05, 0.20))
 	for x in [-half.x + 12, half.x - 28]:
-		rect(Vector2(x, half.y - 5), Vector2(15, 40), skin.outline)
-		rect(Vector2(x + 5, half.y + 5), Vector2(5, 25), skin.wood_dark)
+		rect(Vector2(x, half.y - 5 + SEATING.TABLETOP_Y), Vector2(15, 40 - SEATING.TABLETOP_Y), skin.outline)
+		rect(Vector2(x + 5, half.y + 5 + SEATING.TABLETOP_Y), Vector2(5, 25 - SEATING.TABLETOP_Y), skin.wood_dark)
+	var tabletop_start := rectangles.size()
 	rect(-half + Vector2(0, 12), size, skin.outline)
 	rect(Vector2(-half.x + 4, half.y - 4), Vector2(size.x - 8, 12), skin.wood_dark)
 	# Stepped corners rather than smooth rounded UI shapes.
@@ -80,6 +85,8 @@ func _build() -> void:
 	rect(-half + Vector2(4, 8), Vector2(4, size.y - 16), skin.wood_light)
 	for y in range(int(-half.y + 35), int(half.y - 8), 35):
 		rect(Vector2(-half.x + 8, y), Vector2(size.x - 16, 4), skin.wood_dark)
+	for index in range(tabletop_start, rectangles.size()):
+		rectangles[index][0].position.y += SEATING.TABLETOP_Y
 	# A quiet place setting for each seat leaves the center free for serving.
 	for seat in seats:
 		# Foreshortened cloth: same depth ratio as the chair's horizontal cushion.

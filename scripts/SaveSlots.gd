@@ -4,6 +4,7 @@ extends Node
 var active_path: String = "user://partida.json"
 var new_game_pending: bool = false
 var selected_mode: String = "cozy"
+var selected_appearance: Dictionary = preload("res://scripts/PlayerAppearance.gd").DEFAULT_LOOK.duplicate()
 
 static func slot_path(base: String, index: int) -> String:
 	return base if index == 0 else "%s_%d.json" % [base.get_basename(), index + 1]

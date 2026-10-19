@@ -24,6 +24,7 @@ var slot_status: Label
 var choosing_new: bool = false
 var selected_slot: int = 0
 var base_save_path: String
+var character_creator: Control
 
 func _ready() -> void:
 	base_save_path = save_manager.save_path
@@ -82,6 +83,15 @@ func _ready() -> void:
 	add_child(confirmation)
 	_build_mode_panel()
 	_build_slot_panel()
+	character_creator = preload("res://scripts/ui/CharacterCreator.gd").new()
+	add_child(character_creator)
+	character_creator.accepted.connect(func(look: Dictionary):
+		slots.selected_appearance = look.duplicate()
+		_enter_game(true))
+	character_creator.cancelled.connect(func():
+		character_creator.hide()
+		_open_slots(true)
+		slot_buttons[selected_slot].grab_focus())
 	refresh_save_status()
 	if continue_button.disabled:
 		new_game_button.grab_focus()
@@ -245,7 +255,8 @@ func _choose_slot(index: int) -> void:
 		_enter_game(false)
 
 func _start_new_game() -> void:
-	_enter_game(true)
+	slot_panel.hide()
+	character_creator.open_creator()
 
 func _enter_game(reset_save: bool) -> void:
 	if starting:

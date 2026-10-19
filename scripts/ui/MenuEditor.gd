@@ -45,6 +45,7 @@ var last_selection: Array = []
 var last_capacity: int = -1
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	# Tooltip popups inherit this local theme, including tags in the filter.
 	theme = Theme.new()
 	var tooltip_style := StyleBoxFlat.new()

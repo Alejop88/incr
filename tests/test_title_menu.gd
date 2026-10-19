@@ -26,6 +26,8 @@ func run_tests() -> void:
 	menu.new_game_button.pressed.emit()
 	menu.mode_buttons.cozy.pressed.emit()
 	menu.slot_buttons[0].pressed.emit()
+	check(menu.character_creator.visible and current_scene == menu, "New game waits for character acceptance")
+	menu.character_creator.accept_button.pressed.emit()
 	await process_frame
 	await process_frame
 	var game: Node = current_scene
@@ -63,6 +65,8 @@ func run_tests() -> void:
 	menu.mode_buttons.cozy.pressed.emit()
 	menu.slot_buttons[0].pressed.emit()
 	menu.confirmation.confirmed.emit()
+	check(menu.character_creator.visible and FileAccess.get_file_as_string(save_path) == original_save, "Opening creator must not overwrite the existing save")
+	menu.character_creator.accept_button.pressed.emit()
 	await process_frame
 	await process_frame
 	game = current_scene

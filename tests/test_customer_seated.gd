@@ -25,8 +25,10 @@ func run_tests() -> void:
 	second.global_position = second.target_position
 	second._physics_process(0.01)
 	check(second.get_node("Sprite2D").seated and second.get_node("Sprite2D").eating, "Late arrival preserves pending meal state")
-	visual.update_movement(Vector2.ZERO, 0.4)
-	check(visual.seated_rig.bite == 2, "Eating advances to hand-at-mouth pose")
+	visual.eating_clock = 0.0
+	visual.update_movement(Vector2.ZERO, 0.9)
+	check(visual.seated_rig.bite == 3, "Eating advances from the plate to the mouth")
+	check(visual.seated_rig.plate_target.is_equal_approx(visual.to_local(table.get_dish_position(0))), "Eating targets this customer's actual place setting")
 	table._on_eating_timer_timeout()
 	check(visual.seated and not visual.eating and visual.seated_rig.bite == 0, "Finished customers return to seated idle")
 	var hair_style: int = visual.hair_style

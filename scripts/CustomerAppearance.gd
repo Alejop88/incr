@@ -286,6 +286,12 @@ func sit_down(toward_table: Vector2) -> void:
 	(material as ShaderMaterial).set_shader_parameter("hide_body", true)
 	_update_hair()
 
+func set_plate_position(world_position: Vector2) -> void:
+	seated_rig.plate_target = to_local(world_position)
+
+func set_table_cover(world_rect: Rect2) -> void:
+	seated_rig.table_occlusion = Rect2(to_local(world_rect.position), world_rect.size / global_scale)
+
 func set_eating(value: bool) -> void:
 	eating = value
 	eating_clock = 0.0

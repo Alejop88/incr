@@ -43,6 +43,8 @@ var selected_table: Area2D = null
 var menu_dishes: Array[DishTypes.Type] = DishTypes.default_menu()
 var menu_capacity: int = DishTypes.MAX_MENU_DISHES
 var game_mode: String = "cozy"
+var bar_unlocked := false
+var selected_drink := ""
 var menu_effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate("cozy", [])
 const BASE_SPAWN_INTERVAL: float = 20.0
 
@@ -52,6 +54,7 @@ func set_game_mode(mode: String) -> void:
 
 func refresh_menu_traits() -> void:
 	menu_effects = preload("res://scripts/MenuTraits.gd").calculate(game_mode, menu_dishes)
+	preload("res://scripts/DrinkTypes.gd").apply(menu_effects, selected_drink, game_mode, bar_unlocked)
 	_apply_menu_traits()
 
 func _apply_menu_traits() -> void:
@@ -444,7 +447,7 @@ func spawn_customer() -> void:
 
 	var seat_positions: Array[Vector2] = available_table.get_group_seat_positions(group_size)
 
-	customer_group.move_customers_to_seats(seat_positions, available_table.global_position)
+	customer_group.move_customers_to_seats(seat_positions, available_table.global_position, available_table.seat_capacity)
 
 	print("Nuevo cliente creado para: ", available_table.name)
 	customer_spawn_timer.start()
@@ -596,7 +599,7 @@ func try_seat_waiting_group() -> void:
 		var seat_positions: Array[Vector2] = \
 			available_table.get_group_seat_positions(group_size)
 
-		customer_group.move_customers_to_seats(seat_positions, available_table.global_position)
+		customer_group.move_customers_to_seats(seat_positions, available_table.global_position, available_table.seat_capacity)
 
 		print(
 			"Un grupo compatible de la cola entra en: ",

@@ -15,6 +15,10 @@ const PERMANENT_TABLE_LEVELS: int = 15
 const PERMANENT_WAITER_LEVELS: int = 6
 
 func _init() -> void:
+	upgrade_costs["permanent_bar"] = 50
+	upgrade_names["permanent_bar"] = "Barra de bebidas"
+	upgrade_descriptions["permanent_bar"] = "Desbloquea una barra permanente. Elige una bebida para potenciar platos de tu carta en modo Normal. Requiere la carta de 8 platos."
+	upgrade_requirements["permanent_bar"] = ["menu_capacity_6"]
 	for level in range(1, 6):
 		var id := "cook_speed_%d" % level
 		upgrade_costs[id] = level * 2
@@ -186,7 +190,7 @@ func load_save_data(data: Dictionary) -> void:
 func buy_upgrade(upgrade_id: String) -> bool:
 	if not upgrade_costs.has(upgrade_id):
 		return false
-	if upgrade_id.begins_with("menu_capacity_") or upgrade_id.begins_with("staff_training_") or upgrade_id.begins_with("permanent_table_") or upgrade_id.begins_with("permanent_waiter_") or upgrade_id in ["player_capacity_2", "permanent_waiter", "waiter_capacity_2", "permanent_vip"]:
+	if upgrade_id.begins_with("menu_capacity_") or upgrade_id.begins_with("staff_training_") or upgrade_id.begins_with("permanent_table_") or upgrade_id.begins_with("permanent_waiter_") or upgrade_id in ["permanent_bar", "player_capacity_2", "permanent_waiter", "waiter_capacity_2", "permanent_vip"]:
 		if not are_upgrade_requirements_met(upgrade_id):
 			return false
 		if is_upgrade_bought(upgrade_id) or not spend_stars(get_upgrade_cost(upgrade_id)):

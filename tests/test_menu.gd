@@ -75,7 +75,7 @@ func run_tests() -> void:
 	editor.set_unlocks([BURGER, PIZZA, DishTypes.Type.PAELLA], 0)
 	editor.dish_buttons[DishTypes.Type.PAELLA].pressed.emit()
 	check(editor.detail_name.text == "PAELLA" and editor.selected == [BURGER, PIZZA], "Full menu must still allow inspecting another dish without adding it")
-	check(editor.detail_icon.visible and not editor.detail_image.visible, "Dishes without textures use their icon")
+	check(editor.detail_image.visible and not editor.detail_icon.visible, "Paella details use its new pixel-art image")
 	var displayed_tags: Array[String] = []
 	for chip in editor.detail_tags.get_children():
 		displayed_tags.append(chip.get_child(0).text)

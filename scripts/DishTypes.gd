@@ -150,7 +150,7 @@ enum Type {
 
 # Añade nuevos identificadores al final. Ver docs/ANADIR_PLATOS.md.
 const CATALOG: Dictionary = {
-	Type.MAKI: {"name": "Maki", "icon": "🍣", "image": "", "tags": ["Sushi", "Arroz", "Pescado", "Fría", "Japonesa"]},
+	Type.MAKI: {"name": "Maki", "icon": "🍣", "image": "res://assets/art/dishes/maki-pixel-v1.png", "tags": ["Sushi", "Arroz", "Pescado", "Fría", "Japonesa"]},
 	Type.SASHIMI: {"name": "Sashimi", "icon": "🐟", "image": "", "tags": ["Pescado", "Cruda", "Fría", "Japonesa"]},
 	Type.ONIGIRI: {"name": "Onigiri", "icon": "🍙", "image": "", "tags": ["Arroz", "Japonesa"]},
 	Type.TEMAKI: {"name": "Temaki", "icon": "🍣", "image": "", "tags": ["Sushi", "Arroz", "Pescado", "Fría", "Japonesa"]},
@@ -162,7 +162,7 @@ const CATALOG: Dictionary = {
 	Type.CEVICHE: {"name": "Ceviche", "icon": "🐟", "image": "", "tags": ["Peruana", "Pescado", "Marisco", "Cruda", "Fría", "Picante"]},
 	Type.FALAFEL: {"name": "Falafel", "icon": "🧆", "image": "", "tags": ["Frita", "Vegetales", "Vegetariana", "Vegana", "Comida rápida"]},
 	Type.FISH_AND_CHIPS: {"name": "Fish and chips", "icon": "🐟", "image": "", "tags": ["Pescado", "Patata", "Frita", "Comida rápida"]},
-	Type.PAELLA: {"name": "Paella", "icon": "🥘", "image": "", "tags": ["Arroz", "Marisco", "Pescado", "Española", "Para compartir"]},
+	Type.PAELLA: {"name": "Paella", "icon": "🥘", "image": "res://assets/art/dishes/paella-pixel-v1.png", "tags": ["Arroz", "Marisco", "Pescado", "Española", "Para compartir"]},
 	Type.TORTILLA_DE_PATATAS: {"name": "Tortilla de patatas", "icon": "🍳", "image": "", "tags": ["Patata", "Vegetariana", "Española", "Para compartir"]},
 	Type.GAZPACHO: {"name": "Gazpacho", "icon": "🥣", "image": "", "tags": ["Fría", "Vegetales", "Vegetariana", "Vegana", "Española", "Caldo"]},
 	Type.RATATOUILLE: {"name": "Ratatouille", "icon": "🍆", "image": "", "tags": ["Vegetales", "Vegetariana", "Vegana", "Francesa"]},
@@ -173,7 +173,7 @@ const CATALOG: Dictionary = {
 	Type.SOPA_DE_MISO: {"name": "Sopa de miso", "icon": "🍲", "image": "", "tags": ["Caldo", "Japonesa"]},
 	Type.EDAMAME: {"name": "Edamame", "icon": "🫛", "image": "", "tags": ["Vegetales", "Vegetariana", "Vegana", "Japonesa", "Para compartir"]},
 	Type.POKE: {"name": "Poke", "icon": "🥗", "image": "", "tags": ["Arroz", "Pescado", "Cruda", "Fría"]},
-	Type.PIZZA: {"name": "Pizza", "icon": "🍕", "image": "", "tags": ["Italiana", "Masa", "Comida rápida", "Para compartir"]},
+	Type.PIZZA: {"name": "Pizza", "icon": "🍕", "image": "res://assets/art/dishes/pizza-pixel-v1.png", "tags": ["Italiana", "Masa", "Comida rápida", "Para compartir"]},
 	Type.LASANA: {"name": "Lasaña", "icon": "🍝", "image": "", "tags": ["Italiana", "Pasta", "Carne"]},
 	Type.CANELONES: {"name": "Canelones", "icon": "🍝", "image": "", "tags": ["Italiana", "Pasta", "Carne"]},
 	Type.VICHYSSOISE: {"name": "Vichyssoise", "icon": "🥣", "image": "", "tags": ["Caldo", "Fría", "Patata", "Vegetariana", "Francesa"]},

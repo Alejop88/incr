@@ -28,6 +28,11 @@ func run_tests() -> void:
 	check(not DishTypes.tags(DishTypes.Type.ONIGIRI).has("Fría"), "Onigiri follows supplied tags, without cold")
 	check(DishTypes.tags(DishTypes.Type.NIGIRI).has("Cruda"), "Nigiri now counts as raw")
 	check(DishTypes.texture(DishTypes.Type.BURGER) != null, "Burger test image is preserved")
+	for dish in [DishTypes.Type.PIZZA, DishTypes.Type.MAKI, DishTypes.Type.PAELLA]:
+		var picture := DishTypes.texture(dish)
+		check(picture != null, "Prototype pixel dish artwork loads: " + DishTypes.title(dish))
+		if picture != null:
+			check(picture.get_image().get_pixel(0, 0).a == 0.0, "Food icon background is transparent")
 	var r: Node = world()
 	r.restore_dish_progress({"menu_dishes": ["SALAD", "PIZZA"], "unlocked_dishes": ["SALAD", "PIZZA", "BURGER", "SOUP", "SANDWICH"]})
 	check(r.menu_dishes == [PIZZA] and r.unlocked_dishes == [PIZZA, BURGER], "Loading filters retired recipes while preserving surviving unlocks")

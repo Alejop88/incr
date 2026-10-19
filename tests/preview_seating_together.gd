@@ -10,7 +10,7 @@ func render_preview() -> void:
 	for capacity in [2, 4]:
 		var origin := Vector2(210 if capacity == 2 else 630, 180)
 		var seats: Array[Vector2] = []
-		seats.assign([Vector2(-125, 0), Vector2(125, 0)] if capacity == 2 else [Vector2(-115, -40), Vector2(115, -40), Vector2(-115, 40), Vector2(115, 40)])
+		seats.assign([Vector2(-95, 0), Vector2(95, 0)] if capacity == 2 else [Vector2(-100, -40), Vector2(100, -40), Vector2(-100, 40), Vector2(100, 40)])
 		var furniture = preload("res://scripts/TableAppearance.gd").new()
 		furniture.configure(capacity, seats, null)
 		for item in furniture.rectangles:
@@ -26,9 +26,15 @@ func render_preview() -> void:
 			var visual = actor.get_node("Sprite2D")
 			visual.set_skin(index % 3)
 			visual.set_hair([0, 7, 4, -1][index], index % 3)
+			var rig = visual.seated_rig
+			rig.plate_target = (preload("res://scripts/TableAppearance.gd").dish_position(capacity, seats[index]) - seats[index] - visual.position) / visual.scale
+			var cover := preload("res://scripts/TableAppearance.gd").tabletop_cover(capacity)
+			rig.table_occlusion = Rect2((cover.position - seats[index] - visual.position) / visual.scale, cover.size / visual.scale)
 			visual.sit_down(Vector2.RIGHT if seats[index].x < 0 else Vector2.LEFT)
 			visual.update_movement(Vector2.ZERO, 0.4)
-			var rig = visual.seated_rig
+			if "--eating" in OS.get_cmdline_user_args():
+				rig.plate_target = (preload("res://scripts/TableAppearance.gd").dish_position(capacity, seats[index]) - seats[index] - visual.position) / visual.scale
+				rig.pose(1.0, 0.0 if index % 2 == 0 else 0.9)
 			var center: Vector2 = origin + seats[index] + visual.position
 			var factor: Vector2 = visual.scale
 			var head: AtlasTexture = rig.head.texture
@@ -45,5 +51,5 @@ func render_preview() -> void:
 				stamp(canvas, hair_image, center + (visual.hair.position - size / 2.0) * factor, size * factor)
 			actor.free()
 	canvas.resize(1680, 840, Image.INTERPOLATE_NEAREST)
-	canvas.save_png("res://output/art-prototypes/seating-together-preview.png")
+	canvas.save_png("res://output/art-prototypes/eating-together-preview.png" if "--eating" in OS.get_cmdline_user_args() else "res://output/art-prototypes/seating-together-preview.png")
 	quit()

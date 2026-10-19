@@ -62,12 +62,16 @@ func get_customer(index: int) -> CharacterBody2D:
 		return null
 
 	return customers[index]
-func move_customers_to_seats(seat_positions: Array[Vector2], table_center: Vector2 = Vector2.INF) -> void:
+func move_customers_to_seats(seat_positions: Array[Vector2], table_center: Vector2 = Vector2.INF, table_capacity: int = 2) -> void:
 	for i in range(customers.size()):
 		var customer: CharacterBody2D = customers[i]
 		customer.visible = true
 		if table_center != Vector2.INF:
 			customer.seat_facing = table_center - seat_positions[i]
+			var capacity := table_capacity
+			customer.plate_position = table_center + preload("res://scripts/TableAppearance.gd").dish_position(capacity, seat_positions[i] - table_center)
+			customer.table_cover = preload("res://scripts/TableAppearance.gd").tabletop_cover(capacity)
+			customer.table_cover.position += table_center
 		customer.move_to_position(seat_positions[i],customer.TargetType.TABLE)
 func leave_restaurant(exit_position: Vector2) -> void:
 	for customer in customers:
