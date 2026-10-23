@@ -22,6 +22,8 @@ var eating_time: float = BASE_EATING_TIME
 @export var payment_amount: float = 5.0
 var dish_value_multipliers: Dictionary = {}
 var served_value_bonus: float = 0.0
+var served_value_total := 0.0
+var game_mode := "cozy"
 @export var seat_capacity: int = 1
 @export var table_skin: Resource = preload("res://assets/art/table_classic.tres")
 var appearance: Node2D
@@ -126,6 +128,7 @@ func reserve(customer_group: Node2D) -> bool:
 
 	seated_customer = leader
 	served_value_bonus = 0.0
+	served_value_total = 0.0
 
 	required_plates = customer_group.get_group_size()
 	occupied_seats = required_plates
@@ -164,6 +167,7 @@ func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null)
 	delivered_plates += 1
 	# Keep each delivered dish's bonus even if the menu changes before payment.
 	served_value_bonus += float(dish_value_multipliers.get(dish, 1.0)) - 1.0
+	served_value_total += DishTypes.dish_value(dish, game_mode, payment_amount - 5.0) * float(dish_value_multipliers.get(dish, 1.0))
 	print(
 	"Cliente servido con ",
 	DishTypes.Type.keys()[dish],
@@ -204,6 +208,7 @@ func receive_food(dish: DishTypes.Type, target_customer: CharacterBody2D = null)
 func start_next_food_round(customer: CharacterBody2D,plates_needed: int) -> void:
 	_set_group_eating(false)
 	served_value_bonus = 0.0
+	served_value_total = 0.0
 	food_round += 1
 	delivered_plates = 0
 	required_plates = plates_needed
@@ -277,6 +282,8 @@ func collect_payment() -> bool:
 		return false
 
 	var total_payment: float = payment_amount * (required_plates + served_value_bonus)
+	if game_mode == "normal":
+		total_payment = served_value_total
 	payment_collected.emit(total_payment)
 	clear_seated_customer()
 
@@ -309,6 +316,7 @@ func get_seated_customer() -> CharacterBody2D:
 func clear_seated_customer() -> void:
 	_set_group_eating(false)
 	served_value_bonus = 0.0
+	served_value_total = 0.0
 	seated_customer = null
 	required_plates = 1
 	delivered_plates = 0

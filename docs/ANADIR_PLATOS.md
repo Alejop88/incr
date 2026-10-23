@@ -2,6 +2,8 @@
 
 Solo necesitas editar `scripts/DishTypes.gd`. Los platos aparecen automáticamente en «Cocina → Crear la carta». No hace falta modificar clientes, cocina ni camareros.
 
+Cada ficha tiene `value` (valor base en euros) y `cook_time` (tiempo base en segundos) para el modo Normal. Por ejemplo, Maki usa `"value": 4.0, "cook_time": 3.0`. Las mejoras de precio se suman antes de los bonus de etiquetas y bebida; las mejoras de cocina restan 0,2 segundos por nivel, con un mínimo base de 0,5 segundos antes de los combos. En Cozy todos mantienen una base de 5 € y 5 segundos. Cambiar estos campos también actualiza las partidas existentes.
+
 El catálogo actual contiene los 139 platos de la lista importada. Ensalada, Sopa y Sandwich genéricos se han retirado; sus identificadores `SALAD`, `SOUP` y `SANDWICH` están reservados para no cambiar la numeración histórica y no deben reutilizarse. Los guardados conservan las recetas vigentes y descartan las retiradas; si no queda ninguna, se recupera una carta válida. Todos los platos tienen icono y campo `image`; solo la hamburguesa conserva su imagen de prueba. Las características individuales se definirán más adelante.
 
 ## Ejemplo: añadir sopa de pollo

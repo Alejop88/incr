@@ -6,6 +6,7 @@ const COOK_TIME_REDUCTION_PER_LEVEL: float = 0.2
 const MIN_COOK_TIME: float = 0.5
 
 var cook_speed_level: int = 0
+var game_mode := "cozy"
 var menu_speed_multiplier: float = 1.0
 var menu_effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate("cozy", [])
 var cook_time: float = BASE_COOK_TIME
@@ -104,7 +105,8 @@ func get_dish_cook_time(dish: int, context: Dictionary = {}) -> float:
 		var table: Node = context.table.get_ref()
 		if is_instance_valid(table) and table.food_round == context.round and table.state == table.State.WAITING_FOOD:
 			repeated = context.repeated
-	return cook_time / traits.dish_multiplier(dish, menu_effects, "cooking_speed", DishTypes.CATALOG) / traits.sharing_speed(dish, repeated, menu_effects)
+	var base := DishTypes.dish_cook_time(dish, game_mode, COOK_TIME_REDUCTION_PER_LEVEL * cook_speed_level)
+	return base / traits.dish_cooking_speed(dish, menu_effects) / traits.sharing_speed(dish, repeated, menu_effects)
 func take_ready_dish() -> DishTypes.Type:
 	if ready_dishes.is_empty():
 		return DishTypes.Type.NONE

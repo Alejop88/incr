@@ -29,6 +29,9 @@ var game_mode: String = "cozy"
 var detail_tags: HFlowContainer
 var inspected_dish: int = DishTypes.Type.NONE
 var cooking_time: float = 5.0
+var cooking_reduction := 0.0
+var selected_drink := ""
+var bar_unlocked := false
 var plate_value: float = 5.0
 var active_traits_panel: PanelContainer
 var active_traits_list: VBoxContainer
@@ -554,11 +557,13 @@ func _update_normal_details() -> void:
 func _update_detail_stats() -> void:
 	if detail_time != null:
 		var effects: Dictionary = preload("res://scripts/MenuTraits.gd").calculate(game_mode, selected)
+		preload("res://scripts/DrinkTypes.gd").apply(effects, selected_drink, game_mode, bar_unlocked)
 		var speed: float = preload("res://scripts/MenuTraits.gd").dish_cooking_speed(inspected_dish, effects)
-		detail_time.text = "TIEMPO: %.1f s" % (cooking_time / speed)
+		var base_time := DishTypes.dish_cook_time(inspected_dish, game_mode, cooking_reduction) if game_mode == "normal" else cooking_time
+		detail_time.text = "TIEMPO: %.1f s" % (base_time / speed)
 		detail_time.tooltip_text = "Tiempo con la carta seleccionada; no incluye repeticiones de una mesa." if game_mode == "normal" else "Tiempo de cocinado"
 		var multiplier: float = preload("res://scripts/MenuTraits.gd").dish_value_multiplier(inspected_dish, effects)
-		detail_value.text = ("VALOR: %.2f €" if game_mode == "normal" else "VALOR: %.1f €") % (plate_value * multiplier)
+		detail_value.text = ("VALOR: %.2f €" if game_mode == "normal" else "VALOR: %.1f €") % (DishTypes.dish_value(inspected_dish, game_mode, plate_value - 5.0) * multiplier)
 		detail_value.tooltip_text = "Valor con la carta seleccionada; se activa al aplicar." if game_mode == "normal" else "Valor del plato"
 
 func show_dish_info(dish: int) -> void:

@@ -58,11 +58,13 @@ func refresh_menu_traits() -> void:
 	_apply_menu_traits()
 
 func _apply_menu_traits() -> void:
+	kitchen_point.game_mode = game_mode
 	waiter_manager.set_menu_speed_multiplier(menu_effects.waiter_speed)
 	kitchen_point.menu_speed_multiplier = menu_effects.cooking_speed
 	kitchen_point.menu_effects = menu_effects
 	update_cook_speed()
 	for table in tables:
+		table.game_mode = game_mode
 		table.menu_speed_multiplier = menu_effects.eating_speed
 		table.menu_patience_multiplier = menu_effects.table_patience
 		for dish in DishTypes.CATALOG:
